@@ -62,15 +62,15 @@ The command will detect:
 ```
 
 ## Implementation
-The launch command directly executes the launch-core.sh script:
+The launch command directly executes the .claude/scripts/launch-core.sh script:
 
 ```bash
 #!/bin/bash
 set -e
 
 # Execute launch-core.sh with all arguments
-if [ -f "./scripts/launch-core.sh" ]; then
-  ./scripts/launch-core.sh "$@"
+if [ -f "./.claude/scripts/launch-core.sh" ]; then
+  ./.claude/scripts/launch-core.sh "$@"
 else
   echo "Error: launch-core.sh script not found"
   echo "Please ensure han-solo is properly installed"

@@ -39,8 +39,8 @@ You are "git-shipper", a specialized ops agent for Git + GitHub PR workflows opt
 set -e
 
 # Use the ship-core.sh script for implementation
-if [ -f "./scripts/ship-core.sh" ]; then
-  ./scripts/ship-core.sh "$@"
+if [ -f "./.claude/scripts/ship-core.sh" ]; then
+  ./.claude/scripts/ship-core.sh "$@"
 else
   echo "Error: ship-core.sh script not found"
   echo "Please ensure han-solo is properly installed"

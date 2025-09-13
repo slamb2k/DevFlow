@@ -44,16 +44,16 @@ Run a comprehensive health check on your git repository to detect issues like di
    - Large uncommitted changes
 
 ## Implementation
-The health command directly executes the health-core.sh script:
+The health command directly executes the .claude/scripts/health-core.sh script:
 
 ```bash
 #!/bin/bash
 set -e
 
 # Execute health-core.sh with all arguments
-if [ -f "./scripts/health-core.sh" ]; then
+if [ -f "./.claude/scripts/health-core.sh" ]; then
   echo "Running comprehensive health check..."
-  ./scripts/health-core.sh "$@"
+  ./.claude/scripts/health-core.sh "$@"
   exit $?
 else
   echo "Error: health-core.sh script not found"

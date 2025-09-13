@@ -132,7 +132,8 @@ describe('Command System', () => {
 
     test('devflow-init should initialize project', async () => {
       const command = new InitCommand();
-      const result = await command.execute([], { projectRoot: '/tmp/test' });
+      const testDir = `/tmp/test-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+      const result = await command.execute([], { projectRoot: testDir });
 
       expect(result.success).toBe(true);
       expect(result.message).toContain('initialized');
