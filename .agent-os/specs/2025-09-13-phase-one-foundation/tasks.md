@@ -38,21 +38,21 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 - [x] 3.8 Verify all configuration validation tests pass
 
 ### 4. Core Slash Commands Implementation
-- [ ] 4.1 Write tests for command parsing, validation, and execution flow
-- [ ] 4.2 Implement base Command class with common functionality
-- [ ] 4.3 Create /devflow-init command with project scaffolding
-- [ ] 4.4 Implement /devflow-analyze command with basic analysis
-- [ ] 4.5 Build /devflow-roadmap command with milestone generation
-- [ ] 4.6 Develop /devflow-optimize command with improvement suggestions
-- [ ] 4.7 Add command help system and usage documentation
-- [ ] 4.8 Verify all slash command tests pass
+- [x] 4.1 Write tests for command parsing, validation, and execution flow
+- [x] 4.2 Implement base Command class with common functionality
+- [x] 4.3 Create /devflow-init command with project scaffolding
+- [x] 4.4 Implement /devflow-analyze command with basic analysis
+- [x] 4.5 Build /devflow-roadmap command with milestone generation
+- [x] 4.6 Develop /devflow-optimize command with improvement suggestions
+- [x] 4.7 Add command help system and usage documentation
+- [x] 4.8 Verify all slash command tests pass
 
 ### 5. Project Analysis Engine and Template System
-- [ ] 5.1 Write tests for project analysis algorithms and template generation
-- [ ] 5.2 Implement ProjectAnalyzer with file scanning and dependency detection
-- [ ] 5.3 Create template engine with variable substitution
-- [ ] 5.4 Build React project template with modern tooling
-- [ ] 5.5 Develop Node.js API template with Express and testing setup
-- [ ] 5.6 Create Python project template with virtual environment and testing
-- [ ] 5.7 Implement template validation and dependency checking
-- [ ] 5.8 Verify all analysis engine and template tests pass
+- [x] 5.1 Write tests for project analysis algorithms and template generation
+- [x] 5.2 Implement ProjectAnalyzer with file scanning and dependency detection
+- [x] 5.3 Create template engine with variable substitution
+- [x] 5.4 Build React project template with modern tooling
+- [x] 5.5 Develop Node.js API template with Express and testing setup
+- [x] 5.6 Create Python project template with virtual environment and testing
+- [x] 5.7 Implement template validation and dependency checking
+- [x] 5.8 Verify all analysis engine and template tests pass
