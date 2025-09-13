@@ -18,24 +18,24 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 - [x] 1.8 Verify all infrastructure tests pass
 
 ### 2. Project Memory System (.devflow/ persistence)
-- [ ] 2.1 Write tests for project state management and file I/O operations
-- [ ] 2.2 Design project memory schema (config.json, state.json, templates.json)
-- [ ] 2.3 Implement ProjectMemory class with CRUD operations
-- [ ] 2.4 Add state validation and migration utilities
-- [ ] 2.5 Create backup and recovery mechanisms
-- [ ] 2.6 Implement memory cleanup and optimization
-- [ ] 2.7 Add file watching for external changes detection
-- [ ] 2.8 Verify all project memory tests pass
+- [x] 2.1 Write tests for project state management and file I/O operations
+- [x] 2.2 Design project memory schema (config.json, state.json, templates.json)
+- [x] 2.3 Implement ProjectMemory class with CRUD operations
+- [x] 2.4 Add state validation and migration utilities
+- [x] 2.5 Create backup and recovery mechanisms
+- [x] 2.6 Implement memory cleanup and optimization
+- [x] 2.7 Add file watching for external changes detection
+- [x] 2.8 Verify all project memory tests pass
 
 ### 3. Configuration Validation System
-- [ ] 3.1 Write tests for configuration schema validation and error handling
-- [ ] 3.2 Define configuration schemas for different project types
-- [ ] 3.3 Implement ConfigValidator with JSON Schema validation
-- [ ] 3.4 Create configuration sanitization and normalization utilities
-- [ ] 3.5 Add configuration diff and merge capabilities
-- [ ] 3.6 Implement configuration backup and rollback
-- [ ] 3.7 Create configuration migration tools
-- [ ] 3.8 Verify all configuration validation tests pass
+- [x] 3.1 Write tests for configuration schema validation and error handling
+- [x] 3.2 Define configuration schemas for different project types
+- [x] 3.3 Implement ConfigValidator with JSON Schema validation
+- [x] 3.4 Create configuration sanitization and normalization utilities
+- [x] 3.5 Add configuration diff and merge capabilities
+- [x] 3.6 Implement configuration backup and rollback
+- [x] 3.7 Create configuration migration tools
+- [x] 3.8 Verify all configuration validation tests pass
 
 ### 4. Core Slash Commands Implementation
 - [ ] 4.1 Write tests for command parsing, validation, and execution flow
