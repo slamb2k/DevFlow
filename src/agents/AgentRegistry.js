@@ -1,5 +1,7 @@
 import { EventEmitter } from 'events';
 import { BaseAgent } from './BaseAgent.js';
+import { interAgentComm } from './InterAgentCommunication.js';
+import { mergeWithDefaults, validateConfig } from './config/agent-schemas.js';
 
 /**
  * Central registry for managing DevFlow agents
@@ -26,11 +28,12 @@ export class AgentRegistry extends EventEmitter {
   }
 
   /**
-   * Register a new agent
+   * Register a new agent with optional configuration
    * @param {string} id - Unique agent identifier
    * @param {BaseAgent} agent - Agent instance
+   * @param {Object} config - Optional agent configuration
    */
-  async register(id, agent) {
+  async register(id, agent, config = {}) {
     if (this.agents.has(id)) {
       throw new Error(`Agent ${id} is already registered`);
     }
@@ -38,6 +41,15 @@ export class AgentRegistry extends EventEmitter {
     if (!(agent instanceof BaseAgent)) {
       throw new Error('Agent must extend BaseAgent class');
     }
+
+    // Validate and merge configuration
+    const validation = validateConfig(id, config);
+    if (!validation.valid) {
+      throw new Error(`Invalid configuration for agent ${id}: ${validation.errors.join(', ')}`);
+    }
+
+    const mergedConfig = mergeWithDefaults(id, config);
+    agent.config = { ...agent.config, ...mergedConfig };
 
     // Store agent
     this.agents.set(id, agent);
@@ -389,5 +401,57 @@ export class AgentRegistry extends EventEmitter {
     }
 
     throw new Error(`All agents with capability ${capability} are busy`);
+  }
+
+  /**
+   * Create and execute a collaborative workflow
+   * @param {string} patternName - Name of the collaboration pattern
+   * @param {Object} context - Workflow context
+   */
+  async executeWorkflow(patternName, context = {}) {
+    const workflowId = await interAgentComm.createWorkflow(patternName, context, this);
+    return await interAgentComm.executeWorkflow(workflowId, this);
+  }
+
+  /**
+   * Execute tasks in parallel across multiple agents
+   * @param {Array} tasks - Array of {agent, task, context} objects
+   */
+  async executeParallel(tasks) {
+    return await interAgentComm.executeParallel(tasks, this);
+  }
+
+  /**
+   * Execute a pipeline of agent tasks
+   * @param {Array} steps - Array of {agent, task, transform} objects
+   * @param {Object} initialContext - Initial context
+   */
+  async executePipeline(steps, initialContext = {}) {
+    return await interAgentComm.executePipeline(steps, initialContext, this);
+  }
+
+  /**
+   * Send a request from one agent to another
+   * @param {string} from - Source agent ID
+   * @param {string} to - Target agent ID
+   * @param {Object} request - Request object {task, context}
+   */
+  async sendInterAgentRequest(from, to, request) {
+    return await interAgentComm.sendRequest(from, to, request, this);
+  }
+
+  /**
+   * Get workflow status
+   * @param {string} workflowId - Workflow identifier
+   */
+  getWorkflowStatus(workflowId) {
+    return interAgentComm.getWorkflowStatus(workflowId);
+  }
+
+  /**
+   * Get collaboration metrics
+   */
+  getCollaborationMetrics() {
+    return interAgentComm.getMetrics();
   }
 }

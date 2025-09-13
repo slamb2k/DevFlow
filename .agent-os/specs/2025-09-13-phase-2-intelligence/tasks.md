@@ -12,15 +12,15 @@
   - [x] 1.7 Integrate agent system with existing CommandRegistry
   - [x] 1.8 Verify all agent foundation tests pass
 
-- [ ] 2. Build Specialized Sub-Agents
-  - [ ] 2.1 Write tests for Analyzer, Architect, Security, and Optimizer agents
-  - [ ] 2.2 Implement Analyzer Agent with AST parsing and complexity analysis
-  - [ ] 2.3 Implement Architect Agent with design pattern recognition
-  - [ ] 2.4 Implement Security Agent with vulnerability scanning integration
-  - [ ] 2.5 Implement Optimizer Agent with performance profiling capabilities
-  - [ ] 2.6 Create agent-specific configuration schemas
-  - [ ] 2.7 Add inter-agent communication capabilities
-  - [ ] 2.8 Verify all specialized agent tests pass
+- [x] 2. Build Specialized Sub-Agents
+  - [x] 2.1 Write tests for Analyzer, Architect, Security, and Optimizer agents
+  - [x] 2.2 Implement Analyzer Agent with AST parsing and complexity analysis
+  - [x] 2.3 Implement Architect Agent with design pattern recognition
+  - [x] 2.4 Implement Security Agent with vulnerability scanning integration
+  - [x] 2.5 Implement Optimizer Agent with performance profiling capabilities
+  - [x] 2.6 Create agent-specific configuration schemas
+  - [x] 2.7 Add inter-agent communication capabilities
+  - [x] 2.8 Verify all specialized agent tests pass
 
 - [ ] 3. Create Output Style System
   - [ ] 3.1 Write tests for StyleRegistry and output formatters
