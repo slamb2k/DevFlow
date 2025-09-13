@@ -156,7 +156,7 @@ PR_NUM="${2:-}"
 
 case "$ACTION" in
   analyze|"")
-    ./scripts/pr-rescue-core.sh analyze
+    ./.claude/scripts/pr-rescue-core.sh analyze
     ;;
   fix)
     if [ -z "$PR_NUM" ]; then
@@ -166,7 +166,7 @@ case "$ACTION" in
     fi
     
     # First analyze the PR
-    ./scripts/pr-rescue-core.sh analyze "$PR_NUM"
+    ./.claude/scripts/pr-rescue-core.sh analyze "$PR_NUM"
     
     # Then offer fix options
     echo
@@ -180,13 +180,13 @@ case "$ACTION" in
     read -p "Choice: " choice
     
     case "$choice" in
-      1) ./scripts/pr-rescue-core.sh enable-auto-merge "$PR_NUM" ;;
-      2) ./scripts/pr-rescue-core.sh update-branch "$PR_NUM" ;;
-      3) 
-        ./scripts/pr-rescue-core.sh update-branch "$PR_NUM"
-        ./scripts/pr-rescue-core.sh enable-auto-merge "$PR_NUM"
+      1) ./.claude/scripts/pr-rescue-core.sh enable-auto-merge "$PR_NUM" ;;
+      2) ./.claude/scripts/pr-rescue-core.sh update-branch "$PR_NUM" ;;
+      3)
+        ./.claude/scripts/pr-rescue-core.sh update-branch "$PR_NUM"
+        ./.claude/scripts/pr-rescue-core.sh enable-auto-merge "$PR_NUM"
         ;;
-      4) ./scripts/pr-rescue-core.sh force-merge "$PR_NUM" ;;
+      4) ./.claude/scripts/pr-rescue-core.sh force-merge "$PR_NUM" ;;
       *) echo "Cancelled" ;;
     esac
     ;;
@@ -196,7 +196,7 @@ case "$ACTION" in
       echo "Usage: /pr-rescue force <PR#>"
       exit 1
     fi
-    ./scripts/pr-rescue-core.sh force-merge "$PR_NUM"
+    ./.claude/scripts/pr-rescue-core.sh force-merge "$PR_NUM"
     ;;
   *)
     echo "Unknown action: $ACTION"

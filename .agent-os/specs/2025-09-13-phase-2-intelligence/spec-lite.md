@@ -1,0 +1,3 @@
+# Spec Summary (Lite)
+
+Implement AI-driven sub-agents and intelligent workflow recommendations to transform DevFlow into an adaptive assistant providing specialized expertise through multiple communication styles. The system will analyze projects for security, performance, and quality issues while learning from patterns to suggest workflow improvements. Four specialized agents (Analyzer, Architect, Security, Optimizer) will work through customizable output styles (Guide, Expert, Coach, Reporter) to deliver context-aware guidance.

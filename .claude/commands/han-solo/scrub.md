@@ -113,8 +113,8 @@ For context efficiency, this command can be executed in two ways:
 set -e
 
 # Use the scrub-core.sh script for implementation
-if [ -f "./scripts/scrub-core.sh" ]; then
-  ./scripts/scrub-core.sh "$@"
+if [ -f "./.claude/scripts/scrub-core.sh" ]; then
+  ./.claude/scripts/scrub-core.sh "$@"
 else
   echo "Error: scrub-core.sh script not found"
   echo "Please ensure han-solo is properly installed"
