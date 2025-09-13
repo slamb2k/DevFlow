@@ -2,15 +2,15 @@
 
 ## Tasks
 
-- [ ] 1. Implement Sub-Agent Architecture Foundation
-  - [ ] 1.1 Write tests for AgentRegistry class and agent lifecycle management
-  - [ ] 1.2 Create base Agent interface and abstract class with standard methods
-  - [ ] 1.3 Implement AgentRegistry with registration, discovery, and invocation
-  - [ ] 1.4 Create agent communication protocol with JSON-RPC style messaging
-  - [ ] 1.5 Implement agent state persistence in .devflow/agents/ directory
-  - [ ] 1.6 Add agent initialization and cleanup lifecycle hooks
-  - [ ] 1.7 Integrate agent system with existing CommandRegistry
-  - [ ] 1.8 Verify all agent foundation tests pass
+- [x] 1. Implement Sub-Agent Architecture Foundation
+  - [x] 1.1 Write tests for AgentRegistry class and agent lifecycle management
+  - [x] 1.2 Create base Agent interface and abstract class with standard methods
+  - [x] 1.3 Implement AgentRegistry with registration, discovery, and invocation
+  - [x] 1.4 Create agent communication protocol with JSON-RPC style messaging
+  - [x] 1.5 Implement agent state persistence in .devflow/agents/ directory
+  - [x] 1.6 Add agent initialization and cleanup lifecycle hooks
+  - [x] 1.7 Integrate agent system with existing CommandRegistry
+  - [x] 1.8 Verify all agent foundation tests pass
 
 - [ ] 2. Build Specialized Sub-Agents
   - [ ] 2.1 Write tests for Analyzer, Architect, Security, and Optimizer agents
