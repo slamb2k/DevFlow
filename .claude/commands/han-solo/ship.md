@@ -21,9 +21,11 @@ Ship your code changes through a governed fast-path optimized for solo developer
 4. **Wait for checks** to pass (default behavior)
 5. **Auto-merge** when all required checks are green
 6. **Clean up** both local and remote branches
-7. **Run /scrub --quiet** automatically after successful merge for comprehensive branch cleanup
+7. **Run /scrub --quiet** automatically after successful merge for comprehensive branch cleanup (unless SKIP_AUTO_SCRUB=true)
 
 ## Command Flags
+
+### Core Flags
 - `--check`: Run safety checks only, don't create PR (uses pre-ship-check.sh)
 - `--nowait`: Create/update PR only, don't wait for merge
 - `--force`: Allow merge even with failing checks (requires explicit intent)
@@ -32,6 +34,22 @@ Ship your code changes through a governed fast-path optimized for solo developer
 - `--branch-name <n>`: Set explicit branch name when creating from default
 - `--body "<text>"`: Set explicit PR body (overrides auto-generation)
 - `--draft`: Create PR as draft
+
+### PR Reuse Flags (NEW)
+- `--pr <number>`: Explicitly target PR #number for updates
+- `--no-pr-reuse`: Disable automatic PR detection (use legacy behavior)
+- `--pr-auto`: Auto-select best matching PR without prompting
+
+## Environment Variables
+
+### Automatic Branch Cleanup
+- `SKIP_AUTO_SCRUB=true`: Skip automatic branch cleanup after successful merge
+- `SKIP_AUTO_SCRUB=false` or unset (default): Run automatic cleanup after merge
+
+The automatic cleanup (`/scrub --quiet`) runs after successful merge to remove old merged branches while preserving any with unmerged commits. To disable:
+```bash
+export SKIP_AUTO_SCRUB=true
+```
 
 ## Examples
 ```bash
@@ -62,6 +80,15 @@ git add file1.js file2.js
 
 # Ship from main with specific branch name
 /ship --branch-name feat/new-feature
+
+# Update existing PR #10 with current changes
+/ship --pr 10
+
+# Auto-select best matching PR (no prompt)
+/ship --pr-auto
+
+# Force create new PR (disable PR reuse)
+/ship --no-pr-reuse
 ```
 
 ## Context (Auto-collected)
@@ -78,6 +105,57 @@ Before delegating to git-shipper, verify:
 2. ✓ GitHub CLI authenticated (`gh auth status`)
 3. ✓ Has commits to ship (`git log -1`)
 4. ✓ Remote is accessible (`git fetch --dry-run`)
+
+## PR Reuse Behavior (NEW)
+
+The ship command now intelligently detects and reuses existing PRs to prevent duplicates:
+
+### Automatic PR Discovery
+When shipping, the command will:
+1. **Check for PRs from current branch** - Finds PRs created from your branch
+2. **Check for PRs with same commits** - Detects PRs containing your HEAD commit
+3. **Check for overlapping changes** - Finds PRs modifying >30% of same files
+4. **Score and rank candidates** - Evaluates PRs based on multiple factors
+5. **Let you choose** - Interactive selection when multiple matches exist
+
+### PR Scoring Algorithm
+PRs are scored based on:
+- Same branch: +100 points
+- Contains HEAD commit: +50 points
+- File overlap percentage: +1 point per %
+- PR freshness: -1 point per day old
+- Has conflicts: -30 points
+- Has review comments: -10 points
+
+### Smart Update Strategies
+- **Force push**: When you own the PR and no reviews exist
+- **Add commits**: When PR has review comments (preserves context)
+- **Create new**: When PR is from a fork or you don't own it
+
+### Example PR Selection
+```
+🔍 Analyzing existing PRs...
+
+Found 2 potential PR candidate(s):
+
+  1. PR #10
+     ⭐ RECOMMENDED [Score: 145]
+     Title: "feat: Add user authentication"
+     Branch: feature/auth (yours)
+     Overlap: 15 files (85%)
+     Status: ✓ No conflicts
+
+  2. PR #15
+     [Score: 42]
+     Title: "fix: Minor updates"
+     Branch: hotfix/updates
+     Overlap: 2 files (10%)
+     Status: ⚠️ Has 3 review(s)
+
+  3. Create new PR
+
+Select option [1-3] (default: 1):
+```
 
 ## Shipping Modes
 
@@ -132,20 +210,30 @@ When you run `/ship --staged`:
 - Auto-deletes branches after merge
 
 ## Implementation
-This command delegates to the git-shipper agent for efficient context usage.
+This command displays a banner immediately then delegates to the git-shipper agent.
 
-When invoked, use the Task tool with:
+First, display the banner for instant feedback:
+```bash
+#!/bin/bash
+# Display banner immediately for instant feedback
+if [ -f "./.claude/scripts/block-text.sh" ]; then
+  ./.claude/scripts/block-text.sh -s "SHIPPING"
+  echo
+fi
+```
+
+Then, use the Task tool with:
 - **subagent_type**: "git-shipper"
 - **description**: "Ship code changes via PR"
 - **prompt**: Pass all command arguments and flags directly to the agent
 
 The git-shipper agent will:
-1. Execute ship-core.sh with all provided arguments
+1. Execute ship-core.sh with all provided arguments (with SKIP_BANNER=1)
 2. Handle the complete shipping workflow
 3. Run scrub cleanup automatically after successful merge
 4. Provide comprehensive INFO/WARN/ERR reporting
 
-## Workflow Steps (handled by ship-core.sh)
+## Workflow Steps (handled by git-shipper)
 1. Validate repository state and authentication
 2. Sync with remote and rebase if needed
 3. Run all configured checks (Nx or standard)
@@ -170,6 +258,13 @@ The git-shipper agent will:
 - **Check failures**: Review CI logs, fix issues, or use `--force` if certain
 - **No commits**: Make at least one commit before shipping
 - **Auth issues**: Run `gh auth login` to authenticate
+
+### PR Reuse Issues
+- **Duplicate PRs**: Ship now auto-detects existing PRs with same changes
+- **Wrong PR selected**: Use `--pr <number>` to explicitly target correct PR
+- **PR won't update**: Check if you own the PR and it's not from a fork
+- **Lost review comments**: Ship preserves reviews by adding commits instead of force-pushing
+- **Want fresh PR**: Use `--no-pr-reuse` to disable PR detection
 
 ### Recovery Commands
 ```bash

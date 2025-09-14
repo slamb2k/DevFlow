@@ -65,6 +65,7 @@ STAGED="${STAGED:-}"
 EXPLICIT_TITLE=""
 EXPLICIT_BRANCH_NAME=""
 EXPLICIT_BODY=""
+EXPLICIT_PR=""
 DRAFT=""
 STASH_MSG=""
 NEED_STASH_POP="false"
@@ -97,6 +98,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --body)
       EXPLICIT_BODY="$2"
+      shift 2
+      ;;
+    --pr)
+      EXPLICIT_PR="$2"
       shift 2
       ;;
     --draft)
@@ -569,7 +574,92 @@ fi
 
 # Check for existing PR (open state)
 echo -e "\n${GREEN}Managing PR...${NC}"
-PR_EXISTS="$(gh pr list --head "${CURR_BRANCH}" --json number --jq '.[0].number' 2>/dev/null || true)"
+
+# First check if user specified a PR explicitly
+if [[ -n "${EXPLICIT_PR}" ]]; then
+  # Verify the PR exists and is open
+  PR_STATE="$(gh pr view "${EXPLICIT_PR}" --json state --jq '.state' 2>/dev/null || true)"
+  if [[ "${PR_STATE}" = "OPEN" ]]; then
+    PR_EXISTS="${EXPLICIT_PR}"
+    note "📌 Using specified PR #${PR_EXISTS}"
+
+    # Get the PR's branch for potential updates
+    PR_BRANCH="$(gh pr view "${PR_EXISTS}" --json headRefName --jq '.headRefName' 2>/dev/null || true)"
+    if [[ -n "${PR_BRANCH}" ]] && [[ "${PR_BRANCH}" != "${CURR_BRANCH}" ]]; then
+      warn "PR #${PR_EXISTS} is from branch '${PR_BRANCH}', not current branch '${CURR_BRANCH}'"
+      note "Will update PR with commits from current branch"
+    fi
+  else
+    fail "PR #${EXPLICIT_PR} is not open (state: ${PR_STATE:-not found})"
+    report
+  fi
+else
+  # Check for PR from current branch
+  PR_EXISTS="$(gh pr list --head "${CURR_BRANCH}" --json number --jq '.[0].number' 2>/dev/null || true)"
+
+  # If no PR from current branch, check for PRs containing our commits
+  if [[ -z "${PR_EXISTS}" ]]; then
+    CURRENT_HEAD="$(git rev-parse HEAD 2>/dev/null || true)"
+    if [[ -n "${CURRENT_HEAD}" ]]; then
+      # Find open PRs that contain our HEAD commit
+      OPEN_PRS="$(gh pr list --state open --json number,headRefName,commits 2>/dev/null || echo '[]')"
+
+      # Use jq to find PRs containing our commit
+      PR_WITH_COMMIT="$(echo "${OPEN_PRS}" | jq -r --arg commit "${CURRENT_HEAD}" '
+        .[] |
+        select(.commits != null) |
+        select(.commits[].oid == $commit) |
+        .number' | head -1)"
+
+      if [[ -n "${PR_WITH_COMMIT}" ]]; then
+        PR_EXISTS="${PR_WITH_COMMIT}"
+        PR_BRANCH="$(echo "${OPEN_PRS}" | jq -r --arg pr "${PR_WITH_COMMIT}" '.[] | select(.number == ($pr | tonumber)) | .headRefName')"
+        warn "🔍 Found existing PR #${PR_EXISTS} (branch: ${PR_BRANCH}) containing your commits"
+        note "Will update this PR instead of creating a new one"
+      fi
+    fi
+
+    # If still no PR found, check for significant file overlap
+    if [[ -z "${PR_EXISTS}" ]]; then
+      # Initialize suggestion variable
+      SUGGESTED_PR=""
+
+      # Get list of files changed in current branch
+      CHANGED_FILES="$(git diff --name-only "origin/${DEFAULT}...HEAD" 2>/dev/null | sort | uniq)"
+      CHANGED_COUNT="$(echo "${CHANGED_FILES}" | wc -l)"
+
+      if [[ ${CHANGED_COUNT} -gt 0 ]]; then
+        # Check each open PR for file overlap
+        for pr_num in $(gh pr list --state open --json number --jq '.[].number' 2>/dev/null); do
+          # Get files changed in this PR
+          PR_FILES="$(gh pr view "${pr_num}" --json files --jq '.files[].path' 2>/dev/null | sort | uniq)"
+
+          # Find overlapping files
+          OVERLAP_FILES="$(comm -12 <(echo "${CHANGED_FILES}") <(echo "${PR_FILES}") 2>/dev/null)"
+          OVERLAP_COUNT="$(echo "${OVERLAP_FILES}" | grep -c '^' || echo 0)"
+
+          # If significant overlap (>50% of our changes or >10 files)
+          if [[ ${OVERLAP_COUNT} -gt 10 ]] || [[ ${OVERLAP_COUNT} -gt $((CHANGED_COUNT / 2)) ]]; then
+            PR_TITLE="$(gh pr view "${pr_num}" --json title --jq '.title' 2>/dev/null)"
+            warn "📊 PR #${pr_num} modifies ${OVERLAP_COUNT} of the same files: ${PR_TITLE}"
+
+            # Suggest using this PR if it's the first match
+            if [[ -z "${SUGGESTED_PR}" ]]; then
+              SUGGESTED_PR="${pr_num}"
+              note "💡 Consider using: /ship --pr ${pr_num}"
+            fi
+          fi
+        done
+
+        # If we found a PR with significant overlap, prompt the user
+        if [[ -n "${SUGGESTED_PR}" ]]; then
+          warn "⚠️ Found PR with overlapping changes. Creating new PR anyway."
+          note "To update existing PR instead, run: /ship --pr ${SUGGESTED_PR}"
+        fi
+      fi
+    fi
+  fi
+fi
 
 if [[ -z "${PR_EXISTS}" ]]; then
   # Create new PR
