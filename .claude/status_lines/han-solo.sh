@@ -305,7 +305,7 @@ format_branch() {
   if [[ "$branch_display" == feat/* ]] || [[ "$branch_display" == feature/* ]]; then
     echo "${STAR} ${YELLOW}${branch_display}${NC}"
   elif [ "$branch_display" = "main" ] || [ "$branch_display" = "master" ]; then
-    echo "${WARNING} ${RED}${BOLD}${branch_display}${NC}"
+    echo "${BRANCH_ICON} ${RED}${BOLD}${branch_display} (Use /launch)${NC}"
   else
     echo "${BRANCH_ICON} ${YELLOW}${branch_display}${NC}"
   fi
@@ -343,11 +343,6 @@ OUTPUT="${OUTPUT} ${GRAY}|${NC} ${MODEL_INFO}"
 CONTEXT=$(get_context_usage)
 if [ -n "$CONTEXT" ]; then
   OUTPUT="${OUTPUT} ${GRAY}|${NC} ${CONTEXT}"
-fi
-
-# Main branch warning (additional emphasis)
-if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
-  OUTPUT="${OUTPUT} ${RED}${BOLD}[USE /launch TO START WORK]${NC}"
 fi
 
 echo -e "$OUTPUT"

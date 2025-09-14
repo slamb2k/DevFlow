@@ -62,15 +62,21 @@ The command will detect:
 ```
 
 ## Implementation
-The launch command directly executes the .claude/scripts/launch-core.sh script:
+The launch command displays a banner then executes the .claude/scripts/launch-core.sh script:
 
 ```bash
 #!/bin/bash
 set -e
 
+# Display banner immediately for instant feedback
+if [ -f "./.claude/scripts/block-text.sh" ]; then
+  ./.claude/scripts/block-text.sh -s "LAUNCHING"
+  echo
+fi
+
 # Execute launch-core.sh with all arguments
 if [ -f "./.claude/scripts/launch-core.sh" ]; then
-  ./.claude/scripts/launch-core.sh "$@"
+  SKIP_BANNER=1 ./.claude/scripts/launch-core.sh "$@"
 else
   echo "Error: launch-core.sh script not found"
   echo "Please ensure han-solo is properly installed"

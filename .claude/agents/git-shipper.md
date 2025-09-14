@@ -38,9 +38,56 @@ You are "git-shipper", a specialized ops agent for Git + GitHub PR workflows opt
 #!/bin/bash
 set -e
 
+# Capture key information for final report
+SHIP_START_TIME=$(date +%s)
+SHIP_SUCCESS=false
+PR_URL=""
+MERGED=false
+
 # Use the ship-core.sh script for implementation
+# Note: Banner is shown by the /ship command for instant feedback
 if [ -f "./.claude/scripts/ship-core.sh" ]; then
-  ./.claude/scripts/ship-core.sh "$@"
+  echo "🚀 Starting ship workflow..."
+  echo
+
+  # Run ship-core and capture output
+  SKIP_BANNER=1 ./.claude/scripts/ship-core.sh "$@"
+  SHIP_EXIT_CODE=$?
+
+  # Mark success if exit code is 0
+  if [ $SHIP_EXIT_CODE -eq 0 ]; then
+    SHIP_SUCCESS=true
+  fi
+
+  # Calculate duration
+  SHIP_END_TIME=$(date +%s)
+  SHIP_DURATION=$((SHIP_END_TIME - SHIP_START_TIME))
+
+  # Generate final report
+  echo
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "📊 SHIP WORKFLOW REPORT"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+  if [ "$SHIP_SUCCESS" = true ]; then
+    echo "✅ Status: SUCCESS"
+  else
+    echo "❌ Status: FAILED (exit code: $SHIP_EXIT_CODE)"
+  fi
+
+  echo "⏱️  Duration: ${SHIP_DURATION} seconds"
+
+  # Try to extract PR URL from recent output
+  if command -v gh >/dev/null 2>&1; then
+    RECENT_PR=$(gh pr list --author @me --limit 1 --json url --jq '.[0].url' 2>/dev/null || echo "")
+    if [ -n "$RECENT_PR" ]; then
+      echo "🔗 PR: $RECENT_PR"
+    fi
+  fi
+
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+  exit $SHIP_EXIT_CODE
 else
   echo "Error: ship-core.sh script not found"
   echo "Please ensure han-solo is properly installed"

@@ -112,9 +112,15 @@ For context efficiency, this command can be executed in two ways:
 #!/bin/bash
 set -e
 
+# Display banner immediately for instant feedback
+if [ -f "./.claude/scripts/block-text.sh" ]; then
+  ./.claude/scripts/block-text.sh -s "SCRUBBING"
+  echo
+fi
+
 # Use the scrub-core.sh script for implementation
 if [ -f "./.claude/scripts/scrub-core.sh" ]; then
-  ./.claude/scripts/scrub-core.sh "$@"
+  SKIP_BANNER=1 ./.claude/scripts/scrub-core.sh "$@"
 else
   echo "Error: scrub-core.sh script not found"
   echo "Please ensure han-solo is properly installed"
