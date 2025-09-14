@@ -31,6 +31,7 @@ Ship your code changes through a governed fast-path optimized for solo developer
 - `--title "<text>"`: Set explicit PR title (overrides auto-generation)
 - `--branch-name <n>`: Set explicit branch name when creating from default
 - `--body "<text>"`: Set explicit PR body (overrides auto-generation)
+- `--pr <number>`: Use existing PR instead of creating new one (smart PR reuse)
 - `--draft`: Create PR as draft
 
 ## Examples
@@ -62,6 +63,9 @@ git add file1.js file2.js
 
 # Ship from main with specific branch name
 /ship --branch-name feat/new-feature
+
+# Update existing PR instead of creating new one
+/ship --pr 10  # Updates and ships through PR #10
 ```
 
 ## Context (Auto-collected)
@@ -128,8 +132,19 @@ When you run `/ship --staged`:
 - **Default**: Wait for checks and merge
 - **--nowait**: Stop after PR creation
 - **--force**: Merge even with failures
+- **--pr**: Update existing PR instead of creating new one
 - Uses squash merge for clean history
 - Auto-deletes branches after merge
+
+### PR Detection & Reuse
+The ship workflow now intelligently detects and reuses existing PRs:
+
+1. **Explicit PR targeting**: Use `--pr <number>` to update a specific PR
+2. **Automatic detection**: Finds PRs containing your commits
+3. **File overlap warning**: Alerts when PRs modify same files
+4. **Smart suggestions**: Recommends using existing PRs when appropriate
+
+This prevents duplicate PRs and maintains cleaner PR history.
 
 ## Implementation
 This command delegates to the git-shipper agent for efficient context usage.
@@ -170,6 +185,10 @@ The git-shipper agent will:
 - **Check failures**: Review CI logs, fix issues, or use `--force` if certain
 - **No commits**: Make at least one commit before shipping
 - **Auth issues**: Run `gh auth login` to authenticate
+- **Duplicate PRs**: Ship now detects existing PRs with your commits
+  - Use `--pr <number>` to update existing PR
+  - Ship warns about PRs with overlapping files
+  - Automatically reuses PRs containing your commits
 
 ### Recovery Commands
 ```bash
