@@ -1,6 +1,6 @@
 # Product Roadmap
 
-> Last Updated: 2025-09-13
+> Last Updated: 2025-09-14
 > Version: 1.0.0
 > Status: Planning
 
@@ -26,7 +26,7 @@
 
 - **Sub-Agent Architecture**: Analyzer, Architect, Security, and Optimizer agents
 - **Custom Output Styles**: Guide, Expert, Coach, and Reporter communication modes
-- **Advanced Analysis**: Security vulnerability detection, performance bottleneck identification
+- [x] **Advanced Analysis**: Security vulnerability detection, performance bottleneck identification
 - **Smart Recommendations**: Context-aware suggestions for workflow improvements
 - **Template Customization**: User-defined templates and workflow patterns
 
