@@ -422,8 +422,11 @@ export class EventBus extends EventEmitter {
       this.metrics[event].error_rate = this.metrics[event].errors / this.metrics[event].count;
     }
 
-    // Emit error event
-    this.emit('error', { error, event });
+    // Emit error event only if there are listeners to avoid Node's unhandled 'error' crash
+    if (this.listenerCount('error') > 0) {
+      // Use the base EventEmitter emit to avoid re-processing middleware on error events
+      super.emit('error', { error, event });
+    }
   }
 
   /**

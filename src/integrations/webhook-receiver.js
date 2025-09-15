@@ -35,8 +35,22 @@ export class WebhookReceiver {
    * Setup Express middleware
    */
   setup_middleware() {
-    this.app.use(express.json());
-    this.app.use(express.urlencoded({ extended: true }));
+    // Capture raw body for signature verification (GitHub/Slack)
+    this.app.use(
+      express.json({
+        verify: (req, _res, buf) => {
+          req.rawBody = buf.toString('utf8');
+        },
+      })
+    );
+    this.app.use(
+      express.urlencoded({
+        extended: true,
+        verify: (req, _res, buf) => {
+          req.rawBody = buf.toString('utf8');
+        },
+      })
+    );
   }
 
   /**
@@ -298,8 +312,10 @@ export class WebhookReceiver {
 
     // Handle batch events
     if (payload.events && Array.isArray(payload.events)) {
-      for (const event of payload.events) {
-        await this.event_bus.emit_async(`custom:${event.type}`, event.data);
+      if (this.event_bus && typeof this.event_bus.emit_async === 'function') {
+        for (const event of payload.events) {
+          await this.event_bus.emit_async(`custom:${event.type}`, event.data);
+        }
       }
       return null;
     }
@@ -344,9 +360,19 @@ export class WebhookReceiver {
       return false;
     }
 
-    const expected = this.generate_github_signature(JSON.stringify(req.body), secret);
+    const payload = req.rawBody || JSON.stringify(req.body);
+    const expected = this.generate_github_signature(payload, secret);
 
-    return signature === expected;
+    try {
+      const sigBuf = Buffer.from(signature, 'utf8');
+      const expBuf = Buffer.from(expected, 'utf8');
+      if (sigBuf.length !== expBuf.length) {
+        return false;
+      }
+      return crypto.timingSafeEqual(sigBuf, expBuf);
+    } catch (_e) {
+      return false;
+    }
   }
 
   /**
@@ -383,9 +409,19 @@ export class WebhookReceiver {
       return false;
     }
 
-    const expected = this.generate_slack_signature(JSON.stringify(req.body), secret, timestamp);
+    const payload = req.rawBody || JSON.stringify(req.body);
+    const expected = this.generate_slack_signature(payload, secret, timestamp);
 
-    return signature === expected;
+    try {
+      const sigBuf = Buffer.from(signature, 'utf8');
+      const expBuf = Buffer.from(expected, 'utf8');
+      if (sigBuf.length !== expBuf.length) {
+        return false;
+      }
+      return crypto.timingSafeEqual(sigBuf, expBuf);
+    } catch (_e) {
+      return false;
+    }
   }
 
   /**
