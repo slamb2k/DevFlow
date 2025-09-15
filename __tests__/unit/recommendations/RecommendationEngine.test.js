@@ -18,7 +18,7 @@ jest.mock('fs/promises', () => ({
   writeFile: mockWriteFile,
   readdir: mockReaddir,
   mkdir: mockMkdir,
-  access: mockAccess
+  access: mockAccess,
 }));
 
 describe('RecommendationEngine', () => {
@@ -62,14 +62,14 @@ describe('RecommendationEngine', () => {
           hash: '123',
           message: 'feat: Add feature',
           date: new Date('2024-01-01T10:00:00'),
-          files: ['src/file1.js', 'src/file2.js']
+          files: ['src/file1.js', 'src/file2.js'],
         },
         {
           hash: '456',
           message: 'fix: Fix bug',
           date: new Date('2024-01-02T14:00:00'),
-          files: ['src/file1.js']
-        }
+          files: ['src/file1.js'],
+        },
       ];
 
       const patterns = await engine.recognizePatterns(mockCommits);
@@ -83,13 +83,13 @@ describe('RecommendationEngine', () => {
       const mockWorkflow = {
         prFrequency: 12, // per month
         branchLifespan: 2, // days
-        commitFrequency: 20 // per week
+        commitFrequency: 20, // per week
       };
 
       const patterns = await engine.analyzeWorkflow(mockWorkflow);
       expect(patterns).toContainEqual(
         expect.objectContaining({
-          type: 'high_pr_frequency'
+          type: 'high_pr_frequency',
         })
       );
     });
@@ -102,7 +102,7 @@ describe('RecommendationEngine', () => {
       expect(recommendations).toContainEqual(
         expect.objectContaining({
           type: 'dependency_update',
-          priority: 'high'
+          priority: 'high',
         })
       );
     });
@@ -113,7 +113,7 @@ describe('RecommendationEngine', () => {
       expect(recommendations).toContainEqual(
         expect.objectContaining({
           type: 'build_optimization',
-          priority: 'medium'
+          priority: 'medium',
         })
       );
     });
@@ -124,7 +124,7 @@ describe('RecommendationEngine', () => {
       expect(recommendations).toContainEqual(
         expect.objectContaining({
           type: 'ci_improvement',
-          priority: 'low'
+          priority: 'low',
         })
       );
     });
@@ -135,7 +135,7 @@ describe('RecommendationEngine', () => {
       const recommendation = {
         type: 'security',
         dataPoints: 10,
-        historicalAccuracy: 0.8
+        historicalAccuracy: 0.8,
       };
 
       const score = engine.calculateConfidence(recommendation);
@@ -147,7 +147,7 @@ describe('RecommendationEngine', () => {
       const recommendations = [
         { id: '1', score: 0.5, priority: 'low' },
         { id: '2', score: 0.9, priority: 'high' },
-        { id: '3', score: 0.7, priority: 'medium' }
+        { id: '3', score: 0.7, priority: 'medium' },
       ];
 
       const prioritized = engine.prioritizeRecommendations(recommendations);
@@ -181,7 +181,7 @@ describe('RecommendationEngine', () => {
     it('should improve recommendations based on feedback', async () => {
       const feedback = [
         { recommendationId: 'rec1', accepted: true },
-        { recommendationId: 'rec2', accepted: false }
+        { recommendationId: 'rec2', accepted: false },
       ];
 
       const improved = await engine.improveRecommendations(feedback);
@@ -197,10 +197,9 @@ describe('RecommendationEngine', () => {
       const patterns = { filePatterns: ['pattern1'] };
       await engine.savePatterns(patterns);
 
-      expect(mockMkdir).toHaveBeenCalledWith(
-        path.join(mockProjectPath, '.devflow/intelligence'),
-        { recursive: true }
-      );
+      expect(mockMkdir).toHaveBeenCalledWith(path.join(mockProjectPath, '.devflow/intelligence'), {
+        recursive: true,
+      });
       expect(mockWriteFile).toHaveBeenCalled();
     });
 
@@ -229,13 +228,13 @@ describe('PatternRecognizer', () => {
         {
           message: 'feat: Add feature',
           files: ['src/file1.js', 'src/file2.js'],
-          date: new Date('2024-01-01T10:00:00')
+          date: new Date('2024-01-01T10:00:00'),
         },
         {
           message: 'fix: Fix bug',
           files: ['src/file1.js'],
-          date: new Date('2024-01-02T14:00:00')
-        }
+          date: new Date('2024-01-02T14:00:00'),
+        },
       ];
 
       const patterns = recognizer.analyzeCommits(commits);
@@ -246,7 +245,7 @@ describe('PatternRecognizer', () => {
       const commits = [
         { message: 'feat: Add feature' },
         { message: 'fix: Fix bug' },
-        { message: 'feat: Add another feature' }
+        { message: 'feat: Add another feature' },
       ];
 
       const patterns = recognizer.detectMessagePatterns(commits);
@@ -260,9 +259,9 @@ describe('PatternRecognizer', () => {
       const fileTree = {
         src: {
           components: ['Button.js', 'Input.js'],
-          utils: ['helpers.js']
+          utils: ['helpers.js'],
         },
-        tests: ['test1.js', 'test2.js']
+        tests: ['test1.js', 'test2.js'],
       };
 
       const patterns = recognizer.analyzeStructure(fileTree);
@@ -353,7 +352,7 @@ describe('FeedbackManager', () => {
         { category: 'security', accepted: true },
         { category: 'security', accepted: true },
         { category: 'security', accepted: false },
-        { category: 'performance', accepted: false }
+        { category: 'performance', accepted: false },
       ];
 
       const stats = await manager.getCategoryStats();
@@ -366,7 +365,7 @@ describe('FeedbackManager', () => {
       manager.feedbackHistory = [
         { type: 'dependency_update', accepted: true },
         { type: 'dependency_update', accepted: true },
-        { type: 'build_optimization', accepted: false }
+        { type: 'build_optimization', accepted: false },
       ];
 
       const successful = await manager.getMostSuccessfulTypes();
@@ -381,7 +380,7 @@ describe('FeedbackManager', () => {
       const weights = { security: 1.0, performance: 1.0 };
       const feedback = [
         { category: 'security', accepted: true },
-        { category: 'performance', accepted: false }
+        { category: 'performance', accepted: false },
       ];
 
       const adjusted = manager.adjustWeights(weights, feedback);

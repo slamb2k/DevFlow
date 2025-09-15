@@ -13,7 +13,7 @@ class MockAgent extends BaseAgent {
     this.executeCalled = true;
     return {
       success: true,
-      result: { processed: task }
+      result: { processed: task },
     };
   }
 
@@ -50,9 +50,9 @@ describe('AgentRegistry', () => {
 
       await registry.register('mock', agent);
 
-      await expect(
-        registry.register('mock', agent)
-      ).rejects.toThrow('Agent mock is already registered');
+      await expect(registry.register('mock', agent)).rejects.toThrow(
+        'Agent mock is already registered'
+      );
     });
 
     test('should list all registered agents', async () => {
@@ -64,7 +64,7 @@ describe('AgentRegistry', () => {
 
       const agents = registry.list();
       expect(agents).toHaveLength(2);
-      expect(agents.map(a => a.id)).toEqual(['agent1', 'agent2']);
+      expect(agents.map((a) => a.id)).toEqual(['agent1', 'agent2']);
     });
   });
 
@@ -81,9 +81,9 @@ describe('AgentRegistry', () => {
     });
 
     test('should throw error when invoking non-existent agent', async () => {
-      await expect(
-        registry.invoke('non-existent', 'task', {})
-      ).rejects.toThrow('Agent non-existent not found');
+      await expect(registry.invoke('non-existent', 'task', {})).rejects.toThrow(
+        'Agent non-existent not found'
+      );
     });
 
     test('should measure execution time', async () => {
@@ -175,14 +175,14 @@ describe('AgentRegistry', () => {
         id: 'mock-agent',
         name: 'Mock Agent',
         status: 'ready',
-        capabilities: ['mock-capability']
+        capabilities: ['mock-capability'],
       });
     });
 
     test('should track agent execution state', async () => {
       const agent = new MockAgent({ id: 'mock-agent', name: 'Mock Agent' });
       agent.execute = jest.fn().mockImplementation(async () => {
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
         return { success: true };
       });
 

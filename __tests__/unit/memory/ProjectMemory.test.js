@@ -42,7 +42,10 @@ describe('ProjectMemory', () => {
       await memory.init();
 
       const devflowPath = path.join(testDir, '.devflow');
-      const exists = await fs.access(devflowPath).then(() => true).catch(() => false);
+      const exists = await fs
+        .access(devflowPath)
+        .then(() => true)
+        .catch(() => false);
 
       expect(exists).toBe(true);
     });
@@ -51,7 +54,10 @@ describe('ProjectMemory', () => {
       await memory.init();
 
       const configPath = path.join(testDir, '.devflow', 'config.json');
-      const exists = await fs.access(configPath).then(() => true).catch(() => false);
+      const exists = await fs
+        .access(configPath)
+        .then(() => true)
+        .catch(() => false);
 
       expect(exists).toBe(true);
 
@@ -68,7 +74,7 @@ describe('ProjectMemory', () => {
       const existingConfig = {
         version: '1.0.0',
         projectName: 'test-project',
-        customField: 'preserved'
+        customField: 'preserved',
       };
 
       await fs.writeFile(
@@ -93,7 +99,7 @@ describe('ProjectMemory', () => {
       const state = {
         currentPhase: 'foundation',
         completedTasks: ['task-1'],
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       await memory.setState(state);
@@ -106,14 +112,14 @@ describe('ProjectMemory', () => {
       const initialState = {
         phase: 'one',
         tasks: ['task-1'],
-        metadata: { version: '1.0' }
+        metadata: { version: '1.0' },
       };
 
       await memory.setState(initialState);
 
       const update = {
         tasks: ['task-1', 'task-2'],
-        metadata: { version: '1.1', author: 'test' }
+        metadata: { version: '1.1', author: 'test' },
       };
 
       await memory.updateState(update);
@@ -129,16 +135,14 @@ describe('ProjectMemory', () => {
 
       // Simulate concurrent updates
       for (let i = 0; i < 10; i++) {
-        updates.push(
-          memory.updateState({ counter: i, [`field${i}`]: true })
-        );
+        updates.push(memory.updateState({ counter: i, [`field${i}`]: true }));
       }
 
       await Promise.all(updates);
 
       const state = await memory.getState();
       expect(typeof state.counter).toBe('number');
-      expect(Object.keys(state).filter(k => k.startsWith('field')).length).toBeGreaterThan(0);
+      expect(Object.keys(state).filter((k) => k.startsWith('field')).length).toBeGreaterThan(0);
     });
   });
 
@@ -151,7 +155,7 @@ describe('ProjectMemory', () => {
       const template = {
         name: 'react-component',
         content: 'export const Component = () => {}',
-        metadata: { framework: 'react' }
+        metadata: { framework: 'react' },
       };
 
       await memory.saveTemplate('react-component', template);
@@ -240,14 +244,11 @@ describe('ProjectMemory', () => {
 
       const oldData = {
         projectName: 'legacy-project',
-        tasks: ['task1', 'task2']
+        tasks: ['task1', 'task2'],
         // Missing version field
       };
 
-      await fs.writeFile(
-        path.join(devflowPath, 'config.json'),
-        JSON.stringify(oldData)
-      );
+      await fs.writeFile(path.join(devflowPath, 'config.json'), JSON.stringify(oldData));
 
       await memory.init();
 
@@ -280,7 +281,7 @@ describe('ProjectMemory', () => {
       await fs.writeFile(configPath, JSON.stringify(config, null, 2));
 
       // Wait for change detection
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(changeDetected).toBe(true);
 
@@ -297,7 +298,7 @@ describe('ProjectMemory', () => {
       await fs.writeFile(statePath, JSON.stringify({ value: 'external' }, null, 2));
 
       // Wait for reload
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const state = await memory.getState();
       expect(state.value).toBe('external');
@@ -353,10 +354,7 @@ describe('ProjectMemory', () => {
       await fs.mkdir(devflowPath, { recursive: true });
 
       // Write corrupted JSON
-      await fs.writeFile(
-        path.join(devflowPath, 'state.json'),
-        '{ invalid json }'
-      );
+      await fs.writeFile(path.join(devflowPath, 'state.json'), '{ invalid json }');
 
       await memory.init();
 

@@ -8,7 +8,7 @@ const execAsync = promisify(exec);
 
 // Mock child_process module
 jest.mock('child_process', () => ({
-  exec: jest.fn((cmd, callback) => callback(null, { stdout: '', stderr: '' }))
+  exec: jest.fn((cmd, callback) => callback(null, { stdout: '', stderr: '' })),
 }));
 
 describe('SecurityAgent', () => {
@@ -25,7 +25,7 @@ describe('SecurityAgent', () => {
       writeFile: jest.spyOn(fs, 'writeFile'),
       mkdir: jest.spyOn(fs, 'mkdir'),
       readdir: jest.spyOn(fs, 'readdir'),
-      stat: jest.spyOn(fs, 'stat')
+      stat: jest.spyOn(fs, 'stat'),
     };
 
     // Mock exec for external tools
@@ -80,7 +80,7 @@ describe('SecurityAgent', () => {
       mockFS.readFile.mockResolvedValueOnce(vulnerableCode);
 
       const result = await security.execute('scan-vulnerabilities', {
-        filePath: 'api.js'
+        filePath: 'api.js',
       });
 
       expect(result.success).toBe(true);
@@ -88,7 +88,7 @@ describe('SecurityAgent', () => {
       expect(result.result.vulnerabilities).toContainEqual(
         expect.objectContaining({
           type: 'sql-injection',
-          severity: 'high'
+          severity: 'high',
         })
       );
     });
@@ -110,14 +110,14 @@ describe('SecurityAgent', () => {
       mockFS.readFile.mockResolvedValueOnce(xssCode);
 
       const result = await security.execute('scan-vulnerabilities', {
-        filePath: 'search.js'
+        filePath: 'search.js',
       });
 
       expect(result.success).toBe(true);
       expect(result.result.vulnerabilities).toContainEqual(
         expect.objectContaining({
           type: 'xss',
-          severity: 'high'
+          severity: 'high',
         })
       );
     });
@@ -136,14 +136,14 @@ describe('SecurityAgent', () => {
       mockFS.readFile.mockResolvedValueOnce(pathTraversalCode);
 
       const result = await security.execute('scan-vulnerabilities', {
-        filePath: 'fileServer.js'
+        filePath: 'fileServer.js',
       });
 
       expect(result.success).toBe(true);
       expect(result.result.vulnerabilities).toContainEqual(
         expect.objectContaining({
           type: 'path-traversal',
-          severity: 'high'
+          severity: 'high',
         })
       );
     });
@@ -165,14 +165,14 @@ describe('SecurityAgent', () => {
       mockFS.readFile.mockResolvedValueOnce(commandInjectionCode);
 
       const result = await security.execute('scan-vulnerabilities', {
-        filePath: 'network.js'
+        filePath: 'network.js',
       });
 
       expect(result.success).toBe(true);
       expect(result.result.vulnerabilities).toContainEqual(
         expect.objectContaining({
           type: 'command-injection',
-          severity: 'critical'
+          severity: 'critical',
         })
       );
     });
@@ -197,7 +197,7 @@ describe('SecurityAgent', () => {
       mockFS.readFile.mockResolvedValueOnce(codeToAnalyze);
 
       const result = await security.execute('sast-analysis', {
-        filePath: 'auth.js'
+        filePath: 'auth.js',
       });
 
       expect(result.success).toBe(true);
@@ -205,13 +205,13 @@ describe('SecurityAgent', () => {
       expect(result.result.issues).toContainEqual(
         expect.objectContaining({
           type: 'weak-crypto',
-          message: expect.stringContaining('MD5')
+          message: expect.stringContaining('MD5'),
         })
       );
       expect(result.result.issues).toContainEqual(
         expect.objectContaining({
           type: 'weak-random',
-          message: expect.stringContaining('Math.random')
+          message: expect.stringContaining('Math.random'),
         })
       );
     });
@@ -235,18 +235,18 @@ describe('SecurityAgent', () => {
       mockFS.readFile.mockResolvedValueOnce(configCode);
 
       const result = await security.execute('sast-analysis', {
-        filePath: 'server.js'
+        filePath: 'server.js',
       });
 
       expect(result.success).toBe(true);
       expect(result.result.issues).toContainEqual(
         expect.objectContaining({
-          type: 'insecure-cors'
+          type: 'insecure-cors',
         })
       );
       expect(result.result.issues).toContainEqual(
         expect.objectContaining({
-          type: 'disabled-security-feature'
+          type: 'disabled-security-feature',
         })
       );
     });
@@ -260,23 +260,27 @@ describe('SecurityAgent', () => {
       // Mock ESLint execution
       mockExec.mockImplementation((cmd, callback) => {
         if (cmd.includes('eslint')) {
-          const eslintOutput = JSON.stringify([{
-            filePath: 'test.js',
-            messages: [{
-              ruleId: 'security/detect-eval-with-expression',
-              severity: 2,
-              message: 'eval can be harmful',
-              line: 1,
-              column: 1
-            }]
-          }]);
+          const eslintOutput = JSON.stringify([
+            {
+              filePath: 'test.js',
+              messages: [
+                {
+                  ruleId: 'security/detect-eval-with-expression',
+                  severity: 2,
+                  message: 'eval can be harmful',
+                  line: 1,
+                  column: 1,
+                },
+              ],
+            },
+          ]);
           callback(null, { stdout: eslintOutput, stderr: '' });
         }
       });
 
       const result = await security.execute('sast-analysis', {
         filePath: 'test.js',
-        useESLint: true
+        useESLint: true,
       });
 
       expect(result.success).toBe(true);
@@ -290,10 +294,10 @@ describe('SecurityAgent', () => {
 
       const packageJson = JSON.stringify({
         dependencies: {
-          'express': '^4.17.1',
-          'lodash': '4.17.19',
-          'axios': '0.21.0'
-        }
+          express: '^4.17.1',
+          lodash: '4.17.19',
+          axios: '0.21.0',
+        },
       });
 
       mockFS.readFile.mockResolvedValueOnce(packageJson);
@@ -305,22 +309,22 @@ describe('SecurityAgent', () => {
             vulnerabilities: {
               high: 1,
               moderate: 2,
-              low: 1
+              low: 1,
             },
             advisories: {
-              '1234': {
+              1234: {
                 module_name: 'lodash',
                 severity: 'high',
-                title: 'Prototype Pollution'
-              }
-            }
+                title: 'Prototype Pollution',
+              },
+            },
           });
           callback(null, { stdout: auditOutput, stderr: '' });
         }
       });
 
       const result = await security.execute('audit-dependencies', {
-        directory: './'
+        directory: './',
       });
 
       expect(result.success).toBe(true);
@@ -334,9 +338,9 @@ describe('SecurityAgent', () => {
 
       const packageJson = JSON.stringify({
         dependencies: {
-          'react': '^16.0.0',
-          'webpack': '^3.0.0'
-        }
+          react: '^16.0.0',
+          webpack: '^3.0.0',
+        },
       });
 
       mockFS.readFile.mockResolvedValueOnce(packageJson);
@@ -349,8 +353,8 @@ describe('SecurityAgent', () => {
               name: 'react',
               current: '16.0.0',
               wanted: '16.14.0',
-              latest: '18.2.0'
-            }
+              latest: '18.2.0',
+            },
           ]);
           callback(null, { stdout: outdatedOutput, stderr: '' });
         }
@@ -358,7 +362,7 @@ describe('SecurityAgent', () => {
 
       const result = await security.execute('audit-dependencies', {
         directory: './',
-        checkOutdated: true
+        checkOutdated: true,
       });
 
       expect(result.success).toBe(true);
@@ -371,15 +375,15 @@ describe('SecurityAgent', () => {
 
       const packageJson = JSON.stringify({
         dependencies: {
-          'minimist': '0.0.8',
-          'serialize-javascript': '2.1.0'
-        }
+          minimist: '0.0.8',
+          'serialize-javascript': '2.1.0',
+        },
       });
 
       mockFS.readFile.mockResolvedValueOnce(packageJson);
 
       const result = await security.execute('audit-dependencies', {
-        directory: './'
+        directory: './',
       });
 
       expect(result.success).toBe(true);
@@ -406,7 +410,7 @@ describe('SecurityAgent', () => {
       mockFS.readFile.mockResolvedValueOnce(codeWithSecrets);
 
       const result = await security.execute('detect-secrets', {
-        filePath: 'config.js'
+        filePath: 'config.js',
       });
 
       expect(result.success).toBe(true);
@@ -415,7 +419,7 @@ describe('SecurityAgent', () => {
       expect(result.result.secrets).toContainEqual(
         expect.objectContaining({
           type: 'api-key',
-          severity: 'critical'
+          severity: 'critical',
         })
       );
     });
@@ -432,14 +436,14 @@ describe('SecurityAgent', () => {
       mockFS.readFile.mockResolvedValueOnce(privateKey);
 
       const result = await security.execute('detect-secrets', {
-        filePath: 'key.pem'
+        filePath: 'key.pem',
       });
 
       expect(result.success).toBe(true);
       expect(result.result.secrets).toContainEqual(
         expect.objectContaining({
           type: 'private-key',
-          severity: 'critical'
+          severity: 'critical',
         })
       );
     });
@@ -456,14 +460,14 @@ describe('SecurityAgent', () => {
       mockFS.readFile.mockResolvedValueOnce(configWithDB);
 
       const result = await security.execute('detect-secrets', {
-        filePath: 'database.js'
+        filePath: 'database.js',
       });
 
       expect(result.success).toBe(true);
       expect(result.result.secrets).toContainEqual(
         expect.objectContaining({
           type: 'database-url',
-          severity: 'high'
+          severity: 'high',
         })
       );
     });
@@ -474,7 +478,7 @@ describe('SecurityAgent', () => {
       mockFS.readdir.mockResolvedValue(['file1.js', 'file2.js', '.env']);
       mockFS.stat.mockResolvedValue({
         isFile: () => true,
-        isDirectory: () => false
+        isDirectory: () => false,
       });
 
       mockFS.readFile
@@ -483,7 +487,7 @@ describe('SecurityAgent', () => {
         .mockResolvedValueOnce('API_KEY=secret123');
 
       const result = await security.execute('detect-secrets', {
-        directory: './'
+        directory: './',
       });
 
       expect(result.success).toBe(true);
@@ -499,12 +503,12 @@ describe('SecurityAgent', () => {
       mockFS.readdir.mockResolvedValue(['src', 'tests']);
       mockFS.stat.mockResolvedValue({
         isDirectory: () => true,
-        isFile: () => false
+        isFile: () => false,
       });
 
       const result = await security.execute('generate-report', {
         directory: './',
-        includeAll: true
+        includeAll: true,
       });
 
       expect(result.success).toBe(true);
@@ -523,17 +527,17 @@ describe('SecurityAgent', () => {
           critical: 0,
           high: 2,
           medium: 5,
-          low: 10
+          low: 10,
         },
         coverage: {
           sast: true,
           dependencies: true,
-          secrets: false
-        }
+          secrets: false,
+        },
       };
 
       const result = await security.execute('calculate-score', {
-        metrics
+        metrics,
       });
 
       expect(result.success).toBe(true);
@@ -565,7 +569,7 @@ describe('SecurityAgent', () => {
       mockFS.readFile.mockResolvedValueOnce(testCode);
 
       await security.execute('detect-secrets', {
-        filePath: 'test.js'
+        filePath: 'test.js',
       });
 
       const state = security.getState();
@@ -573,7 +577,7 @@ describe('SecurityAgent', () => {
       expect(state.scanHistory.length).toBeGreaterThan(0);
       expect(state.scanHistory[0]).toMatchObject({
         type: 'detect-secrets',
-        file: 'test.js'
+        file: 'test.js',
       });
     });
 

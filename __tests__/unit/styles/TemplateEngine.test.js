@@ -20,7 +20,7 @@ describe('TemplateEngine', () => {
           // Simple template substitution for testing
           let result = template;
           if (context) {
-            Object.keys(context).forEach(key => {
+            Object.keys(context).forEach((key) => {
               result = result.replace(new RegExp(`{{${key}}}`, 'g'), context[key]);
             });
           }
@@ -30,13 +30,13 @@ describe('TemplateEngine', () => {
       registerHelper: jest.fn(),
       registerPartial: jest.fn(),
       SafeString: jest.fn((str) => str),
-      create: jest.fn(() => mockHandlebars)
+      create: jest.fn(() => mockHandlebars),
     };
 
     // Dynamic import with mocked Handlebars
     jest.unstable_mockModule('handlebars', () => ({
       default: mockHandlebars,
-      ...mockHandlebars
+      ...mockHandlebars,
     }));
 
     const templateModule = await import('../../../src/styles/TemplateEngine.js');
@@ -73,7 +73,7 @@ describe('TemplateEngine', () => {
       const templates = {
         header: '=== {{title}} ===',
         footer: '--- End of {{section}} ---',
-        item: '• {{description}}'
+        item: '• {{description}}',
       };
 
       engine.registerTemplates(templates);
@@ -138,7 +138,7 @@ describe('TemplateEngine', () => {
       const helpers = {
         upper: (str) => str.toUpperCase(),
         lower: (str) => str.toLowerCase(),
-        reverse: (str) => str.split('').reverse().join('')
+        reverse: (str) => str.split('').reverse().join(''),
       };
 
       // Reset the mock call count since built-in helpers are registered in constructor
@@ -152,23 +152,20 @@ describe('TemplateEngine', () => {
       engine.registerBuiltInHelpers();
 
       const expectedHelpers = [
-        'json',      // JSON stringify
-        'date',      // Date formatting
-        'number',    // Number formatting
+        'json', // JSON stringify
+        'date', // Date formatting
+        'number', // Number formatting
         'pluralize', // Pluralization
-        'truncate',  // String truncation
-        'padLeft',   // Left padding
-        'padRight',  // Right padding
-        'repeat',    // String repetition
-        'box',       // Box drawing
-        'table'      // Table formatting
+        'truncate', // String truncation
+        'padLeft', // Left padding
+        'padRight', // Right padding
+        'repeat', // String repetition
+        'box', // Box drawing
+        'table', // Table formatting
       ];
 
-      expectedHelpers.forEach(helper => {
-        expect(mockHandlebars.registerHelper).toHaveBeenCalledWith(
-          helper,
-          expect.any(Function)
-        );
+      expectedHelpers.forEach((helper) => {
+        expect(mockHandlebars.registerHelper).toHaveBeenCalledWith(helper, expect.any(Function));
       });
     });
   });
@@ -176,17 +173,14 @@ describe('TemplateEngine', () => {
   describe('Template Partials', () => {
     test('should register partial', () => {
       engine.registerPartial('header', '=== {{title}} ===');
-      expect(mockHandlebars.registerPartial).toHaveBeenCalledWith(
-        'header',
-        '=== {{title}} ==='
-      );
+      expect(mockHandlebars.registerPartial).toHaveBeenCalledWith('header', '=== {{title}} ===');
     });
 
     test('should register multiple partials', () => {
       const partials = {
         header: '=== Header ===',
         footer: '=== Footer ===',
-        divider: '---'
+        divider: '---',
       };
 
       engine.registerPartials(partials);
@@ -212,13 +206,12 @@ describe('TemplateEngine', () => {
       const templateDir = '/tmp/templates';
 
       // Mock fs operations
-      jest.spyOn(fs, 'readdir').mockResolvedValue([
-        'guide.hbs',
-        'expert.hbs',
-        'not-a-template.txt'
-      ]);
+      jest
+        .spyOn(fs, 'readdir')
+        .mockResolvedValue(['guide.hbs', 'expert.hbs', 'not-a-template.txt']);
 
-      jest.spyOn(fs, 'readFile')
+      jest
+        .spyOn(fs, 'readFile')
         .mockResolvedValueOnce('Guide: {{content}}')
         .mockResolvedValueOnce('Expert: {{content}}');
 
@@ -233,8 +226,9 @@ describe('TemplateEngine', () => {
     test('should handle file loading errors', async () => {
       jest.spyOn(fs, 'readFile').mockRejectedValue(new Error('File not found'));
 
-      await expect(engine.loadTemplate('test', '/nonexistent.hbs'))
-        .rejects.toThrow('File not found');
+      await expect(engine.loadTemplate('test', '/nonexistent.hbs')).rejects.toThrow(
+        'File not found'
+      );
     });
   });
 
@@ -301,7 +295,7 @@ describe('TemplateEngine', () => {
       engine.registerTemplate('requirements', 'Name: {{name}}, Age: {{age}}');
 
       const validation = engine.validateContext('requirements', {
-        name: 'John'
+        name: 'John',
         // Missing 'age'
       });
 
@@ -330,13 +324,13 @@ describe('TemplateEngine', () => {
         return jest.fn((context) => {
           let result = template;
           // Replace partials
-          Object.keys(partials).forEach(name => {
+          Object.keys(partials).forEach((name) => {
             const partialContent = partials[name];
             result = result.replace(new RegExp(`{{> ${name}}}`, 'g'), partialContent);
           });
           // Replace variables
           if (context) {
-            Object.keys(context).forEach(key => {
+            Object.keys(context).forEach((key) => {
               result = result.replace(new RegExp(`{{${key}}}`, 'g'), context[key]);
             });
           }
@@ -344,18 +338,21 @@ describe('TemplateEngine', () => {
         });
       });
 
-      engine.registerTemplate('base', `
+      engine.registerTemplate(
+        'base',
+        `
         Header: {{header}}
         {{> content}}
         Footer: {{footer}}
-      `);
+      `
+      );
 
       engine.registerPartial('content', 'Main content: {{body}}');
 
       const result = engine.render('base', {
         header: 'Top',
         body: 'Middle',
-        footer: 'Bottom'
+        footer: 'Bottom',
       });
 
       expect(result).toContain('Header: Top');
@@ -369,13 +366,16 @@ describe('TemplateEngine', () => {
       // and focus on simpler behavior
       engine.registerPartial('item', '• Item');
       engine.registerPartial('list', 'List: {{> item}}');
-      engine.registerTemplate('document', `
+      engine.registerTemplate(
+        'document',
+        `
         Title: {{title}}
         {{> list}}
-      `);
+      `
+      );
 
       const result = engine.render('document', {
-        title: 'My List'
+        title: 'My List',
       });
 
       expect(result).toContain('Title: My List');
@@ -403,21 +403,18 @@ describe('TemplateEngine', () => {
       const data = {
         templates: {
           imported1: 'Imported 1: {{data}}',
-          imported2: 'Imported 2: {{info}}'
+          imported2: 'Imported 2: {{info}}',
         },
         partials: {
-          header: '=== Header ==='
-        }
+          header: '=== Header ===',
+        },
       };
 
       engine.importTemplates(data);
 
       expect(engine.hasTemplate('imported1')).toBe(true);
       expect(engine.hasTemplate('imported2')).toBe(true);
-      expect(mockHandlebars.registerPartial).toHaveBeenCalledWith(
-        'header',
-        '=== Header ==='
-      );
+      expect(mockHandlebars.registerPartial).toHaveBeenCalledWith('header', '=== Header ===');
     });
 
     test('should save templates to file', async () => {
@@ -439,8 +436,8 @@ describe('TemplateEngine', () => {
       const data = {
         templates: {
           loaded1: 'Loaded 1',
-          loaded2: 'Loaded 2'
-        }
+          loaded2: 'Loaded 2',
+        },
       };
 
       jest.spyOn(fs, 'readFile').mockResolvedValue(JSON.stringify(data));

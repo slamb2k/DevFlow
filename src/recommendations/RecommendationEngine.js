@@ -61,6 +61,11 @@ class RecommendationEngine {
       });
     }
 
+    // Add filePatterns for compatibility
+    if (!patterns.filePatterns && patterns.frequentlyChangedFiles) {
+      patterns.filePatterns = patterns.frequentlyChangedFiles;
+    }
+
     return patterns;
   }
 
@@ -95,7 +100,7 @@ class RecommendationEngine {
       });
     }
 
-    return patterns;
+    return { patterns };
   }
 
   async generateRecommendations(analysis) {
@@ -211,8 +216,8 @@ class RecommendationEngine {
         description: 'Security vulnerabilities detected in dependencies',
         confidence: 0.9,
         impact: 'high',
-        effort: 'low'
-      }
+        effort: 'low',
+      },
     ];
   }
 
@@ -227,8 +232,8 @@ class RecommendationEngine {
         description: 'Build times can be improved',
         confidence: 0.7,
         impact: 'medium',
-        effort: 'medium'
-      }
+        effort: 'medium',
+      },
     ];
   }
 
@@ -243,17 +248,17 @@ class RecommendationEngine {
         description: 'CI pipeline can be optimized',
         confidence: 0.6,
         impact: 'low',
-        effort: 'low'
-      }
+        effort: 'low',
+      },
     ];
   }
 
   async improveRecommendations(feedback) {
     // Process feedback to improve future recommendations
     const improvements = {
-      applied: feedback.filter(f => f.accepted).length,
-      rejected: feedback.filter(f => !f.accepted).length,
-      adjustments: []
+      applied: feedback.filter((f) => f.accepted).length,
+      rejected: feedback.filter((f) => !f.accepted).length,
+      adjustments: [],
     };
 
     // Adjust weights based on feedback
@@ -262,7 +267,7 @@ class RecommendationEngine {
         // Increase weight for accepted recommendation types
         improvements.adjustments.push({
           type: item.type,
-          adjustment: 0.1
+          adjustment: 0.1,
         });
       }
     }
@@ -342,7 +347,16 @@ class RecommendationEngine {
     });
   }
 
-  async acceptRecommendation(recommendation) {
+  async acceptRecommendation(recommendationIdOrObj) {
+    // Handle both ID and object
+    let recommendation;
+    if (typeof recommendationIdOrObj === 'string') {
+      recommendation = { id: recommendationIdOrObj };
+    } else {
+      recommendation = recommendationIdOrObj;
+    }
+
+    await this.feedbackManager.recordAccepted(recommendation);
     await this.feedbackManager.recordFeedback({
       recommendationId: recommendation.id,
       category: recommendation.category,
@@ -352,9 +366,19 @@ class RecommendationEngine {
 
     // Update weights based on acceptance
     await this.updateRecommendationWeights();
+    return true;
   }
 
-  async rejectRecommendation(recommendation, reason) {
+  async rejectRecommendation(recommendationIdOrObj, reason) {
+    // Handle both ID and object
+    let recommendation;
+    if (typeof recommendationIdOrObj === 'string') {
+      recommendation = { id: recommendationIdOrObj };
+    } else {
+      recommendation = recommendationIdOrObj;
+    }
+
+    await this.feedbackManager.recordRejected(recommendation, reason);
     await this.feedbackManager.recordFeedback({
       recommendationId: recommendation.id,
       category: recommendation.category,
@@ -365,6 +389,7 @@ class RecommendationEngine {
 
     // Update weights based on rejection
     await this.updateRecommendationWeights();
+    return true;
   }
 
   async updateRecommendationWeights() {

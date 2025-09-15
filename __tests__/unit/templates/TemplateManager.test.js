@@ -21,7 +21,7 @@ jest.mock('fs/promises', () => ({
   mkdir: mockMkdir,
   access: mockAccess,
   copyFile: mockCopyFile,
-  unlink: mockUnlink
+  unlink: mockUnlink,
 }));
 
 describe('TemplateManager', () => {
@@ -65,7 +65,7 @@ describe('TemplateManager', () => {
         id: 'custom-template',
         name: 'Custom Template',
         category: 'ci',
-        content: 'template content'
+        content: 'template content',
       };
 
       await manager.saveTemplate(template);
@@ -76,7 +76,7 @@ describe('TemplateManager', () => {
     it('should load template by name', async () => {
       const mockContent = JSON.stringify({
         name: 'Test Template',
-        content: 'template content'
+        content: 'template content',
       });
       mockReadFile.mockResolvedValue(mockContent);
 
@@ -88,10 +88,12 @@ describe('TemplateManager', () => {
 
     it('should list all available templates', async () => {
       mockReaddir.mockResolvedValue(['template1.json', 'template2.json']);
-      mockReadFile.mockResolvedValue(JSON.stringify({
-        id: 'template1',
-        name: 'Template 1'
-      }));
+      mockReadFile.mockResolvedValue(
+        JSON.stringify({
+          id: 'template1',
+          name: 'Template 1',
+        })
+      );
 
       const templates = await manager.getAllTemplates();
 
@@ -103,7 +105,7 @@ describe('TemplateManager', () => {
       manager.templates.set('old-template', {
         id: 'old-template',
         name: 'Old Template',
-        builtin: false
+        builtin: false,
       });
 
       mockUnlink.mockResolvedValue();
@@ -135,12 +137,12 @@ describe('TemplateManager', () => {
     it('should substitute variables in template', async () => {
       manager.templates.set('test', {
         id: 'test',
-        content: 'Project: {{projectName}}\nVersion: {{version}}'
+        content: 'Project: {{projectName}}\nVersion: {{version}}',
       });
 
       const variables = {
         projectName: 'DevFlow',
-        version: '1.0.0'
+        version: '1.0.0',
       };
 
       const processed = await manager.renderTemplate('test', variables);
@@ -183,7 +185,7 @@ describe('TemplateManager', () => {
 
       manager.templates.set('export-test', {
         id: 'export-test',
-        name: 'Export Test'
+        name: 'Export Test',
       });
 
       await manager.exportTemplate('export-test');
@@ -194,7 +196,7 @@ describe('TemplateManager', () => {
     it('should import template from file', async () => {
       const templateData = {
         id: 'import-test',
-        name: 'Import Test'
+        name: 'Import Test',
       };
       mockReadFile.mockResolvedValue(JSON.stringify(templateData));
 
@@ -217,8 +219,8 @@ describe('TemplateManager', () => {
       const bundle = {
         templates: [
           { id: 'bundled1', name: 'Bundled 1' },
-          { id: 'bundled2', name: 'Bundled 2' }
-        ]
+          { id: 'bundled2', name: 'Bundled 2' },
+        ],
       };
 
       // Import each template
@@ -257,7 +259,7 @@ describe('TemplateValidator', () => {
         id: 'test',
         name: 'Test Template',
         category: 'ci',
-        content: 'template content'
+        content: 'template content',
       };
 
       const isValid = validator.validate(template);
@@ -266,7 +268,7 @@ describe('TemplateValidator', () => {
 
     it('should detect missing required fields', () => {
       const template = {
-        name: 'Test Template'
+        name: 'Test Template',
         // Missing id
       };
 
@@ -277,7 +279,7 @@ describe('TemplateValidator', () => {
     it('should validate field types', () => {
       const template = {
         id: 123, // Should be string
-        name: 'Test Template'
+        name: 'Test Template',
       };
 
       const isValid = validator.validate(template);
@@ -288,9 +290,9 @@ describe('TemplateValidator', () => {
       const customSchema = {
         type: 'object',
         properties: {
-          customField: { type: 'string' }
+          customField: { type: 'string' },
         },
-        required: ['customField']
+        required: ['customField'],
       };
 
       validator.addSchema('custom', customSchema);
@@ -330,10 +332,10 @@ describe('TemplateInheritance', () => {
     it('should merge child into parent template', () => {
       const parent = {
         name: 'Parent',
-        settings: { a: 1, b: 2 }
+        settings: { a: 1, b: 2 },
       };
       const child = {
-        settings: { b: 3, c: 4 }
+        settings: { b: 3, c: 4 },
       };
 
       const merged = inheritance.merge(parent, child);
@@ -344,10 +346,10 @@ describe('TemplateInheritance', () => {
 
     it('should handle array merging', () => {
       const parent = {
-        items: ['a', 'b']
+        items: ['a', 'b'],
       };
       const child = {
-        items: ['c', 'd']
+        items: ['c', 'd'],
       };
 
       const merged = inheritance.merge(parent, child, { arrays: 'concat' });
@@ -493,12 +495,12 @@ describe('TemplateVariables', () => {
       const schema = {
         name: 'string',
         age: 'number',
-        active: 'boolean'
+        active: 'boolean',
       };
       const values = {
         name: 'John',
         age: 30,
-        active: true
+        active: true,
       };
 
       const isValid = variables.validateTypes(schema, values);

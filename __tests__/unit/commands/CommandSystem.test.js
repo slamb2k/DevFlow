@@ -73,7 +73,7 @@ describe('Command System', () => {
         getArgSchema() {
           return {
             required: ['name'],
-            optional: ['age']
+            optional: ['age'],
           };
         }
 
@@ -97,8 +97,8 @@ describe('Command System', () => {
             description: 'A helpful command',
             usage: 'helpful [options]',
             options: {
-              '--flag': 'A flag option'
-            }
+              '--flag': 'A flag option',
+            },
           };
         }
 
@@ -152,7 +152,7 @@ describe('Command System', () => {
       const command = new RoadmapCommand();
       const result = await command.execute([], {
         projectRoot: '/tmp/test',
-        framework: 'react'
+        framework: 'react',
       });
 
       expect(result).toHaveProperty('phases');
@@ -163,7 +163,7 @@ describe('Command System', () => {
       const command = new OptimizeCommand();
       const result = await command.execute([], {
         projectRoot: '/tmp/test',
-        analysis: { framework: 'node' }
+        analysis: { framework: 'node' },
       });
 
       expect(result).toHaveProperty('suggestions');
@@ -190,7 +190,7 @@ describe('Command System', () => {
 
       const result = await registry.pipeline([
         { command: 'step1', args: [] },
-        { command: 'step2', args: [] }
+        { command: 'step2', args: [] },
       ]);
 
       expect(result.step1).toBe(true);

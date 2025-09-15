@@ -7,16 +7,16 @@ const mockFs = {
   readdir: jest.fn(),
   access: jest.fn(),
   mkdir: jest.fn(),
-  unlink: jest.fn()
+  unlink: jest.fn(),
 };
 
 jest.mock('fs', () => ({
-  promises: mockFs
+  promises: mockFs,
 }));
 
 const mockExecSync = jest.fn();
 jest.mock('child_process', () => ({
-  execSync: mockExecSync
+  execSync: mockExecSync,
 }));
 
 const mockGlob = jest.fn();
@@ -85,7 +85,9 @@ describe('AdvancedAnalysisEngine', () => {
     });
 
     it('should handle partial analyzer failures gracefully', async () => {
-      jest.spyOn(engine.securityScanner, 'scan').mockRejectedValue(new Error('Security scan failed'));
+      jest
+        .spyOn(engine.securityScanner, 'scan')
+        .mockRejectedValue(new Error('Security scan failed'));
       jest.spyOn(engine.performanceProfiler, 'profile').mockResolvedValue({ metrics: {} });
 
       const report = await engine.runFullAnalysis();
@@ -126,23 +128,32 @@ describe('SecurityScanner', () => {
       fs.readdir.mockResolvedValue(mockFiles);
       fs.readFile.mockResolvedValue('const password = "hardcoded";');
 
-      execSync.mockReturnValue(JSON.stringify({
-        results: [{
-          filePath: 'app.js',
-          messages: [{
-            ruleId: 'security/detect-hardcoded-credentials',
-            severity: 2,
-            message: 'Hardcoded credentials detected'
-          }]
-        }]
-      }));
+      execSync.mockReturnValue(
+        JSON.stringify({
+          results: [
+            {
+              filePath: 'app.js',
+              messages: [
+                {
+                  ruleId: 'security/detect-hardcoded-credentials',
+                  severity: 2,
+                  message: 'Hardcoded credentials detected',
+                },
+              ],
+            },
+          ],
+        })
+      );
 
       const results = await scanner.scanJavaScript();
 
       expect(results).toHaveProperty('vulnerabilities');
       expect(results.vulnerabilities).toHaveLength(1);
       expect(results.vulnerabilities[0]).toHaveProperty('file', 'app.js');
-      expect(results.vulnerabilities[0]).toHaveProperty('rule', 'security/detect-hardcoded-credentials');
+      expect(results.vulnerabilities[0]).toHaveProperty(
+        'rule',
+        'security/detect-hardcoded-credentials'
+      );
     });
 
     it('should handle ESLint configuration errors', async () => {
@@ -158,14 +169,18 @@ describe('SecurityScanner', () => {
 
   describe('Python Security Scanning', () => {
     it('should run Bandit on Python files', async () => {
-      execSync.mockReturnValue(JSON.stringify({
-        results: [{
-          filename: 'app.py',
-          issue_text: 'Possible SQL injection',
-          issue_severity: 'HIGH',
-          line_number: 42
-        }]
-      }));
+      execSync.mockReturnValue(
+        JSON.stringify({
+          results: [
+            {
+              filename: 'app.py',
+              issue_text: 'Possible SQL injection',
+              issue_severity: 'HIGH',
+              line_number: 42,
+            },
+          ],
+        })
+      );
 
       const results = await scanner.scanPython();
 
@@ -186,13 +201,15 @@ describe('SecurityScanner', () => {
   describe('Dependency Vulnerability Scanning', () => {
     it('should run npm audit for Node.js projects', async () => {
       fs.access.mockResolvedValue(); // package.json exists
-      execSync.mockReturnValue(JSON.stringify({
-        vulnerabilities: {
-          high: 2,
-          moderate: 5,
-          low: 10
-        }
-      }));
+      execSync.mockReturnValue(
+        JSON.stringify({
+          vulnerabilities: {
+            high: 2,
+            moderate: 5,
+            low: 10,
+          },
+        })
+      );
 
       const results = await scanner.scanDependencies();
 
@@ -207,14 +224,20 @@ describe('SecurityScanner', () => {
         return Promise.reject(new Error('File not found'));
       });
 
-      execSync.mockReturnValue(JSON.stringify([{
-        name: 'flask',
-        version: '1.0.0',
-        vulns: [{
-          id: 'CVE-2021-12345',
-          fix_versions: ['1.0.1']
-        }]
-      }]));
+      execSync.mockReturnValue(
+        JSON.stringify([
+          {
+            name: 'flask',
+            version: '1.0.0',
+            vulns: [
+              {
+                id: 'CVE-2021-12345',
+                fix_versions: ['1.0.1'],
+              },
+            ],
+          },
+        ])
+      );
 
       const results = await scanner.scanDependencies();
 
@@ -236,13 +259,17 @@ describe('PerformanceProfiler', () => {
   describe('Bundle Analysis', () => {
     it('should analyze webpack bundle size', async () => {
       fs.access.mockResolvedValue(); // webpack.config.js exists
-      execSync.mockReturnValue(JSON.stringify({
-        assets: [{
-          name: 'main.js',
-          size: 1048576,
-          chunks: ['main']
-        }]
-      }));
+      execSync.mockReturnValue(
+        JSON.stringify({
+          assets: [
+            {
+              name: 'main.js',
+              size: 1048576,
+              chunks: ['main'],
+            },
+          ],
+        })
+      );
 
       const results = await profiler.analyzeBundleSize();
 
@@ -253,12 +280,16 @@ describe('PerformanceProfiler', () => {
     });
 
     it('should provide recommendations for large bundles', async () => {
-      execSync.mockReturnValue(JSON.stringify({
-        assets: [{
-          name: 'vendor.js',
-          size: 5242880 // 5MB
-        }]
-      }));
+      execSync.mockReturnValue(
+        JSON.stringify({
+          assets: [
+            {
+              name: 'vendor.js',
+              size: 5242880, // 5MB
+            },
+          ],
+        })
+      );
 
       const results = await profiler.analyzeBundleSize();
       expect(results).toHaveProperty('recommendations');
@@ -294,7 +325,7 @@ describe('PerformanceProfiler', () => {
       const mockMetrics = {
         responseTime: 150,
         throughput: 1000,
-        errorRate: 0.01
+        errorRate: 0.01,
       };
 
       jest.spyOn(profiler, 'collectRuntimeMetrics').mockResolvedValue(mockMetrics);
@@ -346,7 +377,7 @@ describe('CodeQualityAnalyzer', () => {
 
       jest.spyOn(analyzer, 'calculateComplexity').mockResolvedValue({
         complexity: 15,
-        functions: [{ name: 'veryComplex', complexity: 15 }]
+        functions: [{ name: 'veryComplex', complexity: 15 }],
       });
 
       const results = await analyzer.calculateComplexity('complex.js');
@@ -361,8 +392,8 @@ describe('CodeQualityAnalyzer', () => {
         total: {
           lines: { total: 1000, covered: 850, pct: 85 },
           functions: { total: 100, covered: 90, pct: 90 },
-          branches: { total: 200, covered: 160, pct: 80 }
-        }
+          branches: { total: 200, covered: 160, pct: 80 },
+        },
       };
 
       fs.readFile.mockResolvedValue(JSON.stringify(mockCoverage));
@@ -378,8 +409,8 @@ describe('CodeQualityAnalyzer', () => {
     it('should identify uncovered files', async () => {
       const mockCoverage = {
         '/src/untested.js': {
-          lines: { total: 50, covered: 0, pct: 0 }
-        }
+          lines: { total: 50, covered: 0, pct: 0 },
+        },
       };
 
       fs.readFile.mockResolvedValue(JSON.stringify(mockCoverage));
@@ -394,15 +425,17 @@ describe('CodeQualityAnalyzer', () => {
     it('should detect duplicate code blocks', async () => {
       const mockFiles = [
         { path: 'a.js', content: 'function foo() { return 1; }' },
-        { path: 'b.js', content: 'function foo() { return 1; }' }
+        { path: 'b.js', content: 'function foo() { return 1; }' },
       ];
 
       jest.spyOn(analyzer, 'detectDuplication').mockResolvedValue({
-        duplicates: [{
-          files: ['a.js', 'b.js'],
-          lines: 1,
-          tokens: 10
-        }]
+        duplicates: [
+          {
+            files: ['a.js', 'b.js'],
+            lines: 1,
+            tokens: 10,
+          },
+        ],
       });
 
       const results = await analyzer.detectDuplication();
@@ -416,7 +449,7 @@ describe('CodeQualityAnalyzer', () => {
     it('should calculate duplication percentage', async () => {
       jest.spyOn(analyzer, 'detectDuplication').mockResolvedValue({
         percentage: 5.2,
-        duplicates: []
+        duplicates: [],
       });
 
       const results = await analyzer.detectDuplication();
@@ -437,7 +470,7 @@ describe('CodeQualityAnalyzer', () => {
     it('should provide maintainability grade', async () => {
       jest.spyOn(analyzer, 'calculateMaintainabilityIndex').mockResolvedValue({
         index: 85,
-        grade: 'A'
+        grade: 'A',
       });
 
       const results = await analyzer.calculateMaintainabilityIndex();
@@ -457,13 +490,15 @@ describe('DependencyAnalyzer', () => {
 
   describe('Outdated Dependencies', () => {
     it('should detect outdated npm packages', async () => {
-      execSync.mockReturnValue(JSON.stringify({
-        'express': {
-          current: '4.17.0',
-          wanted: '4.17.1',
-          latest: '4.18.0'
-        }
-      }));
+      execSync.mockReturnValue(
+        JSON.stringify({
+          express: {
+            current: '4.17.0',
+            wanted: '4.17.1',
+            latest: '4.18.0',
+          },
+        })
+      );
 
       const results = await analyzer.checkOutdated();
 
@@ -485,11 +520,13 @@ describe('DependencyAnalyzer', () => {
 
   describe('License Compatibility', () => {
     it('should check license compatibility', async () => {
-      execSync.mockReturnValue(JSON.stringify([
-        { name: 'express', license: 'MIT' },
-        { name: 'react', license: 'MIT' },
-        { name: 'gpl-package', license: 'GPL-3.0' }
-      ]));
+      execSync.mockReturnValue(
+        JSON.stringify([
+          { name: 'express', license: 'MIT' },
+          { name: 'react', license: 'MIT' },
+          { name: 'gpl-package', license: 'GPL-3.0' },
+        ])
+      );
 
       const results = await analyzer.checkLicenses('MIT');
 
@@ -499,9 +536,7 @@ describe('DependencyAnalyzer', () => {
     });
 
     it('should flag packages with missing licenses', async () => {
-      execSync.mockReturnValue(JSON.stringify([
-        { name: 'no-license', license: null }
-      ]));
+      execSync.mockReturnValue(JSON.stringify([{ name: 'no-license', license: null }]));
 
       const results = await analyzer.checkLicenses();
 
@@ -512,17 +547,19 @@ describe('DependencyAnalyzer', () => {
 
   describe('Dependency Graph', () => {
     it('should generate dependency tree', async () => {
-      execSync.mockReturnValue(JSON.stringify({
-        name: 'project',
-        dependencies: {
-          'express': {
-            version: '4.17.0',
-            dependencies: {
-              'body-parser': { version: '1.19.0' }
-            }
-          }
-        }
-      }));
+      execSync.mockReturnValue(
+        JSON.stringify({
+          name: 'project',
+          dependencies: {
+            express: {
+              version: '4.17.0',
+              dependencies: {
+                'body-parser': { version: '1.19.0' },
+              },
+            },
+          },
+        })
+      );
 
       const results = await analyzer.generateDependencyTree();
 
@@ -535,7 +572,7 @@ describe('DependencyAnalyzer', () => {
     it('should detect circular dependencies', async () => {
       const mockCircular = {
         'package-a': ['package-b'],
-        'package-b': ['package-a']
+        'package-b': ['package-a'],
       };
 
       jest.spyOn(analyzer, 'detectCircularDependencies').mockResolvedValue(mockCircular);
@@ -563,7 +600,7 @@ describe('AnalysisReportAggregator', () => {
       const report = aggregator.aggregate({
         security: securityResults,
         performance: performanceResults,
-        codeQuality: qualityResults
+        codeQuality: qualityResults,
       });
 
       expect(report).toHaveProperty('security', securityResults);
@@ -576,7 +613,7 @@ describe('AnalysisReportAggregator', () => {
     it('should generate summary statistics', () => {
       const results = {
         security: { vulnerabilities: [{ severity: 'HIGH' }, { severity: 'LOW' }] },
-        codeQuality: { coverage: 85, complexity: 10 }
+        codeQuality: { coverage: 85, complexity: 10 },
       };
 
       const report = aggregator.aggregate(results);
@@ -591,7 +628,7 @@ describe('AnalysisReportAggregator', () => {
         security: { vulnerabilities: [] },
         performance: { buildTime: 3000 },
         codeQuality: { coverage: 90, complexity: 5 },
-        dependencies: { outdated: 2 }
+        dependencies: { outdated: 2 },
       };
 
       const report = aggregator.aggregate(results);
@@ -611,7 +648,7 @@ describe('AnalysisReportAggregator', () => {
 
     it('should format report as Markdown', () => {
       const results = {
-        security: { vulnerabilities: [{ file: 'app.js', severity: 'HIGH' }] }
+        security: { vulnerabilities: [{ file: 'app.js', severity: 'HIGH' }] },
       };
       const formatted = aggregator.formatReport(results, 'markdown');
 
@@ -644,10 +681,7 @@ describe('AnalysisReportAggregator', () => {
 
       await aggregator.exportReport(results, filePath, 'json');
 
-      expect(fs.writeFile).toHaveBeenCalledWith(
-        filePath,
-        expect.stringContaining('"security"')
-      );
+      expect(fs.writeFile).toHaveBeenCalledWith(filePath, expect.stringContaining('"security"'));
     });
 
     it('should create output directory if not exists', async () => {
@@ -664,12 +698,12 @@ describe('AnalysisReportAggregator', () => {
     it('should compare two analysis reports', () => {
       const previousReport = {
         security: { vulnerabilities: [{ id: 'V1' }, { id: 'V2' }] },
-        codeQuality: { coverage: 80 }
+        codeQuality: { coverage: 80 },
       };
 
       const currentReport = {
         security: { vulnerabilities: [{ id: 'V2' }, { id: 'V3' }] },
-        codeQuality: { coverage: 85 }
+        codeQuality: { coverage: 85 },
       };
 
       const diff = aggregator.compareReports(previousReport, currentReport);
@@ -683,11 +717,11 @@ describe('AnalysisReportAggregator', () => {
 
     it('should identify improvements and regressions', () => {
       const previousReport = {
-        codeQuality: { complexity: 15, coverage: 70 }
+        codeQuality: { complexity: 15, coverage: 70 },
       };
 
       const currentReport = {
-        codeQuality: { complexity: 10, coverage: 65 }
+        codeQuality: { complexity: 10, coverage: 65 },
       };
 
       const diff = aggregator.compareReports(previousReport, currentReport);
