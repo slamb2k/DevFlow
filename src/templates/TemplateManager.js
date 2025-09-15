@@ -12,7 +12,7 @@ class TemplateManager {
     this.validator = new TemplateValidator();
     this.renderer = new TemplateRenderer();
     this.inheritance = new TemplateInheritance();
-    this.variableProcessor = new TemplateVariables();
+    this.variables = new TemplateVariables();
     this.templates = new Map();
     this.categories = new Map();
   }
@@ -215,8 +215,8 @@ class TemplateManager {
 
     // Process variables
     let content = template.content || '';
-    if (this.variableProcessor) {
-      content = this.variableProcessor.substitute(content, variables);
+    if (this.variables) {
+      content = this.variables.substitute(content, variables);
     }
     return content;
   }
