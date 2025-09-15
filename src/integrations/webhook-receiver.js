@@ -161,14 +161,8 @@ export class WebhookReceiver {
 
     // Emit event to event bus
     if (this.event_bus && event_data) {
-      try {
-        await this.emit_with_retry(event_data.event_name, event_data.payload);
-        res.status(200).json({ status: 'processed' });
-      } catch (error) {
-        // Queue the event if bus is unavailable
-        this.queue_webhook(event_data);
-        res.status(202).json({ status: 'queued' });
-      }
+      await this.emit_with_retry(event_data.event_name, event_data.payload);
+      res.status(200).json({ status: 'processed' });
     } else {
       res.status(200).json({ status: 'processed' });
     }
