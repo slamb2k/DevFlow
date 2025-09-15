@@ -34,6 +34,21 @@ DevFlow uses GitHub Actions for continuous integration and deployment.
 - Unit Tests
 - Build Check
 
+### Release Management (`release.yml`)
+
+**Triggers**: Manual workflow dispatch
+
+**Options**:
+- **Release Type**: patch, minor, major, or prerelease
+- **Prerelease ID**: beta, alpha, or rc (for prereleases)
+
+**Features**:
+- Automatic version bumping
+- Changelog generation from commits
+- NPM publishing with appropriate tags
+- GitHub release creation
+- Categorized commit history (features, fixes, docs)
+
 ## Setup Instructions
 
 ### 1. NPM Publishing Setup
@@ -74,11 +89,29 @@ npm run build
 2. Push to main (via PR)
 3. CI automatically publishes if version changed
 
-### Manual Publishing
+### Manual Release (Recommended)
+
+Use the Release Management workflow:
+
+1. Go to Actions → Release Management
+2. Click "Run workflow"
+3. Select release type (patch/minor/major/prerelease)
+4. Click "Run workflow"
+
+The workflow will:
+- Bump version
+- Generate changelog
+- Run tests
+- Publish to npm
+- Create GitHub release
+- Tag the commit
+
+### Local Publishing (Emergency Only)
 
 ```bash
 npm version patch  # or minor/major
 git push origin main --tags
+npm publish --access public
 ```
 
 ## Dependabot

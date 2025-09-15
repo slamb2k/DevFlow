@@ -6,6 +6,7 @@ This directory contains GitHub-specific configuration for DevFlow CI/CD.
 
 - **ci.yml** - Main CI pipeline with test and publish jobs
 - **pr-checks.yml** - Required checks for pull requests
+- **release.yml** - Manual release workflow for version management
 
 ## Setup Required
 

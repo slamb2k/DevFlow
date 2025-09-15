@@ -1,0 +1,169 @@
+name: Release Management
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+      prerelease_id:
+        description: 'Prerelease identifier (beta, alpha, rc)'
+        required: false
+        default: 'beta'
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Determine version bump
+        id: version
+        run: |
+          if [[ "${{ github.event.inputs.release_type }}" == "prerelease" ]]; then
+            VERSION=$(npm version prerelease --preid=${{ github.event.inputs.prerelease_id }} --no-git-tag-version)
+          else
+            VERSION=$(npm version ${{ github.event.inputs.release_type }} --no-git-tag-version)
+          fi
+          echo "version=${VERSION#v}" >> $GITHUB_OUTPUT
+          echo "New version: ${VERSION#v}"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          # Generate changelog based on commit messages
+          if [ -z "$LAST_TAG" ]; then
+            COMMITS=$(git log --format="- %s (%h)" --no-merges | head -50)
+          else
+            COMMITS=$(git log --format="- %s (%h)" --no-merges ${LAST_TAG}..HEAD)
+          fi
+
+          # Categorize commits
+          echo "## Changelog" > CHANGELOG_TEMP.md
+          echo "" >> CHANGELOG_TEMP.md
+
+          # Features
+          FEATURES=$(echo "$COMMITS" | grep -E "^- feat:|^- feature:" || true)
+          if [ -n "$FEATURES" ]; then
+            echo "### ✨ Features" >> CHANGELOG_TEMP.md
+            echo "$FEATURES" >> CHANGELOG_TEMP.md
+            echo "" >> CHANGELOG_TEMP.md
+          fi
+
+          # Bug fixes
+          FIXES=$(echo "$COMMITS" | grep -E "^- fix:|^- bugfix:" || true)
+          if [ -n "$FIXES" ]; then
+            echo "### 🐛 Bug Fixes" >> CHANGELOG_TEMP.md
+            echo "$FIXES" >> CHANGELOG_TEMP.md
+            echo "" >> CHANGELOG_TEMP.md
+          fi
+
+          # Documentation
+          DOCS=$(echo "$COMMITS" | grep -E "^- docs:|^- doc:" || true)
+          if [ -n "$DOCS" ]; then
+            echo "### 📚 Documentation" >> CHANGELOG_TEMP.md
+            echo "$DOCS" >> CHANGELOG_TEMP.md
+            echo "" >> CHANGELOG_TEMP.md
+          fi
+
+          # Other changes
+          OTHERS=$(echo "$COMMITS" | grep -vE "^- (feat|feature|fix|bugfix|docs|doc):" || true)
+          if [ -n "$OTHERS" ]; then
+            echo "### 🔄 Other Changes" >> CHANGELOG_TEMP.md
+            echo "$OTHERS" >> CHANGELOG_TEMP.md
+            echo "" >> CHANGELOG_TEMP.md
+          fi
+
+          cat CHANGELOG_TEMP.md
+
+      - name: Run tests
+        run: npm test
+        env:
+          NODE_OPTIONS: '--experimental-vm-modules'
+
+      - name: Build project
+        run: npm run build
+
+      - name: Commit version bump
+        run: |
+          git add package.json package-lock.json
+          git commit -m "chore(release): v${{ steps.version.outputs.version }} [skip ci]"
+          git push origin main
+
+      - name: Publish to NPM
+        id: npm_publish
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
+          if [[ "${{ github.event.inputs.release_type }}" == "prerelease" ]]; then
+            npm publish --tag ${{ github.event.inputs.prerelease_id }} --access public
+          else
+            npm publish --access public
+          fi
+
+          # Get package URL
+          PACKAGE_URL="https://www.npmjs.com/package/devflow/v/${{ steps.version.outputs.version }}"
+          echo "package_url=$PACKAGE_URL" >> $GITHUB_OUTPUT
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          release_name: v${{ steps.version.outputs.version }}
+          body_path: CHANGELOG_TEMP.md
+          draft: false
+          prerelease: ${{ github.event.inputs.release_type == 'prerelease' }}
+
+      - name: Post release summary
+        run: |
+          echo "## 🎉 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Version Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Type**: ${{ github.event.inputs.release_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
+          echo "- [NPM Package](${{ steps.npm_publish.outputs.package_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [GitHub Release](https://github.com/slamb2k/DevFlow/releases/tag/v${{ steps.version.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📥 Installation" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "npm install devflow@${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
