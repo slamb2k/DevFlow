@@ -191,6 +191,8 @@ describe('RateLimiter', () => {
     });
 
     it('should execute with automatic retry and backoff', async () => {
+      jest.useRealTimers(); // Use real timers for this test
+
       const failing_function = jest
         .fn()
         .mockRejectedValueOnce(new Error('Fail 1'))
@@ -199,14 +201,18 @@ describe('RateLimiter', () => {
 
       const result = await rate_limiter.execute_with_backoff(failing_function, {
         max_retries: 3,
-        initial_delay: 100,
+        initial_delay: 10,
       });
 
       expect(result).toBe('Success');
       expect(failing_function).toHaveBeenCalledTimes(3);
+
+      jest.useFakeTimers(); // Restore fake timers
     });
 
     it('should respect max retries', async () => {
+      jest.useRealTimers(); // Use real timers for this test
+
       const always_failing = jest.fn().mockRejectedValue(new Error('Always fails'));
 
       await expect(
@@ -217,6 +223,8 @@ describe('RateLimiter', () => {
       ).rejects.toThrow('Always fails');
 
       expect(always_failing).toHaveBeenCalledTimes(3); // Initial + 2 retries
+
+      jest.useFakeTimers(); // Restore fake timers
     });
   });
 
@@ -373,6 +381,10 @@ describe('RateLimiter', () => {
       rate_limiter.record_failure('healed');
 
       jest.advanceTimersByTime(1000);
+
+      // Call get_circuit_state to trigger transition to half-open
+      const halfOpenState = rate_limiter.get_circuit_state('healed');
+      expect(halfOpenState).toBe('half-open');
 
       rate_limiter.record_success('healed');
       rate_limiter.record_success('healed');

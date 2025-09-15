@@ -275,6 +275,23 @@ class ScoringAlgorithm {
 
     return Math.min(1.0, Math.max(0, roi));
   }
+
+  calculateConfidence(recommendation) {
+    let confidence = 0.5; // Base confidence
+
+    // Increase confidence based on data points
+    if (recommendation.dataPoints) {
+      confidence += Math.min(0.3, recommendation.dataPoints * 0.03);
+    }
+
+    // Apply historical accuracy weight
+    if (recommendation.historicalAccuracy) {
+      confidence = this.applyHistoricalWeight(confidence, recommendation.historicalAccuracy);
+    }
+
+    // Normalize to 0-1 range
+    return Math.min(1.0, Math.max(0, confidence));
+  }
 }
 
 export default ScoringAlgorithm;
