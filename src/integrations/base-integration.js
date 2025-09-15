@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'events';
 
 /**
  * Base class for all platform integrations
@@ -6,14 +6,14 @@ import { EventEmitter } from 'events'
  */
 export class BaseIntegration extends EventEmitter {
   constructor(options = {}) {
-    super()
+    super();
 
-    this.name = options.name || 'unknown'
-    this.platform = options.platform || 'unknown'
-    this.version = options.version || '1.0.0'
-    this.status = 'disconnected'
-    this.config = {}
-    this.metadata = options.metadata || {}
+    this.name = options.name || 'unknown';
+    this.platform = options.platform || 'unknown';
+    this.version = options.version || '1.0.0';
+    this.status = 'disconnected';
+    this.config = {};
+    this.metadata = options.metadata || {};
   }
 
   /**
@@ -21,7 +21,7 @@ export class BaseIntegration extends EventEmitter {
    * Must be implemented by subclasses
    */
   async initialize() {
-    throw new Error('Method initialize must be implemented')
+    throw new Error('Method initialize must be implemented');
   }
 
   /**
@@ -29,7 +29,7 @@ export class BaseIntegration extends EventEmitter {
    * Must be implemented by subclasses
    */
   async connect() {
-    throw new Error('Method connect must be implemented')
+    throw new Error('Method connect must be implemented');
   }
 
   /**
@@ -37,7 +37,7 @@ export class BaseIntegration extends EventEmitter {
    * Must be implemented by subclasses
    */
   async disconnect() {
-    throw new Error('Method disconnect must be implemented')
+    throw new Error('Method disconnect must be implemented');
   }
 
   /**
@@ -45,52 +45,52 @@ export class BaseIntegration extends EventEmitter {
    * Must be implemented by subclasses
    */
   async cleanup() {
-    throw new Error('Method cleanup must be implemented')
+    throw new Error('Method cleanup must be implemented');
   }
 
   /**
    * Handle incoming events from the platform
    * Must be implemented by subclasses
    */
-  async handle_event(event) {
-    throw new Error('Method handle_event must be implemented')
+  async handle_event(_event) {
+    throw new Error('Method handle_event must be implemented');
   }
 
   /**
    * Get the current status of the integration
    */
   get_status() {
-    return this.status
+    return this.status;
   }
 
   /**
    * Set the status of the integration
    */
   set_status(status) {
-    const old_status = this.status
-    this.status = status
-    this.emit('status_changed', { old_status, new_status: status })
+    const old_status = this.status;
+    this.status = status;
+    this.emit('status_changed', { old_status, new_status: status });
   }
 
   /**
    * Get the integration name
    */
   get_name() {
-    return this.name
+    return this.name;
   }
 
   /**
    * Get the platform name
    */
   get_platform() {
-    return this.platform
+    return this.platform;
   }
 
   /**
    * Get the integration version
    */
   get_version() {
-    return this.version
+    return this.version;
   }
 
   /**
@@ -98,17 +98,17 @@ export class BaseIntegration extends EventEmitter {
    */
   set_config(config) {
     if (!config || typeof config !== 'object') {
-      throw new Error('Invalid configuration')
+      throw new Error('Invalid configuration');
     }
-    this.config = { ...this.config, ...config }
-    this.emit('config_changed', this.config)
+    this.config = { ...this.config, ...config };
+    this.emit('config_changed', this.config);
   }
 
   /**
    * Get the integration configuration
    */
   get_config() {
-    return { ...this.config }
+    return { ...this.config };
   }
 
   /**
@@ -116,15 +116,15 @@ export class BaseIntegration extends EventEmitter {
    * Can be overridden by subclasses for specific validation
    */
   validate_config(config) {
-    return config && typeof config === 'object'
+    return config && typeof config === 'object';
   }
 
   /**
    * Send an event to the platform
    * Can be overridden by subclasses
    */
-  async send_event(event) {
-    throw new Error('Method send_event must be implemented')
+  async send_event(_event) {
+    throw new Error('Method send_event must be implemented');
   }
 
   /**
@@ -132,21 +132,21 @@ export class BaseIntegration extends EventEmitter {
    * Can be overridden by subclasses
    */
   async receive_message(message) {
-    return { status: 'received', message }
+    return { status: 'received', message };
   }
 
   /**
    * Get integration metadata
    */
   get_metadata() {
-    return { ...this.metadata }
+    return { ...this.metadata };
   }
 
   /**
    * Set integration metadata
    */
   set_metadata(metadata) {
-    this.metadata = { ...this.metadata, ...metadata }
+    this.metadata = { ...this.metadata, ...metadata };
   }
 
   /**
@@ -159,7 +159,7 @@ export class BaseIntegration extends EventEmitter {
       status: this.status,
       platform: this.platform,
       name: this.name,
-    }
+    };
   }
 
   /**
@@ -173,15 +173,15 @@ export class BaseIntegration extends EventEmitter {
       webhooks: false,
       oauth: false,
       rate_limited: true,
-    }
+    };
   }
 
   /**
    * Execute a platform-specific action
    * Should be overridden by subclasses
    */
-  async execute_action(action, params) {
-    throw new Error(`Action ${action} not implemented`)
+  async execute_action(action, _params) {
+    throw new Error(`Action ${action} not implemented`);
   }
 
   /**
@@ -193,7 +193,7 @@ export class BaseIntegration extends EventEmitter {
       name: this.name,
       status: this.status,
       uptime: Date.now() - (this.connected_at || Date.now()),
-    }
+    };
   }
 
   /**
@@ -201,11 +201,11 @@ export class BaseIntegration extends EventEmitter {
    */
   emit(event, ...args) {
     try {
-      return super.emit(event, ...args)
+      return super.emit(event, ...args);
     } catch (error) {
-      console.error('Error in event handler:', error)
-      this.emit('error', error)
-      return false
+      console.error('Error in event handler:', error);
+      this.emit('error', error);
+      return false;
     }
   }
 }

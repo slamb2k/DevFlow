@@ -27,7 +27,7 @@ class ErrorHandler {
     // Log the error
     Logger.error(errorInfo.message, {
       ...errorInfo,
-      ...context
+      ...context,
     });
 
     // Display user-friendly error if in CLI mode
@@ -51,7 +51,7 @@ class ErrorHandler {
       code: error.code || 'UNKNOWN_ERROR',
       timestamp: new Date().toISOString(),
       stack: error.stack,
-      context
+      context,
     };
 
     // Add any custom error properties
@@ -71,7 +71,7 @@ class ErrorHandler {
    * @param {object} errorInfo - Formatted error information
    */
   display(errorInfo) {
-    console.error('\n' + chalk.red.bold('❌ Error:'), chalk.red(errorInfo.message));
+    console.error(`\n${chalk.red.bold('❌ Error:')}`, chalk.red(errorInfo.message));
 
     if (errorInfo.suggestion) {
       console.error(chalk.yellow('💡 Suggestion:'), errorInfo.suggestion);
@@ -101,7 +101,7 @@ class ErrorHandler {
         this.handle(error, {
           ...context,
           function: fn.name || 'anonymous',
-          arguments: args
+          arguments: args,
         });
         throw error;
       }
@@ -145,7 +145,7 @@ class ErrorHandler {
     const stats = {
       totalErrors: this.errorCount,
       errorsByType: {},
-      recentErrors: this.errorLog.slice(-10)
+      recentErrors: this.errorLog.slice(-10),
     };
 
     for (const error of this.errorLog) {
@@ -211,5 +211,5 @@ export {
   DependencyError,
   FileSystemError,
   NetworkError,
-  CommandError
+  CommandError,
 };

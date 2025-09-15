@@ -17,7 +17,7 @@ class RecommendationEngine {
       performance: 1.2,
       workflow: 1.0,
       codeQuality: 1.1,
-      dependencies: 0.9
+      dependencies: 0.9,
     };
   }
 
@@ -42,21 +42,22 @@ class RecommendationEngine {
     const patterns = this.patternRecognizer.analyzeCommits(commits);
 
     // Look for security-focused patterns
-    const securityCommits = commits.filter(c =>
-      c.message.toLowerCase().includes('security') ||
-      c.message.toLowerCase().includes('vulnerability') ||
-      c.message.toLowerCase().includes('cve')
+    const securityCommits = commits.filter(
+      (c) =>
+        c.message.toLowerCase().includes('security') ||
+        c.message.toLowerCase().includes('vulnerability') ||
+        c.message.toLowerCase().includes('cve')
     );
 
     if (securityCommits.length > 0) {
       const securityFiles = new Set();
-      securityCommits.forEach(c => c.files.forEach(f => securityFiles.add(f)));
+      securityCommits.forEach((c) => c.files.forEach((f) => securityFiles.add(f)));
 
       patterns.push({
         type: 'security_focus',
         frequency: securityCommits.length,
         files: Array.from(securityFiles),
-        confidence: 0.8
+        confidence: 0.8,
       });
     }
 
@@ -68,13 +69,13 @@ class RecommendationEngine {
 
     // Check for long-lived branches
     if (workflow.branches && workflow.branches.length > 0) {
-      const featureBranches = workflow.branches.filter(b => b.includes('feature/'));
+      const featureBranches = workflow.branches.filter((b) => b.includes('feature/'));
 
       if (featureBranches.length > 3) {
         patterns.push({
           type: 'feature_branch_workflow',
           recommendation: 'Consider using shorter-lived branches',
-          confidence: 0.7
+          confidence: 0.7,
         });
       }
     }
@@ -84,13 +85,13 @@ class RecommendationEngine {
       patterns.push({
         type: 'high_pr_frequency',
         recommendation: 'Great PR frequency! Keep up the good practice',
-        confidence: 0.9
+        confidence: 0.9,
       });
     } else if (workflow.prFrequency === 'sporadic') {
       patterns.push({
         type: 'low_pr_frequency',
         recommendation: 'Consider more frequent, smaller PRs for easier reviews',
-        confidence: 0.6
+        confidence: 0.6,
       });
     }
 
@@ -102,7 +103,7 @@ class RecommendationEngine {
 
     // Security recommendations
     if (analysis.security && analysis.security.vulnerabilities) {
-      const highSeverity = analysis.security.vulnerabilities.filter(v => v.severity === 'HIGH');
+      const highSeverity = analysis.security.vulnerabilities.filter((v) => v.severity === 'HIGH');
 
       if (highSeverity.length > 0) {
         recommendations.push({
@@ -115,7 +116,7 @@ class RecommendationEngine {
           confidence: 0.95,
           impact: 'high',
           effort: 'medium',
-          dataPoints: highSeverity.length
+          dataPoints: highSeverity.length,
         });
       }
     }
@@ -134,7 +135,7 @@ class RecommendationEngine {
           confidence: 0.8,
           impact: 'high',
           effort: 'medium',
-          dataPoints: 1
+          dataPoints: 1,
         });
       }
 
@@ -150,7 +151,7 @@ class RecommendationEngine {
           confidence: 0.7,
           impact: 'medium',
           effort: 'low',
-          dataPoints: 1
+          dataPoints: 1,
         });
       }
     }
@@ -169,7 +170,7 @@ class RecommendationEngine {
           confidence: 0.85,
           impact: 'medium',
           effort: 'high',
-          dataPoints: 1
+          dataPoints: 1,
         });
       }
 
@@ -185,7 +186,7 @@ class RecommendationEngine {
           confidence: 0.75,
           impact: 'medium',
           effort: 'medium',
-          dataPoints: 1
+          dataPoints: 1,
         });
       }
     }
@@ -213,7 +214,7 @@ class RecommendationEngine {
         suggestion: 'Break large features into smaller PRs',
         confidence: 0.8,
         impact: 'high',
-        effort: 'low'
+        effort: 'low',
       });
     }
 
@@ -228,7 +229,7 @@ class RecommendationEngine {
         suggestion: 'Implement branch protection rules with auto-delete',
         confidence: 0.9,
         impact: 'medium',
-        effort: 'low'
+        effort: 'low',
       });
     }
 
@@ -262,7 +263,9 @@ class RecommendationEngine {
       const priorityOrder = { high: 3, medium: 2, low: 1 };
       const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
 
-      if (priorityDiff !== 0) return priorityDiff;
+      if (priorityDiff !== 0) {
+        return priorityDiff;
+      }
 
       // Then by score
       return (b.score || 0) - (a.score || 0);
@@ -274,7 +277,7 @@ class RecommendationEngine {
       recommendationId: recommendation.id,
       category: recommendation.category,
       accepted: true,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Update weights based on acceptance
@@ -287,7 +290,7 @@ class RecommendationEngine {
       category: recommendation.category,
       accepted: false,
       reason,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Update weights based on rejection
@@ -298,7 +301,8 @@ class RecommendationEngine {
     const stats = await this.feedbackManager.getCategoryStats();
 
     for (const [category, data] of Object.entries(stats)) {
-      if (data.total > 5) { // Only update if we have enough data
+      if (data.total > 5) {
+        // Only update if we have enough data
         const acceptanceRate = data.acceptanceRate || 0.5;
 
         // Adjust weight based on acceptance rate
@@ -345,7 +349,7 @@ class RecommendationEngine {
           action: 'Add security scanning tools to your pipeline',
           confidence: 0.8,
           impact: 'high',
-          effort: 'medium'
+          effort: 'medium',
         });
       }
 
@@ -366,7 +370,7 @@ class RecommendationEngine {
             action: 'Review architecture to reduce coupling',
             confidence: 0.75,
             impact: 'medium',
-            effort: 'high'
+            effort: 'high',
           });
         }
       }
@@ -385,7 +389,7 @@ class RecommendationEngine {
           action: 'Ensure feature flags are properly managed',
           confidence: 0.9,
           impact: 'low',
-          effort: 'low'
+          effort: 'low',
         });
       }
 
@@ -400,7 +404,7 @@ class RecommendationEngine {
           action: 'Set up GitHub Actions or similar CI/CD tool',
           confidence: 0.95,
           impact: 'high',
-          effort: 'medium'
+          effort: 'medium',
         });
       }
     }
@@ -418,14 +422,14 @@ class RecommendationEngine {
           action: 'Set up Jest or similar testing framework',
           confidence: 0.95,
           impact: 'high',
-          effort: 'high'
+          effort: 'high',
         });
       }
     }
 
     return {
       patterns,
-      recommendations: this.prioritizeRecommendations(recommendations)
+      recommendations: this.prioritizeRecommendations(recommendations),
     };
   }
 }

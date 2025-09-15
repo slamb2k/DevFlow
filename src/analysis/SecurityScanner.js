@@ -16,7 +16,7 @@ class SecurityScanner {
       javascript: await this.scanJavaScript(),
       python: await this.scanPython(),
       dependencies: await this.scanDependencies(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     results.vulnerabilities = this.aggregateVulnerabilities(results);
@@ -29,7 +29,7 @@ class SecurityScanner {
     try {
       const jsFiles = await globAsync('**/*.{js,jsx,ts,tsx}', {
         cwd: this.projectPath,
-        ignore: ['node_modules/**', 'dist/**', 'build/**', 'coverage/**']
+        ignore: ['node_modules/**', 'dist/**', 'build/**', 'coverage/**'],
       });
 
       if (jsFiles.length === 0) {
@@ -54,7 +54,7 @@ class SecurityScanner {
                 severity: this.mapESLintSeverity(message.severity),
                 message: message.message,
                 line: message.line,
-                column: message.column
+                column: message.column,
               });
             }
           }
@@ -75,7 +75,7 @@ class SecurityScanner {
                     severity: this.mapESLintSeverity(message.severity),
                     message: message.message,
                     line: message.line,
-                    column: message.column
+                    column: message.column,
                   });
                 }
               }
@@ -96,7 +96,7 @@ class SecurityScanner {
     try {
       const pyFiles = await globAsync('**/*.py', {
         cwd: this.projectPath,
-        ignore: ['venv/**', '__pycache__/**', '*.pyc']
+        ignore: ['venv/**', '__pycache__/**', '*.pyc'],
       });
 
       if (pyFiles.length === 0) {
@@ -108,14 +108,14 @@ class SecurityScanner {
         const output = execSync(command, { cwd: this.projectPath, encoding: 'utf8' });
         const results = JSON.parse(output);
 
-        const vulnerabilities = results.results.map(issue => ({
+        const vulnerabilities = results.results.map((issue) => ({
           file: path.relative(this.projectPath, issue.filename),
           severity: issue.issue_severity,
           confidence: issue.issue_confidence,
           message: issue.issue_text,
           line: issue.line_number,
           cwe: issue.issue_cwe,
-          testId: issue.test_id
+          testId: issue.test_id,
         }));
 
         return { vulnerabilities, scanned: pyFiles.length };
@@ -161,7 +161,7 @@ class SecurityScanner {
         high: auditReport.metadata?.vulnerabilities?.high || 0,
         moderate: auditReport.metadata?.vulnerabilities?.moderate || 0,
         low: auditReport.metadata?.vulnerabilities?.low || 0,
-        info: auditReport.metadata?.vulnerabilities?.info || 0
+        info: auditReport.metadata?.vulnerabilities?.info || 0,
       };
     } catch (error) {
       if (error.stdout) {
@@ -172,7 +172,7 @@ class SecurityScanner {
             high: auditReport.metadata?.vulnerabilities?.high || 0,
             moderate: auditReport.metadata?.vulnerabilities?.moderate || 0,
             low: auditReport.metadata?.vulnerabilities?.low || 0,
-            info: auditReport.metadata?.vulnerabilities?.info || 0
+            info: auditReport.metadata?.vulnerabilities?.info || 0,
           };
         } catch (parseError) {
           return { error: error.message };
@@ -188,11 +188,11 @@ class SecurityScanner {
       const output = execSync(command, { cwd: this.projectPath, encoding: 'utf8' });
       const auditReport = JSON.parse(output);
 
-      const vulnerabilities = auditReport.map(vuln => ({
+      const vulnerabilities = auditReport.map((vuln) => ({
         name: vuln.name,
         version: vuln.version,
         vulns: vuln.vulns,
-        fixVersions: vuln.vulns.map(v => v.fix_versions).flat()
+        fixVersions: vuln.vulns.map((v) => v.fix_versions).flat(),
       }));
 
       return { vulnerabilities };
@@ -220,12 +220,12 @@ class SecurityScanner {
         'security/detect-non-literal-require': 'warn',
         'security/detect-object-injection': 'warn',
         'security/detect-possible-timing-attacks': 'warn',
-        'security/detect-pseudoRandomBytes': 'error'
+        'security/detect-pseudoRandomBytes': 'error',
       },
       parserOptions: {
         ecmaVersion: 2021,
-        sourceType: 'module'
-      }
+        sourceType: 'module',
+      },
     };
 
     await fs.writeFile(configPath, JSON.stringify(config, null, 2));
@@ -233,9 +233,12 @@ class SecurityScanner {
 
   mapESLintSeverity(severity) {
     switch (severity) {
-      case 2: return 'HIGH';
-      case 1: return 'MEDIUM';
-      default: return 'LOW';
+      case 2:
+        return 'HIGH';
+      case 1:
+        return 'MEDIUM';
+      default:
+        return 'LOW';
     }
   }
 
@@ -243,17 +246,21 @@ class SecurityScanner {
     const allVulnerabilities = [];
 
     if (results.javascript?.vulnerabilities) {
-      allVulnerabilities.push(...results.javascript.vulnerabilities.map(v => ({
-        ...v,
-        source: 'javascript'
-      })));
+      allVulnerabilities.push(
+        ...results.javascript.vulnerabilities.map((v) => ({
+          ...v,
+          source: 'javascript',
+        }))
+      );
     }
 
     if (results.python?.vulnerabilities) {
-      allVulnerabilities.push(...results.python.vulnerabilities.map(v => ({
-        ...v,
-        source: 'python'
-      })));
+      allVulnerabilities.push(
+        ...results.python.vulnerabilities.map((v) => ({
+          ...v,
+          source: 'python',
+        }))
+      );
     }
 
     return allVulnerabilities;
@@ -265,9 +272,9 @@ class SecurityScanner {
       bySeverity: {
         HIGH: 0,
         MEDIUM: 0,
-        LOW: 0
+        LOW: 0,
       },
-      bySource: {}
+      bySource: {},
     };
 
     if (results.vulnerabilities) {
@@ -288,7 +295,7 @@ class SecurityScanner {
       summary.npmVulnerabilities = {
         high: results.dependencies.npm.high || 0,
         moderate: results.dependencies.npm.moderate || 0,
-        low: results.dependencies.npm.low || 0
+        low: results.dependencies.npm.low || 0,
       };
     }
 

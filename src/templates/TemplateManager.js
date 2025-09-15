@@ -155,7 +155,9 @@ class TemplateManager {
 
   async getTemplatesByCategory(category) {
     const templateIds = this.categories.get(category);
-    if (!templateIds) return [];
+    if (!templateIds) {
+      return [];
+    }
 
     const templates = [];
     for (const id of templateIds) {
@@ -180,7 +182,7 @@ class TemplateManager {
       if (
         template.name.toLowerCase().includes(lowerQuery) ||
         template.description?.toLowerCase().includes(lowerQuery) ||
-        template.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
+        template.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery))
       ) {
         results.push(template);
       }
@@ -210,7 +212,7 @@ class TemplateManager {
       name: newName,
       parent: original.id,
       builtin: false,
-      path: undefined
+      path: undefined,
     };
 
     return this.saveTemplate(clone);
@@ -366,7 +368,9 @@ class TemplateManager {
 
     for (const line of lines) {
       const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith('#')) continue;
+      if (!trimmed || trimmed.startsWith('#')) {
+        continue;
+      }
 
       const indent = line.length - line.trimStart().length;
       const match = trimmed.match(/^([^:]+):\s*(.*)$/);
@@ -401,7 +405,7 @@ class TemplateManager {
         if (!Array.isArray(current)) {
           // Convert to array
           const parent = stack[stack.length - 2].obj;
-          const key = Object.keys(parent).find(k => parent[k] === current);
+          const key = Object.keys(parent).find((k) => parent[k] === current);
           parent[key] = [];
           stack[stack.length - 1].obj = parent[key];
         }
@@ -422,7 +426,7 @@ class TemplateManager {
       total: this.templates.size,
       byCategory: {},
       builtin: 0,
-      custom: 0
+      custom: 0,
     };
 
     for (const template of this.templates.values()) {

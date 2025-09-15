@@ -9,33 +9,33 @@ export const agentSchemas = {
       maxComplexity: {
         type: 'number',
         default: 10,
-        description: 'Maximum acceptable cyclomatic complexity'
+        description: 'Maximum acceptable cyclomatic complexity',
       },
       maxFileSize: {
         type: 'number',
         default: 1000,
-        description: 'Maximum lines of code per file'
+        description: 'Maximum lines of code per file',
       },
       enableCaching: {
         type: 'boolean',
         default: true,
-        description: 'Enable analysis result caching'
+        description: 'Enable analysis result caching',
       },
       patterns: {
         type: 'object',
         properties: {
           detectAntiPatterns: { type: 'boolean', default: true },
           detectCodeSmells: { type: 'boolean', default: true },
-          detectDesignPatterns: { type: 'boolean', default: true }
-        }
+          detectDesignPatterns: { type: 'boolean', default: true },
+        },
       },
       excludePaths: {
         type: 'array',
         items: { type: 'string' },
         default: ['node_modules', 'dist', 'build', '.git'],
-        description: 'Paths to exclude from analysis'
-      }
-    }
+        description: 'Paths to exclude from analysis',
+      },
+    },
   },
 
   architect: {
@@ -45,33 +45,33 @@ export const agentSchemas = {
         type: 'string',
         enum: ['layered', 'microservices', 'hexagonal', 'mvc', 'mvvm'],
         default: 'layered',
-        description: 'Expected architecture pattern'
+        description: 'Expected architecture pattern',
       },
       diagramFormat: {
         type: 'string',
         enum: ['mermaid', 'plantuml', 'graphviz'],
         default: 'mermaid',
-        description: 'Output format for diagrams'
+        description: 'Output format for diagrams',
       },
       validationLevel: {
         type: 'string',
         enum: ['strict', 'moderate', 'lenient'],
         default: 'moderate',
-        description: 'How strictly to validate architecture'
+        description: 'How strictly to validate architecture',
       },
       patternConfidenceThreshold: {
         type: 'number',
         default: 0.7,
         minimum: 0,
         maximum: 1,
-        description: 'Minimum confidence level for pattern detection'
+        description: 'Minimum confidence level for pattern detection',
       },
       enableCaching: {
         type: 'boolean',
         default: true,
-        description: 'Enable validation result caching'
-      }
-    }
+        description: 'Enable validation result caching',
+      },
+    },
   },
 
   security: {
@@ -81,22 +81,22 @@ export const agentSchemas = {
         type: 'string',
         enum: ['basic', 'standard', 'comprehensive'],
         default: 'standard',
-        description: 'Depth of security scanning'
+        description: 'Depth of security scanning',
       },
       enableSAST: {
         type: 'boolean',
         default: true,
-        description: 'Enable static application security testing'
+        description: 'Enable static application security testing',
       },
       enableSecretDetection: {
         type: 'boolean',
         default: true,
-        description: 'Enable secret and credential detection'
+        description: 'Enable secret and credential detection',
       },
       enableDependencyAudit: {
         type: 'boolean',
         default: true,
-        description: 'Enable dependency vulnerability scanning'
+        description: 'Enable dependency vulnerability scanning',
       },
       customRules: {
         type: 'array',
@@ -105,25 +105,25 @@ export const agentSchemas = {
           properties: {
             name: { type: 'string' },
             pattern: { type: 'string' },
-            severity: { type: 'string', enum: ['low', 'medium', 'high', 'critical'] }
-          }
+            severity: { type: 'string', enum: ['low', 'medium', 'high', 'critical'] },
+          },
         },
         default: [],
-        description: 'Custom security rules'
+        description: 'Custom security rules',
       },
       excludePaths: {
         type: 'array',
         items: { type: 'string' },
         default: ['node_modules', 'test', '__tests__'],
-        description: 'Paths to exclude from security scanning'
+        description: 'Paths to exclude from security scanning',
       },
       severityThreshold: {
         type: 'string',
         enum: ['low', 'medium', 'high', 'critical'],
         default: 'medium',
-        description: 'Minimum severity to report'
-      }
-    }
+        description: 'Minimum severity to report',
+      },
+    },
   },
 
   optimizer: {
@@ -134,39 +134,39 @@ export const agentSchemas = {
         properties: {
           loadTime: { type: 'number', default: 3000 },
           bundleSize: { type: 'number', default: 2000000 },
-          cacheHitRate: { type: 'number', default: 0.7 }
-        }
+          cacheHitRate: { type: 'number', default: 0.7 },
+        },
       },
       enableProfiling: {
         type: 'boolean',
         default: true,
-        description: 'Enable performance profiling'
+        description: 'Enable performance profiling',
       },
       enableBundleAnalysis: {
         type: 'boolean',
         default: true,
-        description: 'Enable bundle size analysis'
+        description: 'Enable bundle size analysis',
       },
       suggestionLevel: {
         type: 'string',
         enum: ['conservative', 'balanced', 'aggressive'],
         default: 'balanced',
-        description: 'How aggressively to suggest optimizations'
+        description: 'How aggressively to suggest optimizations',
       },
       cacheStrategy: {
         type: 'string',
         enum: ['none', 'memory', 'disk'],
         default: 'memory',
-        description: 'Caching strategy for analysis results'
+        description: 'Caching strategy for analysis results',
       },
       bottleneckSeverityThreshold: {
         type: 'string',
         enum: ['low', 'medium', 'high'],
         default: 'medium',
-        description: 'Minimum severity for bottleneck reporting'
-      }
-    }
-  }
+        description: 'Minimum severity for bottleneck reporting',
+      },
+    },
+  },
 };
 
 /**
@@ -243,7 +243,7 @@ export function validateConfig(agentId, config) {
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
 

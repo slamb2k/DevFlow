@@ -22,7 +22,7 @@ export class JsonRpcProtocol {
     const request = {
       jsonrpc: this.version,
       method,
-      id: id !== null ? id : ++this.requestId
+      id: id !== null ? id : ++this.requestId,
     };
 
     if (params !== null && params !== undefined) {
@@ -44,7 +44,7 @@ export class JsonRpcProtocol {
 
     const notification = {
       jsonrpc: this.version,
-      method
+      method,
     };
 
     if (params !== null && params !== undefined) {
@@ -67,7 +67,7 @@ export class JsonRpcProtocol {
     return {
       jsonrpc: this.version,
       result,
-      id
+      id,
     };
   }
 
@@ -81,7 +81,7 @@ export class JsonRpcProtocol {
   createError(code, message, data = null, id = null) {
     const error = {
       code,
-      message
+      message,
     };
 
     if (data !== null && data !== undefined) {
@@ -91,7 +91,7 @@ export class JsonRpcProtocol {
     return {
       jsonrpc: this.version,
       error,
-      id
+      id,
     };
   }
 
@@ -127,7 +127,7 @@ export class JsonRpcProtocol {
           JsonRpcProtocol.ERROR_CODES.PARSE_ERROR,
           'Invalid JSON',
           error.message
-        )
+        ),
       };
     }
 
@@ -135,7 +135,7 @@ export class JsonRpcProtocol {
     if (Array.isArray(parsed)) {
       return {
         type: 'batch',
-        requests: parsed.map(req => this.parseRequest(req))
+        requests: parsed.map((req) => this.parseRequest(req)),
       };
     }
 
@@ -156,7 +156,7 @@ export class JsonRpcProtocol {
           `Invalid JSON-RPC version: ${request.jsonrpc}`,
           null,
           request.id || null
-        )
+        ),
       };
     }
 
@@ -174,7 +174,7 @@ export class JsonRpcProtocol {
           'Method is required and must be a string',
           null,
           request.id || null
-        )
+        ),
       };
     }
 
@@ -183,7 +183,7 @@ export class JsonRpcProtocol {
       return {
         type: 'notification',
         method: request.method,
-        params: request.params || null
+        params: request.params || null,
       };
     }
 
@@ -192,7 +192,7 @@ export class JsonRpcProtocol {
       type: 'request',
       id: request.id,
       method: request.method,
-      params: request.params || null
+      params: request.params || null,
     };
   }
 
@@ -207,7 +207,7 @@ export class JsonRpcProtocol {
         error: this.createError(
           JsonRpcProtocol.ERROR_CODES.INVALID_REQUEST,
           'Response must have an ID'
-        )
+        ),
       };
     }
 
@@ -215,7 +215,7 @@ export class JsonRpcProtocol {
       return {
         type: 'error',
         id: response.id,
-        error: response.error
+        error: response.error,
       };
     }
 
@@ -223,7 +223,7 @@ export class JsonRpcProtocol {
       return {
         type: 'response',
         id: response.id,
-        result: response.result
+        result: response.result,
       };
     }
 
@@ -234,7 +234,7 @@ export class JsonRpcProtocol {
         'Invalid response format',
         null,
         response.id
-      )
+      ),
     };
   }
 
@@ -269,7 +269,7 @@ export class JsonRpcProtocol {
     AGENT_BUSY: -32001,
     AGENT_ERROR: -32002,
     CAPABILITY_NOT_FOUND: -32003,
-    TASK_FAILED: -32004
+    TASK_FAILED: -32004,
   };
 
   /**
@@ -287,7 +287,7 @@ export class JsonRpcProtocol {
       [JsonRpcProtocol.ERROR_CODES.AGENT_BUSY]: 'Agent is busy',
       [JsonRpcProtocol.ERROR_CODES.AGENT_ERROR]: 'Agent error',
       [JsonRpcProtocol.ERROR_CODES.CAPABILITY_NOT_FOUND]: 'Capability not found',
-      [JsonRpcProtocol.ERROR_CODES.TASK_FAILED]: 'Task execution failed'
+      [JsonRpcProtocol.ERROR_CODES.TASK_FAILED]: 'Task execution failed',
     };
 
     return messages[code] || 'Unknown error';
@@ -321,7 +321,7 @@ export class AgentCommunicator {
         timeout: setTimeout(() => {
           this.pendingRequests.delete(request.id);
           reject(new Error(`Request timeout: ${method} to ${targetAgent}`));
-        }, 30000) // 30 second timeout
+        }, 30000), // 30 second timeout
       });
 
       // Send request
@@ -435,7 +435,7 @@ export class AgentCommunicator {
    * Send message (to be implemented by registry)
    * @private
    */
-  send(targetAgent, message) {
+  send(_targetAgent, _message) {
     // This will be implemented by the registry
     throw new Error('Send method must be implemented');
   }

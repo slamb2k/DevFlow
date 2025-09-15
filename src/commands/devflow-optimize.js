@@ -13,8 +13,8 @@ export class OptimizeCommand extends BaseCommand {
       usage: 'devflow-optimize [options]',
       options: {
         '--category': 'Optimization category (performance, security, quality)',
-        '--apply': 'Apply suggested optimizations automatically'
-      }
+        '--apply': 'Apply suggested optimizations automatically',
+      },
     };
   }
 
@@ -41,7 +41,7 @@ export class OptimizeCommand extends BaseCommand {
         title: 'Enable code splitting',
         description: 'Split your code into smaller chunks for faster loading',
         impact: 'high',
-        effort: 'medium'
+        effort: 'medium',
       });
 
       suggestions.push({
@@ -49,7 +49,7 @@ export class OptimizeCommand extends BaseCommand {
         title: 'Add caching strategy',
         description: 'Implement browser and server-side caching',
         impact: 'high',
-        effort: 'low'
+        effort: 'low',
       });
     }
 
@@ -60,7 +60,7 @@ export class OptimizeCommand extends BaseCommand {
         title: 'Add security headers',
         description: 'Implement CSP, HSTS, and other security headers',
         impact: 'high',
-        effort: 'low'
+        effort: 'low',
       });
 
       suggestions.push({
@@ -68,7 +68,7 @@ export class OptimizeCommand extends BaseCommand {
         title: 'Enable dependency scanning',
         description: 'Set up automated vulnerability scanning',
         impact: 'medium',
-        effort: 'low'
+        effort: 'low',
       });
     }
 
@@ -79,7 +79,7 @@ export class OptimizeCommand extends BaseCommand {
         title: 'Increase test coverage',
         description: 'Aim for >80% code coverage',
         impact: 'high',
-        effort: 'high'
+        effort: 'high',
       });
 
       suggestions.push({
@@ -87,7 +87,7 @@ export class OptimizeCommand extends BaseCommand {
         title: 'Add pre-commit hooks',
         description: 'Enforce code quality before commits',
         impact: 'medium',
-        effort: 'low'
+        effort: 'low',
       });
     }
 
@@ -99,7 +99,9 @@ export class OptimizeCommand extends BaseCommand {
     console.log(chalk.cyan('═'.repeat(60)));
 
     const grouped = suggestions.reduce((acc, sug) => {
-      if (!acc[sug.category]) acc[sug.category] = [];
+      if (!acc[sug.category]) {
+        acc[sug.category] = [];
+      }
       acc[sug.category].push(sug);
       return acc;
     }, {});
@@ -115,14 +117,14 @@ export class OptimizeCommand extends BaseCommand {
       }
     }
 
-    console.log(chalk.cyan('\n' + '═'.repeat(60) + '\n'));
+    console.log(chalk.cyan(`\n${'═'.repeat(60)}\n`));
   }
 
   getCategoryIcon(category) {
     const icons = {
       performance: '⚡',
       security: '🔒',
-      quality: '✨'
+      quality: '✨',
     };
     return icons[category] || '📌';
   }

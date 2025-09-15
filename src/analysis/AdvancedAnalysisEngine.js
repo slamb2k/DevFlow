@@ -36,7 +36,7 @@ class AdvancedAnalysisEngine {
       { name: 'security', instance: this.securityScanner, method: 'scan' },
       { name: 'performance', instance: this.performanceProfiler, method: 'profile' },
       { name: 'codeQuality', instance: this.codeQualityAnalyzer, method: 'analyze' },
-      { name: 'dependencies', instance: this.dependencyAnalyzer, method: 'analyze' }
+      { name: 'dependencies', instance: this.dependencyAnalyzer, method: 'analyze' },
     ];
 
     for (const analyzer of analyzers) {
@@ -45,7 +45,7 @@ class AdvancedAnalysisEngine {
       } catch (error) {
         results[analyzer.name] = {
           error: error.message,
-          status: 'failed'
+          status: 'failed',
         };
       }
     }
@@ -61,10 +61,10 @@ class AdvancedAnalysisEngine {
 
     const results = {};
     const analyzerMap = {
-      'security': { instance: this.securityScanner, method: 'scan' },
-      'performance': { instance: this.performanceProfiler, method: 'profile' },
-      'codeQuality': { instance: this.codeQualityAnalyzer, method: 'analyze' },
-      'dependencies': { instance: this.dependencyAnalyzer, method: 'analyze' }
+      security: { instance: this.securityScanner, method: 'scan' },
+      performance: { instance: this.performanceProfiler, method: 'profile' },
+      codeQuality: { instance: this.codeQualityAnalyzer, method: 'analyze' },
+      dependencies: { instance: this.dependencyAnalyzer, method: 'analyze' },
     };
 
     for (const analyzerName of selectedAnalyzers) {
@@ -75,7 +75,7 @@ class AdvancedAnalysisEngine {
         } catch (error) {
           results[analyzerName] = {
             error: error.message,
-            status: 'failed'
+            status: 'failed',
           };
         }
       }

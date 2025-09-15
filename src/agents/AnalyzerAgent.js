@@ -14,14 +14,15 @@ export class AnalyzerAgent extends BaseAgent {
       ...config,
       id: 'analyzer',
       name: 'AnalyzerAgent',
-      description: 'Performs AST parsing, complexity analysis, pattern detection, and dependency analysis'
+      description:
+        'Performs AST parsing, complexity analysis, pattern detection, and dependency analysis',
     });
 
     this.capabilities = [
       'ast-parsing',
       'complexity-analysis',
       'pattern-detection',
-      'dependency-analysis'
+      'dependency-analysis',
     ];
 
     // Analysis cache
@@ -39,13 +40,13 @@ export class AnalyzerAgent extends BaseAgent {
       antiPatterns: [
         { name: 'swallowed-error', regex: /catch\s*\([^)]*\)\s*{\s*(?:\/\/.*)?}/ },
         { name: 'var-in-loop', regex: /for\s*\(.*var\s+/ },
-        { name: 'console-log', regex: /console\.(log|error|warn|info)/ }
+        { name: 'console-log', regex: /console\.(log|error|warn|info)/ },
       ],
       codeSmells: [
         { name: 'long-method', maxLines: 50 },
         { name: 'long-parameter-list', maxParams: 5 },
-        { name: 'god-object', maxMethods: 20 }
-      ]
+        { name: 'god-object', maxMethods: 20 },
+      ],
     };
   }
 
@@ -55,7 +56,7 @@ export class AnalyzerAgent extends BaseAgent {
       'analyze-complexity',
       'detect-patterns',
       'analyze-dependencies',
-      'analyze-project'
+      'analyze-project',
     ];
     return validTasks.includes(task);
   }
@@ -84,7 +85,7 @@ export class AnalyzerAgent extends BaseAgent {
     if (useCache && this.analysisCache.has(filePath)) {
       return {
         ...this.analysisCache.get(filePath),
-        cached: true
+        cached: true,
       };
     }
 
@@ -95,7 +96,7 @@ export class AnalyzerAgent extends BaseAgent {
       const ast = parser.parse(code, {
         sourceType: 'module',
         plugins: isTypeScript ? ['typescript', 'jsx'] : ['jsx'],
-        errorRecovery: true
+        errorRecovery: true,
       });
 
       const analysis = {
@@ -104,7 +105,7 @@ export class AnalyzerAgent extends BaseAgent {
         classes: [],
         interfaces: [],
         imports: [],
-        exports: []
+        exports: [],
       };
 
       // Extract key elements
@@ -127,7 +128,7 @@ export class AnalyzerAgent extends BaseAgent {
           if (path.node.declaration?.id) {
             analysis.exports.push(path.node.declaration.id.name);
           }
-        }
+        },
       });
 
       // Cache result
@@ -142,8 +143,8 @@ export class AnalyzerAgent extends BaseAgent {
         summary: {
           functions: analysis.functions.length,
           classes: analysis.classes.length,
-          interfaces: analysis.interfaces.length
-        }
+          interfaces: analysis.interfaces.length,
+        },
       };
 
       this.state.analysisHistory.push(this.state.lastAnalysis);
@@ -163,31 +164,46 @@ export class AnalyzerAgent extends BaseAgent {
       const ast = parser.parse(code, {
         sourceType: 'module',
         plugins: ['jsx'],
-        errorRecovery: true
+        errorRecovery: true,
       });
 
       const complexity = {
         cyclomatic: 1,
         functions: {},
-        cognitive: 0
+        cognitive: 0,
       };
 
       const metrics = {
         linesOfCode: code.split('\n').length,
-        commentLines: (code.match(/\/\/.*/g) || []).length +
-                     (code.match(/\/\*[\s\S]*?\*\//g) || []).join('').split('\n').length,
-        maintainabilityIndex: 100
+        commentLines:
+          (code.match(/\/\/.*/g) || []).length +
+          (code.match(/\/\*[\s\S]*?\*\//g) || []).join('').split('\n').length,
+        maintainabilityIndex: 100,
       };
 
       // Calculate cyclomatic complexity
       traverse.default(ast, {
-        IfStatement() { complexity.cyclomatic++; },
-        ConditionalExpression() { complexity.cyclomatic++; },
-        ForStatement() { complexity.cyclomatic++; },
-        WhileStatement() { complexity.cyclomatic++; },
-        DoWhileStatement() { complexity.cyclomatic++; },
-        CatchClause() { complexity.cyclomatic++; },
-        SwitchCase() { complexity.cyclomatic++; },
+        IfStatement() {
+          complexity.cyclomatic++;
+        },
+        ConditionalExpression() {
+          complexity.cyclomatic++;
+        },
+        ForStatement() {
+          complexity.cyclomatic++;
+        },
+        WhileStatement() {
+          complexity.cyclomatic++;
+        },
+        DoWhileStatement() {
+          complexity.cyclomatic++;
+        },
+        CatchClause() {
+          complexity.cyclomatic++;
+        },
+        SwitchCase() {
+          complexity.cyclomatic++;
+        },
         LogicalExpression(path) {
           if (path.node.operator === '&&' || path.node.operator === '||') {
             complexity.cyclomatic++;
@@ -198,24 +214,42 @@ export class AnalyzerAgent extends BaseAgent {
           let funcComplexity = 1;
 
           path.traverse({
-            IfStatement() { funcComplexity++; },
-            ConditionalExpression() { funcComplexity++; },
-            ForStatement() { funcComplexity++; },
-            WhileStatement() { funcComplexity++; },
-            DoWhileStatement() { funcComplexity++; },
-            CatchClause() { funcComplexity++; },
-            SwitchCase() { funcComplexity++; }
+            IfStatement() {
+              funcComplexity++;
+            },
+            ConditionalExpression() {
+              funcComplexity++;
+            },
+            ForStatement() {
+              funcComplexity++;
+            },
+            WhileStatement() {
+              funcComplexity++;
+            },
+            DoWhileStatement() {
+              funcComplexity++;
+            },
+            CatchClause() {
+              funcComplexity++;
+            },
+            SwitchCase() {
+              funcComplexity++;
+            },
           });
 
           complexity.functions[funcName] = funcComplexity;
-        }
+        },
       });
 
       // Calculate maintainability index
       const volume = metrics.linesOfCode * Math.log2(complexity.cyclomatic + 1);
-      const effort = volume * complexity.cyclomatic;
-      metrics.maintainabilityIndex = Math.max(0,
-        171 - 5.2 * Math.log(volume) - 0.23 * complexity.cyclomatic - 16.2 * Math.log(metrics.linesOfCode)
+      const _effort = volume * complexity.cyclomatic;
+      metrics.maintainabilityIndex = Math.max(
+        0,
+        171 -
+          5.2 * Math.log(volume) -
+          0.23 * complexity.cyclomatic -
+          16.2 * Math.log(metrics.linesOfCode)
       );
 
       const recommendations = [];
@@ -225,14 +259,16 @@ export class AnalyzerAgent extends BaseAgent {
 
       Object.entries(complexity.functions).forEach(([func, comp]) => {
         if (comp > 10) {
-          recommendations.push(`Function '${func}' has high complexity (${comp}) - consider refactoring`);
+          recommendations.push(
+            `Function '${func}' has high complexity (${comp}) - consider refactoring`
+          );
         }
       });
 
       return {
         complexity,
         metrics,
-        recommendations
+        recommendations,
       };
     } catch (error) {
       throw new Error(`Failed to analyze complexity: ${error.message}`);
@@ -247,7 +283,7 @@ export class AnalyzerAgent extends BaseAgent {
       const ast = parser.parse(code, {
         sourceType: 'module',
         plugins: ['jsx'],
-        errorRecovery: true
+        errorRecovery: true,
       });
 
       const patterns = [];
@@ -258,7 +294,10 @@ export class AnalyzerAgent extends BaseAgent {
       const codeStr = code.toString();
 
       // Singleton detection
-      if (codeStr.includes('getInstance') || (codeStr.includes('static instance') && codeStr.includes('constructor'))) {
+      if (
+        codeStr.includes('getInstance') ||
+        (codeStr.includes('static instance') && codeStr.includes('constructor'))
+      ) {
         patterns.push({ name: 'singleton', confidence: 0.9 });
       }
 
@@ -268,7 +307,11 @@ export class AnalyzerAgent extends BaseAgent {
       }
 
       // Observer detection
-      if (codeStr.includes('subscribe') && codeStr.includes('notify') && codeStr.includes('observers')) {
+      if (
+        codeStr.includes('subscribe') &&
+        codeStr.includes('notify') &&
+        codeStr.includes('observers')
+      ) {
         patterns.push({ name: 'observer', confidence: 0.85 });
       }
 
@@ -278,7 +321,7 @@ export class AnalyzerAgent extends BaseAgent {
       }
 
       // Check for anti-patterns
-      this.state.patterns.antiPatterns.forEach(pattern => {
+      this.state.patterns.antiPatterns.forEach((pattern) => {
         if (pattern.regex.test(codeStr)) {
           antiPatterns.push({ name: pattern.name, severity: 'medium' });
         }
@@ -296,7 +339,7 @@ export class AnalyzerAgent extends BaseAgent {
               codeSmells.push({
                 type: 'long-method',
                 name: funcName,
-                lines
+                lines,
               });
             }
           }
@@ -306,7 +349,7 @@ export class AnalyzerAgent extends BaseAgent {
             codeSmells.push({
               type: 'long-parameter-list',
               name: funcName,
-              params
+              params,
             });
           }
         },
@@ -315,17 +358,19 @@ export class AnalyzerAgent extends BaseAgent {
           let methodCount = 0;
 
           path.traverse({
-            ClassMethod() { methodCount++; }
+            ClassMethod() {
+              methodCount++;
+            },
           });
 
           if (methodCount > 20) {
             codeSmells.push({
               type: 'god-object',
               name: className,
-              methods: methodCount
+              methods: methodCount,
             });
           }
-        }
+        },
       });
 
       // Long function name detection
@@ -336,7 +381,7 @@ export class AnalyzerAgent extends BaseAgent {
       return {
         patterns,
         antiPatterns,
-        codeSmells
+        codeSmells,
       };
     } catch (error) {
       throw new Error(`Failed to detect patterns: ${error.message}`);
@@ -355,7 +400,7 @@ export class AnalyzerAgent extends BaseAgent {
         return {
           production: Object.keys(pkg.dependencies || {}),
           development: Object.keys(pkg.devDependencies || {}),
-          total: Object.keys({...pkg.dependencies, ...pkg.devDependencies}).length
+          total: Object.keys({ ...pkg.dependencies, ...pkg.devDependencies }).length,
         };
       } catch (error) {
         throw new Error(`Failed to analyze package.json: ${error.message}`);
@@ -381,7 +426,7 @@ export class AnalyzerAgent extends BaseAgent {
       return {
         totalFiles: files.length,
         dependencies: Array.from(dependencies.entries()),
-        circularDependencies: circular
+        circularDependencies: circular,
       };
     }
 
@@ -391,13 +436,13 @@ export class AnalyzerAgent extends BaseAgent {
       const ast = parser.parse(code, {
         sourceType: 'module',
         plugins: ['jsx'],
-        errorRecovery: true
+        errorRecovery: true,
       });
 
       const dependencies = {
         imports: [],
         requires: [],
-        exports: []
+        exports: [],
       };
 
       traverse.default(ast, {
@@ -416,7 +461,7 @@ export class AnalyzerAgent extends BaseAgent {
           if (path.node.declaration?.id) {
             dependencies.exports.push(path.node.declaration.id.name);
           }
-        }
+        },
       });
 
       return dependencies;
@@ -434,12 +479,12 @@ export class AnalyzerAgent extends BaseAgent {
         totalFiles: files.length,
         languages: {},
         totalLines: 0,
-        avgComplexity: 0
+        avgComplexity: 0,
       };
 
       const codeQuality = {
         issues: [],
-        score: 100
+        score: 100,
       };
 
       let totalComplexity = 0;
@@ -463,7 +508,7 @@ export class AnalyzerAgent extends BaseAgent {
             codeQuality.issues.push({
               file,
               issue: 'High complexity',
-              severity: 'high'
+              severity: 'high',
             });
             codeQuality.score -= 5;
           }
@@ -477,7 +522,7 @@ export class AnalyzerAgent extends BaseAgent {
 
       return {
         summary,
-        codeQuality
+        codeQuality,
       };
     } catch (error) {
       throw new Error(`Failed to analyze project: ${error.message}`);
@@ -491,7 +536,9 @@ export class AnalyzerAgent extends BaseAgent {
       const entries = await fs.readdir(dir);
 
       for (const entry of entries) {
-        if (entry === 'node_modules' || entry.startsWith('.')) continue;
+        if (entry === 'node_modules' || entry.startsWith('.')) {
+          continue;
+        }
 
         const fullPath = path.join(dir, entry);
         const stat = await fs.stat(fullPath);
@@ -499,7 +546,7 @@ export class AnalyzerAgent extends BaseAgent {
         if (stat.isDirectory()) {
           const subFiles = await this.getAllFiles(fullPath, extensions);
           files.push(...subFiles);
-        } else if (stat.isFile() && extensions.some(ext => entry.endsWith(ext))) {
+        } else if (stat.isFile() && extensions.some((ext) => entry.endsWith(ext))) {
           files.push(fullPath);
         }
       }
@@ -540,7 +587,9 @@ export class AnalyzerAgent extends BaseAgent {
         return;
       }
 
-      if (visited.has(file)) return;
+      if (visited.has(file)) {
+        return;
+      }
 
       visited.add(file);
       stack.add(file);

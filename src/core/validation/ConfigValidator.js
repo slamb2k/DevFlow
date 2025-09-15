@@ -18,68 +18,82 @@ export class ConfigValidator {
    */
   initializeSchemas() {
     // React project schema
-    this.schemas.set('react', Joi.object({
-      projectType: Joi.string().required().valid('react'),
-      framework: Joi.string().required(),
-      dependencies: Joi.array().items(Joi.string()).default([]),
-      scripts: Joi.object({
-        start: Joi.string(),
-        build: Joi.string(),
-        test: Joi.string(),
-        lint: Joi.string()
-      }).default({}),
-      build: Joi.object({
-        outputDir: Joi.string().default('build'),
-        sourceMap: Joi.boolean().default(true),
-        optimization: Joi.object({
-          minify: Joi.boolean().default(true),
-          splitChunks: Joi.boolean().default(true)
-        })
-      }),
-      port: Joi.number().min(1).max(65535).default(3000),
-      debug: Joi.boolean().default(false)
-    }));
+    this.schemas.set(
+      'react',
+      Joi.object({
+        projectType: Joi.string().required().valid('react'),
+        framework: Joi.string().required(),
+        dependencies: Joi.array().items(Joi.string()).default([]),
+        scripts: Joi.object({
+          start: Joi.string(),
+          build: Joi.string(),
+          test: Joi.string(),
+          lint: Joi.string(),
+        }).default({}),
+        build: Joi.object({
+          outputDir: Joi.string().default('build'),
+          sourceMap: Joi.boolean().default(true),
+          optimization: Joi.object({
+            minify: Joi.boolean().default(true),
+            splitChunks: Joi.boolean().default(true),
+          }),
+        }),
+        port: Joi.number().min(1).max(65535).default(3000),
+        debug: Joi.boolean().default(false),
+      })
+    );
 
     // Node.js project schema
-    this.schemas.set('node', Joi.object({
-      projectType: Joi.string().required().valid('node'),
-      framework: Joi.string(),
-      dependencies: Joi.array().items(Joi.string()).default([]),
-      scripts: Joi.object({
-        start: Joi.string().default('node index.js'),
-        dev: Joi.string(),
-        test: Joi.string(),
-        build: Joi.string()
-      }).default({
-        start: 'node index.js'
-      }),
-      port: Joi.number().min(1).max(65535),
-      debug: Joi.boolean().default(false)
-    }));
+    this.schemas.set(
+      'node',
+      Joi.object({
+        projectType: Joi.string().required().valid('node'),
+        framework: Joi.string(),
+        dependencies: Joi.array().items(Joi.string()).default([]),
+        scripts: Joi.object({
+          start: Joi.string().default('node index.js'),
+          dev: Joi.string(),
+          test: Joi.string(),
+          build: Joi.string(),
+        }).default({
+          start: 'node index.js',
+        }),
+        port: Joi.number().min(1).max(65535),
+        debug: Joi.boolean().default(false),
+      })
+    );
 
     // Python project schema
-    this.schemas.set('python', Joi.object({
-      projectType: Joi.string().required().valid('python'),
-      framework: Joi.string(),
-      dependencies: Joi.array().items(Joi.string()).default([]),
-      scripts: Joi.object({
-        start: Joi.string().default('python main.py'),
-        test: Joi.string().default('pytest'),
-        lint: Joi.string().default('pylint')
-      }).default({
-        start: 'python main.py',
-        test: 'pytest'
-      }),
-      virtualEnv: Joi.string().default('venv'),
-      pythonVersion: Joi.string().pattern(/^\d+\.\d+/).default('3.9')
-    }));
+    this.schemas.set(
+      'python',
+      Joi.object({
+        projectType: Joi.string().required().valid('python'),
+        framework: Joi.string(),
+        dependencies: Joi.array().items(Joi.string()).default([]),
+        scripts: Joi.object({
+          start: Joi.string().default('python main.py'),
+          test: Joi.string().default('pytest'),
+          lint: Joi.string().default('pylint'),
+        }).default({
+          start: 'python main.py',
+          test: 'pytest',
+        }),
+        virtualEnv: Joi.string().default('venv'),
+        pythonVersion: Joi.string()
+          .pattern(/^\d+\.\d+/)
+          .default('3.9'),
+      })
+    );
 
     // Generic schema for unknown project types
-    this.schemas.set('generic', Joi.object({
-      projectType: Joi.string(),
-      dependencies: Joi.array().items(Joi.string()).default([]),
-      scripts: Joi.object().pattern(Joi.string(), Joi.string()).default({})
-    }));
+    this.schemas.set(
+      'generic',
+      Joi.object({
+        projectType: Joi.string(),
+        dependencies: Joi.array().items(Joi.string()).default([]),
+        scripts: Joi.object().pattern(Joi.string(), Joi.string()).default({}),
+      })
+    );
   }
 
   /**
@@ -91,8 +105,8 @@ export class ConfigValidator {
 
     return {
       valid: !result.error,
-      errors: result.error ? result.error.details.map(d => d.message) : [],
-      value: result.value
+      errors: result.error ? result.error.details.map((d) => d.message) : [],
+      value: result.value,
     };
   }
 
@@ -158,7 +172,7 @@ export class ConfigValidator {
     // Use Joi to apply defaults
     const { value } = schema.validate(normalized, {
       abortEarly: false,
-      stripUnknown: false
+      stripUnknown: false,
     });
 
     return value || normalized;
@@ -171,7 +185,7 @@ export class ConfigValidator {
     const diff = {
       added: [],
       removed: [],
-      changed: []
+      changed: [],
     };
 
     // Check for added and changed fields
@@ -244,13 +258,14 @@ export class ConfigValidator {
 
     this.backups.set(id, {
       config: JSON.parse(JSON.stringify(config)),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     // Limit backup count
     if (this.backups.size > 10) {
-      const oldest = Array.from(this.backups.entries())
-        .sort((a, b) => a[1].timestamp - b[1].timestamp)[0];
+      const oldest = Array.from(this.backups.entries()).sort(
+        (a, b) => a[1].timestamp - b[1].timestamp
+      )[0];
       this.backups.delete(oldest[0]);
     }
 

@@ -13,7 +13,7 @@ class PerformanceProfiler {
       bundle: await this.analyzeBundleSize(),
       buildPerformance: await this.measureBuildPerformance(),
       runtime: await this.collectRuntimeMetrics(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     results.summary = this.generateSummary(results);
@@ -36,11 +36,11 @@ class PerformanceProfiler {
         const statsData = await fs.readFile(statsPath, 'utf8');
         const stats = JSON.parse(statsData);
 
-        const assets = stats.assets.map(asset => ({
+        const assets = stats.assets.map((asset) => ({
           name: asset.name,
           size: asset.size,
           chunks: asset.chunks,
-          sizeInMB: (asset.size / 1048576).toFixed(2)
+          sizeInMB: (asset.size / 1048576).toFixed(2),
         }));
 
         const totalSize = assets.reduce((sum, asset) => sum + asset.size, 0);
@@ -49,7 +49,7 @@ class PerformanceProfiler {
           totalSize,
           totalSizeInMB: (totalSize / 1048576).toFixed(2),
           assets: assets.sort((a, b) => b.size - a.size),
-          largestAssets: assets.slice(0, 5)
+          largestAssets: assets.slice(0, 5),
         };
 
         await fs.unlink(statsPath).catch(() => {});
@@ -66,7 +66,7 @@ class PerformanceProfiler {
   async measureBuildPerformance() {
     const results = {
       buildTime: await this.measureBuildTime(),
-      memory: await this.profileBuildMemory()
+      memory: await this.profileBuildMemory(),
     };
 
     return results;
@@ -87,7 +87,7 @@ class PerformanceProfiler {
         execSync('npm run build', {
           cwd: this.projectPath,
           encoding: 'utf8',
-          stdio: 'pipe'
+          stdio: 'pipe',
         });
       } catch (error) {
         // Build might fail but we still want to measure time
@@ -99,7 +99,7 @@ class PerformanceProfiler {
       return {
         buildTime: Math.round(buildTime),
         buildTimeSeconds: (buildTime / 1000).toFixed(2),
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       return { error: error.message, skipped: false };
@@ -126,7 +126,7 @@ class PerformanceProfiler {
             rss: usage.rss,
             heapUsed: usage.heapUsed,
             heapTotal: usage.heapTotal,
-            external: usage.external
+            external: usage.external,
           });
         }
       }, interval);
@@ -135,7 +135,7 @@ class PerformanceProfiler {
         execSync('npm run build', {
           cwd: this.projectPath,
           encoding: 'utf8',
-          stdio: 'pipe'
+          stdio: 'pipe',
         });
       } catch (error) {
         // Build might fail but we still want memory data
@@ -148,9 +148,9 @@ class PerformanceProfiler {
         return { error: 'No memory data collected' };
       }
 
-      const peakMemory = Math.max(...memoryUsage.map(m => m.rss));
+      const peakMemory = Math.max(...memoryUsage.map((m) => m.rss));
       const averageMemory = memoryUsage.reduce((sum, m) => sum + m.rss, 0) / memoryUsage.length;
-      const peakHeap = Math.max(...memoryUsage.map(m => m.heapUsed));
+      const peakHeap = Math.max(...memoryUsage.map((m) => m.heapUsed));
 
       return {
         peakMemory,
@@ -159,7 +159,7 @@ class PerformanceProfiler {
         averageMemoryMB: (averageMemory / 1048576).toFixed(2),
         peakHeap,
         peakHeapMB: (peakHeap / 1048576).toFixed(2),
-        samples: memoryUsage.length
+        samples: memoryUsage.length,
       };
     } catch (error) {
       return { error: error.message, skipped: false };
@@ -179,12 +179,12 @@ class PerformanceProfiler {
           throughput: metrics.throughput || null,
           errorRate: metrics.errorRate || null,
           uptime: metrics.uptime || null,
-          requestsPerSecond: metrics.requestsPerSecond || null
+          requestsPerSecond: metrics.requestsPerSecond || null,
         };
       } catch (error) {
         return {
           message: 'No runtime metrics available',
-          hint: 'Runtime metrics will be collected when the application is running'
+          hint: 'Runtime metrics will be collected when the application is running',
         };
       }
     } catch (error) {
@@ -197,13 +197,13 @@ class PerformanceProfiler {
       bundleSize: null,
       buildTime: null,
       memoryUsage: null,
-      issues: []
+      issues: [],
     };
 
     if (results.bundle && !results.bundle.skipped && !results.bundle.error) {
       summary.bundleSize = {
-        total: results.bundle.totalSizeInMB + ' MB',
-        largestAsset: results.bundle.largestAssets?.[0]?.name
+        total: `${results.bundle.totalSizeInMB} MB`,
+        largestAsset: results.bundle.largestAssets?.[0]?.name,
       };
 
       if (parseFloat(results.bundle.totalSizeInMB) > 10) {
@@ -212,7 +212,7 @@ class PerformanceProfiler {
     }
 
     if (results.buildPerformance?.buildTime && !results.buildPerformance.buildTime.skipped) {
-      summary.buildTime = results.buildPerformance.buildTime.buildTimeSeconds + ' seconds';
+      summary.buildTime = `${results.buildPerformance.buildTime.buildTimeSeconds} seconds`;
 
       if (results.buildPerformance.buildTime.buildTime > 60000) {
         summary.issues.push('Build time exceeds 1 minute');
@@ -221,8 +221,8 @@ class PerformanceProfiler {
 
     if (results.buildPerformance?.memory && !results.buildPerformance.memory.skipped) {
       summary.memoryUsage = {
-        peak: results.buildPerformance.memory.peakMemoryMB + ' MB',
-        average: results.buildPerformance.memory.averageMemoryMB + ' MB'
+        peak: `${results.buildPerformance.memory.peakMemoryMB} MB`,
+        average: `${results.buildPerformance.memory.averageMemoryMB} MB`,
       };
 
       if (parseFloat(results.buildPerformance.memory.peakMemoryMB) > 1024) {
@@ -244,17 +244,19 @@ class PerformanceProfiler {
       }
 
       if (totalSizeMB > 10) {
-        recommendations.push('Bundle size is very large - implement lazy loading for non-critical modules');
+        recommendations.push(
+          'Bundle size is very large - implement lazy loading for non-critical modules'
+        );
       }
 
-      const largeAssets = results.bundle.assets.filter(a => parseFloat(a.sizeInMB) > 1);
+      const largeAssets = results.bundle.assets.filter((a) => parseFloat(a.sizeInMB) > 1);
       if (largeAssets.length > 0) {
-        recommendations.push(`Large assets detected: ${largeAssets.map(a => a.name).join(', ')}`);
+        recommendations.push(`Large assets detected: ${largeAssets.map((a) => a.name).join(', ')}`);
         recommendations.push('Consider optimizing images and using compression');
       }
 
-      if (results.bundle.assets.some(a => a.name.includes('vendor'))) {
-        const vendorAsset = results.bundle.assets.find(a => a.name.includes('vendor'));
+      if (results.bundle.assets.some((a) => a.name.includes('vendor'))) {
+        const vendorAsset = results.bundle.assets.find((a) => a.name.includes('vendor'));
         if (parseFloat(vendorAsset.sizeInMB) > 2) {
           recommendations.push('Vendor bundle is large - review and remove unused dependencies');
         }
@@ -269,7 +271,9 @@ class PerformanceProfiler {
       }
 
       if (buildTimeMs > 60000) {
-        recommendations.push('Build time exceeds 1 minute - review webpack configuration and plugins');
+        recommendations.push(
+          'Build time exceeds 1 minute - review webpack configuration and plugins'
+        );
       }
     }
 
@@ -277,17 +281,23 @@ class PerformanceProfiler {
       const peakMemoryMB = parseFloat(results.buildPerformance.memory.peakMemoryMB);
 
       if (peakMemoryMB > 512) {
-        recommendations.push('High memory usage during build - consider increasing Node.js memory limit');
+        recommendations.push(
+          'High memory usage during build - consider increasing Node.js memory limit'
+        );
       }
 
       if (peakMemoryMB > 1024) {
-        recommendations.push('Very high memory usage - review build process and consider splitting builds');
+        recommendations.push(
+          'Very high memory usage - review build process and consider splitting builds'
+        );
       }
     }
 
     if (results.runtime && results.runtime.responseTime) {
       if (results.runtime.responseTime > 1000) {
-        recommendations.push('High response time detected - optimize database queries and API calls');
+        recommendations.push(
+          'High response time detected - optimize database queries and API calls'
+        );
       }
 
       if (results.runtime.errorRate && results.runtime.errorRate > 0.01) {

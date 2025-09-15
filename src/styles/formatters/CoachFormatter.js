@@ -14,7 +14,7 @@ export class CoachFormatter extends BaseFormatter {
       verbose: true,
       includeEncouragement: true,
       includeQuestions: true,
-      colors: true
+      colors: true,
     });
   }
 
@@ -56,7 +56,7 @@ export class CoachFormatter extends BaseFormatter {
 
     // Decision making
     if (data.decision) {
-      sections.push(this.applyColor('🤔 Let\'s think about this together:', 'yellow', opts));
+      sections.push(this.applyColor("🤔 Let's think about this together:", 'yellow', opts));
       sections.push(data.decision);
       sections.push('');
 
@@ -69,8 +69,8 @@ export class CoachFormatter extends BaseFormatter {
       }
 
       if (data.considerations && Array.isArray(data.considerations)) {
-        sections.push('What\'s important to consider:');
-        data.considerations.forEach(consideration => {
+        sections.push("What's important to consider:");
+        data.considerations.forEach((consideration) => {
           sections.push(`  • ${consideration}`);
         });
         sections.push('');
@@ -101,7 +101,7 @@ export class CoachFormatter extends BaseFormatter {
       sections.push(data.issue);
       if (data.suggestion) {
         sections.push('');
-        sections.push('Here\'s a suggestion:');
+        sections.push("Here's a suggestion:");
         sections.push(this.indent(data.suggestion));
       }
       if (data.encouragement) {
@@ -117,20 +117,20 @@ export class CoachFormatter extends BaseFormatter {
       sections.push(data.progress_update);
       if (data.completed_tasks) {
         sections.push('');
-        sections.push('What you\'ve accomplished:');
-        data.completed_tasks.forEach(task => {
+        sections.push("What you've accomplished:");
+        data.completed_tasks.forEach((task) => {
           sections.push(`  ✅ ${task}`);
         });
       }
       if (data.upcoming_tasks) {
         sections.push('');
-        sections.push('What\'s coming next:');
-        data.upcoming_tasks.forEach(task => {
+        sections.push("What's coming next:");
+        data.upcoming_tasks.forEach((task) => {
           sections.push(`  ⏳ ${task}`);
         });
       }
       sections.push('');
-      sections.push('You\'re making great progress! Keep it up!');
+      sections.push("You're making great progress! Keep it up!");
       sections.push('');
     }
 
@@ -140,7 +140,7 @@ export class CoachFormatter extends BaseFormatter {
       sections.push(data.reflection);
       if (data.questions && Array.isArray(data.questions)) {
         sections.push('');
-        data.questions.forEach(question => {
+        data.questions.forEach((question) => {
           sections.push(`  • ${question}`);
         });
       }
@@ -176,12 +176,12 @@ export class CoachFormatter extends BaseFormatter {
 
     // Collaboration
     if (data.collaboration) {
-      sections.push(this.applyColor('🤝 Let\'s Collaborate:', 'blue', opts));
+      sections.push(this.applyColor("🤝 Let's Collaborate:", 'blue', opts));
       sections.push(data.collaboration);
       if (data.team_questions) {
         sections.push('');
         sections.push('Questions to discuss with your team:');
-        data.team_questions.forEach(q => {
+        data.team_questions.forEach((q) => {
           sections.push(`  • ${q}`);
         });
       }
@@ -193,8 +193,8 @@ export class CoachFormatter extends BaseFormatter {
       sections.push(this.applyColor('📚 Your Learning Journey:', 'cyan', opts));
       if (data.completed_lessons) {
         sections.push('');
-        sections.push('What you\'ve learned:');
-        data.completed_lessons.forEach(lesson => {
+        sections.push("What you've learned:");
+        data.completed_lessons.forEach((lesson) => {
           sections.push(`  ✅ ${lesson}`);
         });
       }
@@ -205,7 +205,7 @@ export class CoachFormatter extends BaseFormatter {
       if (data.next_lessons) {
         sections.push('');
         sections.push('Coming up:');
-        data.next_lessons.forEach(lesson => {
+        data.next_lessons.forEach((lesson) => {
           sections.push(`  📖 ${lesson}`);
         });
       }
@@ -219,14 +219,14 @@ export class CoachFormatter extends BaseFormatter {
       if (data.strengths) {
         sections.push('');
         sections.push('Your strengths:');
-        data.strengths.forEach(strength => {
+        data.strengths.forEach((strength) => {
           sections.push(`  ⭐ ${strength}`);
         });
       }
       if (data.areas_to_improve) {
         sections.push('');
         sections.push('Areas to explore further:');
-        data.areas_to_improve.forEach(area => {
+        data.areas_to_improve.forEach((area) => {
           sections.push(`  🔍 ${area}`);
         });
       }
@@ -251,7 +251,7 @@ export class CoachFormatter extends BaseFormatter {
   formatSupportive(data, options) {
     const sections = [];
 
-    sections.push(this.applyColor('Let\'s review what we have:', 'cyan', options));
+    sections.push(this.applyColor("Let's review what we have:", 'cyan', options));
     sections.push('');
 
     if (typeof data === 'object' && data !== null) {
@@ -260,7 +260,7 @@ export class CoachFormatter extends BaseFormatter {
         sections.push(`${formattedKey}:`);
 
         if (Array.isArray(value)) {
-          value.forEach(item => {
+          value.forEach((item) => {
             sections.push(`  • ${this.formatValue(item)}`);
           });
         } else if (typeof value === 'object' && value !== null) {
@@ -271,7 +271,7 @@ export class CoachFormatter extends BaseFormatter {
         sections.push('');
       }
 
-      sections.push('How does this look to you? Is there anything you\'d like to adjust?');
+      sections.push("How does this look to you? Is there anything you'd like to adjust?");
     } else {
       sections.push(String(data));
     }
@@ -292,7 +292,7 @@ export class CoachFormatter extends BaseFormatter {
       .replace(/([A-Z])/g, ' $1')
       .trim()
       .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   }
 

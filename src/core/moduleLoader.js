@@ -24,7 +24,7 @@ class ModuleLoader {
       module,
       options,
       loaded: false,
-      dependencies: options.dependencies || []
+      dependencies: options.dependencies || [],
     });
 
     if (options.autoLoad) {
@@ -139,7 +139,7 @@ class ModuleLoader {
    */
   loadAll() {
     const unloaded = Array.from(this.modules.keys()).filter(
-      name => !this.modules.get(name).loaded
+      (name) => !this.modules.get(name).loaded
     );
 
     for (const name of unloaded) {

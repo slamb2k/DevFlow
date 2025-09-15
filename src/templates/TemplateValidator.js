@@ -1,7 +1,15 @@
 class TemplateValidator {
   constructor() {
     this.requiredFields = ['name', 'content'];
-    this.optionalFields = ['id', 'category', 'description', 'variables', 'parent', 'tags', 'metadata'];
+    this.optionalFields = [
+      'id',
+      'category',
+      'description',
+      'variables',
+      'parent',
+      'tags',
+      'metadata',
+    ];
     this.validCategories = ['cicd', 'docker', 'config', 'documentation', 'testing', 'general'];
   }
 
@@ -29,7 +37,9 @@ class TemplateValidator {
 
     // Validate category
     if (template.category && !this.validCategories.includes(template.category)) {
-      errors.push(`Invalid category: ${template.category}. Must be one of: ${this.validCategories.join(', ')}`);
+      errors.push(
+        `Invalid category: ${template.category}. Must be one of: ${this.validCategories.join(', ')}`
+      );
     }
 
     // Validate variables
@@ -59,7 +69,7 @@ class TemplateValidator {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -177,7 +187,11 @@ class TemplateValidator {
       errors.push(`Max value for ${variableName} must be a number`);
     }
 
-    if (validation.min !== undefined && validation.max !== undefined && validation.min > validation.max) {
+    if (
+      validation.min !== undefined &&
+      validation.max !== undefined &&
+      validation.min > validation.max
+    ) {
       errors.push(`Min value cannot be greater than max value for ${variableName}`);
     }
 
@@ -210,7 +224,7 @@ class TemplateValidator {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -287,19 +301,25 @@ class TemplateValidator {
 
       // Validate choices
       if (templateVar.choices && !templateVar.choices.includes(value)) {
-        errors.push(`Variable ${templateVar.name} must be one of: ${templateVar.choices.join(', ')}`);
+        errors.push(
+          `Variable ${templateVar.name} must be one of: ${templateVar.choices.join(', ')}`
+        );
       }
 
       // Apply validation rules
       if (templateVar.validation) {
-        const validationErrors = this.applyValidationRules(templateVar.name, value, templateVar.validation);
+        const validationErrors = this.applyValidationRules(
+          templateVar.name,
+          value,
+          templateVar.validation
+        );
         errors.push(...validationErrors);
       }
     }
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 

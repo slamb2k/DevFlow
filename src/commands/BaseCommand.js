@@ -16,7 +16,7 @@ export class BaseCommand {
   getArgSchema() {
     return {
       required: [],
-      optional: []
+      optional: [],
     };
   }
 
@@ -29,7 +29,7 @@ export class BaseCommand {
       description: 'Base command',
       usage: `${this.name} [options]`,
       options: {},
-      examples: []
+      examples: [],
     };
   }
 
@@ -84,7 +84,7 @@ export class BaseCommand {
    * Execute the command
    * Must be overridden in subclasses
    */
-  async execute(args, context = {}) {
+  async execute(_args, _context = {}) {
     throw new Error('Execute method must be implemented by subclass');
   }
 
@@ -127,13 +127,14 @@ export class BaseCommand {
    * Log messages with formatting
    */
   log(message, level = 'info') {
-    const timestamp = new Date().toISOString();
-    const prefix = {
-      info: 'ℹ️',
-      success: '✅',
-      warning: '⚠️',
-      error: '❌'
-    }[level] || '•';
+    const _timestamp = new Date().toISOString();
+    const prefix =
+      {
+        info: 'ℹ️',
+        success: '✅',
+        warning: '⚠️',
+        error: '❌',
+      }[level] || '•';
 
     console.log(`${prefix} ${message}`);
   }
@@ -152,7 +153,7 @@ export class BaseCommand {
       },
       complete: () => {
         console.log(`\n✅ ${label} complete!`);
-      }
+      },
     };
   }
 

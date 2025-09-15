@@ -43,7 +43,7 @@ export class ProjectMemory extends EventEmitter {
     if (!(await this.fileExists(this.statePath))) {
       await this.writeJson(this.statePath, {
         initialized: true,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       });
     }
 
@@ -68,8 +68,8 @@ export class ProjectMemory extends EventEmitter {
       settings: {
         maxBackups: 10,
         autoBackup: true,
-        watchEnabled: false
-      }
+        watchEnabled: false,
+      },
     };
 
     await this.writeJson(this.configPath, defaultConfig);
@@ -190,7 +190,7 @@ export class ProjectMemory extends EventEmitter {
       label,
       config: await this.getConfig(),
       state: await this.getState(),
-      templates: await this.readJson(this.templatesPath)
+      templates: await this.readJson(this.templatesPath),
     };
 
     await this.writeJson(backupPath, backup);
@@ -226,8 +226,8 @@ export class ProjectMemory extends EventEmitter {
     try {
       const files = await fs.readdir(this.backupsPath);
       return files
-        .filter(f => f.endsWith('.json'))
-        .map(f => f.replace('.json', ''))
+        .filter((f) => f.endsWith('.json'))
+        .map((f) => f.replace('.json', ''))
         .sort()
         .reverse();
     } catch (error) {
@@ -263,7 +263,9 @@ export class ProjectMemory extends EventEmitter {
     const emitter = new EventEmitter();
 
     this.watcher = watch(this.devflowPath, { recursive: true }, async (eventType, filename) => {
-      if (!filename || filename.includes('.lock')) return;
+      if (!filename || filename.includes('.lock')) {
+        return;
+      }
 
       emitter.emit('change', filename);
 
@@ -289,7 +291,7 @@ export class ProjectMemory extends EventEmitter {
    */
   async cleanup(options = {}) {
     const maxAge = options.maxAge || 30; // days
-    const cutoff = Date.now() - (maxAge * 24 * 60 * 60 * 1000);
+    const cutoff = Date.now() - maxAge * 24 * 60 * 60 * 1000;
 
     const backups = await this.listBackups();
     for (const backupId of backups) {
@@ -324,7 +326,7 @@ export class ProjectMemory extends EventEmitter {
     return {
       before: Object.keys(templates).length,
       after: Object.keys(optimized).length,
-      removed: Object.keys(templates).length - Object.keys(optimized).length
+      removed: Object.keys(templates).length - Object.keys(optimized).length,
     };
   }
 
@@ -356,7 +358,7 @@ export class ProjectMemory extends EventEmitter {
         config.settings = {
           maxBackups: 10,
           autoBackup: true,
-          watchEnabled: false
+          watchEnabled: false,
         };
       }
 
@@ -381,7 +383,7 @@ export class ProjectMemory extends EventEmitter {
       if (!state || typeof state !== 'object') {
         await this.writeJson(this.statePath, {
           recovered: true,
-          recoveredAt: new Date().toISOString()
+          recoveredAt: new Date().toISOString(),
         });
       }
     } catch (error) {
@@ -390,7 +392,7 @@ export class ProjectMemory extends EventEmitter {
       await this.writeJson(this.statePath, {
         recovered: true,
         error: error.message,
-        recoveredAt: new Date().toISOString()
+        recoveredAt: new Date().toISOString(),
       });
     }
   }
@@ -418,7 +420,7 @@ export class ProjectMemory extends EventEmitter {
       return {
         recovered: true,
         error: error.message,
-        recoveredAt: new Date().toISOString()
+        recoveredAt: new Date().toISOString(),
       };
     }
   }
@@ -456,7 +458,7 @@ export class ProjectMemory extends EventEmitter {
         return;
       } catch (error) {
         if (error.code === 'EEXIST' && i < maxAttempts - 1) {
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         } else {
           throw error;
         }

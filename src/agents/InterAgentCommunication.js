@@ -24,16 +24,16 @@ export class InterAgentCommunication extends EventEmitter {
         agents: ['analyzer', 'security'],
         flow: [
           { agent: 'analyzer', task: 'analyze-dependencies', output: 'dependencies' },
-          { agent: 'security', task: 'audit-dependencies', input: 'dependencies' }
-        ]
+          { agent: 'security', task: 'audit-dependencies', input: 'dependencies' },
+        ],
       },
       'performance-optimization': {
         name: 'Performance Optimization Pipeline',
         agents: ['analyzer', 'optimizer'],
         flow: [
           { agent: 'analyzer', task: 'analyze-complexity', output: 'complexity' },
-          { agent: 'optimizer', task: 'suggest-optimizations', input: 'complexity' }
-        ]
+          { agent: 'optimizer', task: 'suggest-optimizations', input: 'complexity' },
+        ],
       },
       'architecture-review': {
         name: 'Architecture Review Pipeline',
@@ -41,8 +41,8 @@ export class InterAgentCommunication extends EventEmitter {
         flow: [
           { agent: 'architect', task: 'analyze-structure', output: 'structure' },
           { agent: 'analyzer', task: 'detect-patterns', input: 'structure' },
-          { agent: 'security', task: 'scan-vulnerabilities', input: 'structure' }
-        ]
+          { agent: 'security', task: 'scan-vulnerabilities', input: 'structure' },
+        ],
       },
       'full-analysis': {
         name: 'Comprehensive Analysis Pipeline',
@@ -51,16 +51,16 @@ export class InterAgentCommunication extends EventEmitter {
           { agent: 'analyzer', task: 'analyze-project', output: 'analysis' },
           { agent: 'architect', task: 'validate-architecture', input: 'analysis' },
           { agent: 'security', task: 'generate-report', input: 'analysis' },
-          { agent: 'optimizer', task: 'generate-report', input: 'analysis' }
-        ]
-      }
+          { agent: 'optimizer', task: 'generate-report', input: 'analysis' },
+        ],
+      },
     };
   }
 
   /**
    * Create a coordinated workflow between agents
    */
-  async createWorkflow(patternName, context, registry) {
+  async createWorkflow(patternName, context, _registry) {
     const pattern = this.collaborationPatterns[patternName];
     if (!pattern) {
       throw new Error(`Unknown collaboration pattern: ${patternName}`);
@@ -73,7 +73,7 @@ export class InterAgentCommunication extends EventEmitter {
       status: 'pending',
       context,
       results: {},
-      startTime: Date.now()
+      startTime: Date.now(),
     };
 
     this.activeWorkflows.set(workflowId, workflow);
@@ -135,7 +135,7 @@ export class InterAgentCommunication extends EventEmitter {
       this.emit('workflow:completed', {
         workflowId,
         results: workflow.results,
-        duration: workflow.duration
+        duration: workflow.duration,
       });
 
       return workflow.results;
@@ -158,7 +158,7 @@ export class InterAgentCommunication extends EventEmitter {
       to,
       type,
       data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -198,7 +198,7 @@ export class InterAgentCommunication extends EventEmitter {
             from,
             content: message,
             timestamp: new Date().toISOString(),
-            broadcast: true
+            broadcast: true,
           });
           results[agentId] = { delivered: true };
         } catch (error) {
@@ -277,7 +277,7 @@ export class InterAgentCommunication extends EventEmitter {
       pattern: workflow.pattern,
       status: workflow.status,
       duration: workflow.duration,
-      error: workflow.error
+      error: workflow.error,
     };
   }
 
@@ -302,17 +302,18 @@ export class InterAgentCommunication extends EventEmitter {
   /**
    * Clean up completed workflows
    */
-  cleanupWorkflows(olderThan = 3600000) { // Default: 1 hour
+  cleanupWorkflows(olderThan = 3600000) {
+    // Default: 1 hour
     const now = Date.now();
     const toRemove = [];
 
     for (const [id, workflow] of this.activeWorkflows.entries()) {
-      if (workflow.status !== 'running' && (now - workflow.startTime) > olderThan) {
+      if (workflow.status !== 'running' && now - workflow.startTime > olderThan) {
         toRemove.push(id);
       }
     }
 
-    toRemove.forEach(id => this.activeWorkflows.delete(id));
+    toRemove.forEach((id) => this.activeWorkflows.delete(id));
     return toRemove.length;
   }
 
@@ -324,13 +325,13 @@ export class InterAgentCommunication extends EventEmitter {
 
     return {
       total: workflows.length,
-      pending: workflows.filter(w => w.status === 'pending').length,
-      running: workflows.filter(w => w.status === 'running').length,
-      completed: workflows.filter(w => w.status === 'completed').length,
-      failed: workflows.filter(w => w.status === 'failed').length,
-      averageDuration: workflows
-        .filter(w => w.duration)
-        .reduce((sum, w) => sum + w.duration, 0) / workflows.filter(w => w.duration).length || 0
+      pending: workflows.filter((w) => w.status === 'pending').length,
+      running: workflows.filter((w) => w.status === 'running').length,
+      completed: workflows.filter((w) => w.status === 'completed').length,
+      failed: workflows.filter((w) => w.status === 'failed').length,
+      averageDuration:
+        workflows.filter((w) => w.duration).reduce((sum, w) => sum + w.duration, 0) /
+          workflows.filter((w) => w.duration).length || 0,
     };
   }
 }

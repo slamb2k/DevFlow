@@ -18,7 +18,7 @@ class TemplateVariables {
       choices: definition.choices,
       validation: definition.validation,
       computed: definition.computed || false,
-      computeFn: definition.computeFn
+      computeFn: definition.computeFn,
     };
 
     if (varDef.computed && !varDef.computeFn) {
@@ -39,10 +39,7 @@ class TemplateVariables {
   }
 
   getAll() {
-    return [
-      ...Array.from(this.variables.values()),
-      ...Array.from(this.computed.values())
-    ];
+    return [...Array.from(this.variables.values()), ...Array.from(this.computed.values())];
   }
 
   resolve(providedVariables = {}) {
@@ -80,7 +77,7 @@ class TemplateVariables {
       if (varDef.required && value === undefined) {
         errors.push({
           field: name,
-          message: `Required variable '${name}' is missing`
+          message: `Required variable '${name}' is missing`,
         });
         continue;
       }
@@ -91,7 +88,7 @@ class TemplateVariables {
         if (typeError) {
           errors.push({
             field: name,
-            message: `Variable '${name}': ${typeError}`
+            message: `Variable '${name}': ${typeError}`,
           });
         }
 
@@ -99,7 +96,7 @@ class TemplateVariables {
         if (varDef.choices && !varDef.choices.includes(value)) {
           errors.push({
             field: name,
-            message: `Variable '${name}' must be one of: ${varDef.choices.join(', ')}`
+            message: `Variable '${name}' must be one of: ${varDef.choices.join(', ')}`,
           });
         }
 
@@ -113,7 +110,7 @@ class TemplateVariables {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -176,7 +173,7 @@ class TemplateVariables {
       if (!regex.test(value)) {
         errors.push({
           field: name,
-          message: rules.patternMessage || `Value does not match pattern: ${rules.pattern}`
+          message: rules.patternMessage || `Value does not match pattern: ${rules.pattern}`,
         });
       }
     }
@@ -188,14 +185,14 @@ class TemplateVariables {
       if (rules.minLength !== undefined && length < rules.minLength) {
         errors.push({
           field: name,
-          message: `Minimum length is ${rules.minLength}, got ${length}`
+          message: `Minimum length is ${rules.minLength}, got ${length}`,
         });
       }
 
       if (rules.maxLength !== undefined && length > rules.maxLength) {
         errors.push({
           field: name,
-          message: `Maximum length is ${rules.maxLength}, got ${length}`
+          message: `Maximum length is ${rules.maxLength}, got ${length}`,
         });
       }
     }
@@ -205,14 +202,14 @@ class TemplateVariables {
       if (rules.min !== undefined && value < rules.min) {
         errors.push({
           field: name,
-          message: `Minimum value is ${rules.min}, got ${value}`
+          message: `Minimum value is ${rules.min}, got ${value}`,
         });
       }
 
       if (rules.max !== undefined && value > rules.max) {
         errors.push({
           field: name,
-          message: `Maximum value is ${rules.max}, got ${value}`
+          message: `Maximum value is ${rules.max}, got ${value}`,
         });
       }
     }
@@ -223,7 +220,7 @@ class TemplateVariables {
       if (customResult !== true) {
         errors.push({
           field: name,
-          message: typeof customResult === 'string' ? customResult : 'Custom validation failed'
+          message: typeof customResult === 'string' ? customResult : 'Custom validation failed',
         });
       }
     }
@@ -283,7 +280,7 @@ class TemplateVariables {
 
   substituteObject(obj, variables) {
     if (Array.isArray(obj)) {
-      return obj.map(item => this.substitute(item, variables));
+      return obj.map((item) => this.substitute(item, variables));
     }
 
     const result = {};
@@ -330,7 +327,7 @@ class TemplateVariables {
         return new Date(value);
       }
       if (Array.isArray(value)) {
-        return value.map(item => this.cloneValue(item));
+        return value.map((item) => this.cloneValue(item));
       }
       const cloned = {};
       for (const [key, val] of Object.entries(value)) {
@@ -419,7 +416,7 @@ class TemplateVariables {
   toJSON() {
     return {
       variables: Array.from(this.variables.values()),
-      computed: Array.from(this.computed.values())
+      computed: Array.from(this.computed.values()),
     };
   }
 

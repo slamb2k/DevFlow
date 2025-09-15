@@ -7,7 +7,7 @@ class AnalysisReportAggregator {
       security: 0.35,
       performance: 0.25,
       codeQuality: 0.25,
-      dependencies: 0.15
+      dependencies: 0.15,
     };
   }
 
@@ -17,7 +17,7 @@ class AnalysisReportAggregator {
     const report = {
       ...results,
       timestamp,
-      summary: this.generateSummary(results)
+      summary: this.generateSummary(results),
     };
 
     return report;
@@ -29,7 +29,7 @@ class AnalysisReportAggregator {
       criticalIssues: 0,
       warnings: 0,
       overallHealth: 0,
-      categories: {}
+      categories: {},
     };
 
     if (results.security) {
@@ -71,7 +71,7 @@ class AnalysisReportAggregator {
       issueCount: 0,
       criticalCount: 0,
       warningCount: 0,
-      score: 100
+      score: 100,
     };
 
     if (security.vulnerabilities && Array.isArray(security.vulnerabilities)) {
@@ -85,12 +85,13 @@ class AnalysisReportAggregator {
         }
       }
 
-      summary.score = Math.max(0, 100 - (summary.criticalCount * 20) - (summary.warningCount * 5));
+      summary.score = Math.max(0, 100 - summary.criticalCount * 20 - summary.warningCount * 5);
     }
 
     if (security.dependencies) {
       if (security.dependencies.npm) {
-        summary.issueCount += (security.dependencies.npm.high || 0) + (security.dependencies.npm.moderate || 0);
+        summary.issueCount +=
+          (security.dependencies.npm.high || 0) + (security.dependencies.npm.moderate || 0);
         summary.criticalCount += security.dependencies.npm.high || 0;
         summary.warningCount += security.dependencies.npm.moderate || 0;
       }
@@ -103,7 +104,7 @@ class AnalysisReportAggregator {
     const summary = {
       issueCount: 0,
       warningCount: 0,
-      score: 100
+      score: 100,
     };
 
     if (performance.bundle && !performance.bundle.skipped) {
@@ -119,7 +120,10 @@ class AnalysisReportAggregator {
     }
 
     if (performance.buildPerformance) {
-      if (performance.buildPerformance.buildTime && !performance.buildPerformance.buildTime.skipped) {
+      if (
+        performance.buildPerformance.buildTime &&
+        !performance.buildPerformance.buildTime.skipped
+      ) {
         const buildTimeMs = performance.buildPerformance.buildTime.buildTime;
 
         if (buildTimeMs > 60000) {
@@ -153,7 +157,7 @@ class AnalysisReportAggregator {
     const summary = {
       issueCount: 0,
       warningCount: 0,
-      score: 100
+      score: 100,
     };
 
     if (codeQuality.complexity && !codeQuality.complexity.skipped) {
@@ -219,7 +223,7 @@ class AnalysisReportAggregator {
     const summary = {
       issueCount: 0,
       warningCount: 0,
-      score: 100
+      score: 100,
     };
 
     if (dependencies.outdated) {
@@ -243,7 +247,8 @@ class AnalysisReportAggregator {
     }
 
     if (dependencies.licenses) {
-      const licenseIssues = dependencies.licenses.incompatible.length + dependencies.licenses.unlicensed.length;
+      const licenseIssues =
+        dependencies.licenses.incompatible.length + dependencies.licenses.unlicensed.length;
 
       if (licenseIssues > 0) {
         summary.issueCount += Math.ceil(licenseIssues / 5);
@@ -449,14 +454,19 @@ class AnalysisReportAggregator {
   </div>`;
     }
 
-    if (report.security && report.security.vulnerabilities && report.security.vulnerabilities.length > 0) {
+    if (
+      report.security &&
+      report.security.vulnerabilities &&
+      report.security.vulnerabilities.length > 0
+    ) {
       html += `
   <h2>Security Vulnerabilities</h2>
   <table>
     <tr><th>File</th><th>Severity</th><th>Issue</th></tr>`;
 
       for (const vuln of report.security.vulnerabilities.slice(0, 10)) {
-        const severityClass = vuln.severity === 'HIGH' ? 'critical' : vuln.severity === 'MEDIUM' ? 'warning' : '';
+        const severityClass =
+          vuln.severity === 'HIGH' ? 'critical' : vuln.severity === 'MEDIUM' ? 'warning' : '';
         html += `
     <tr>
       <td>${vuln.file}</td>
@@ -487,12 +497,12 @@ class AnalysisReportAggregator {
 
   formatAsText(report) {
     let text = 'ANALYSIS REPORT\n';
-    text += '=' . repeat(50) + '\n\n';
+    text += `${'='.repeat(50)}\n\n`;
     text += `Generated: ${report.timestamp}\n\n`;
 
     if (report.summary) {
       text += 'SUMMARY\n';
-      text += '-'.repeat(30) + '\n';
+      text += `${'-'.repeat(30)}\n`;
       text += `Overall Health: ${report.summary.overallHealth}/100\n`;
       text += `Total Issues: ${report.summary.totalIssues}\n`;
       text += `Critical Issues: ${report.summary.criticalIssues}\n`;
@@ -501,7 +511,7 @@ class AnalysisReportAggregator {
 
     if (report.security) {
       text += 'SECURITY\n';
-      text += '-'.repeat(30) + '\n';
+      text += `${'-'.repeat(30)}\n`;
 
       if (report.security.vulnerabilities && report.security.vulnerabilities.length > 0) {
         text += `Found ${report.security.vulnerabilities.length} vulnerabilities\n`;
@@ -515,7 +525,7 @@ class AnalysisReportAggregator {
 
     if (report.performance) {
       text += 'PERFORMANCE\n';
-      text += '-'.repeat(30) + '\n';
+      text += `${'-'.repeat(30)}\n`;
 
       if (report.performance.bundle && !report.performance.bundle.skipped) {
         text += `Bundle Size: ${report.performance.bundle.totalSizeInMB} MB\n`;
@@ -529,7 +539,7 @@ class AnalysisReportAggregator {
 
     if (report.codeQuality) {
       text += 'CODE QUALITY\n';
-      text += '-'.repeat(30) + '\n';
+      text += `${'-'.repeat(30)}\n`;
 
       if (report.codeQuality.coverage && !report.codeQuality.coverage.skipped) {
         text += `Coverage: ${report.codeQuality.coverage.overall || report.codeQuality.coverage.lines}%\n`;
@@ -547,7 +557,7 @@ class AnalysisReportAggregator {
 
     if (report.dependencies && report.dependencies.summary) {
       text += 'DEPENDENCIES\n';
-      text += '-'.repeat(30) + '\n';
+      text += `${'-'.repeat(30)}\n`;
       text += `Health: ${report.dependencies.summary.health}\n`;
       text += `Outdated: ${report.dependencies.summary.outdatedCount}\n`;
       text += `License Issues: ${report.dependencies.summary.licenseIssues}\n`;
@@ -577,7 +587,7 @@ class AnalysisReportAggregator {
       timestamp: new Date().toISOString(),
       previous: previousReport.timestamp,
       current: currentReport.timestamp,
-      changes: {}
+      changes: {},
     };
 
     if (previousReport.security && currentReport.security) {
@@ -585,15 +595,24 @@ class AnalysisReportAggregator {
     }
 
     if (previousReport.performance && currentReport.performance) {
-      diff.performance = this.comparePerformanceReports(previousReport.performance, currentReport.performance);
+      diff.performance = this.comparePerformanceReports(
+        previousReport.performance,
+        currentReport.performance
+      );
     }
 
     if (previousReport.codeQuality && currentReport.codeQuality) {
-      diff.codeQuality = this.compareCodeQualityReports(previousReport.codeQuality, currentReport.codeQuality);
+      diff.codeQuality = this.compareCodeQualityReports(
+        previousReport.codeQuality,
+        currentReport.codeQuality
+      );
     }
 
     if (previousReport.dependencies && currentReport.dependencies) {
-      diff.dependencies = this.compareDependencyReports(previousReport.dependencies, currentReport.dependencies);
+      diff.dependencies = this.compareDependencyReports(
+        previousReport.dependencies,
+        currentReport.dependencies
+      );
     }
 
     diff.summary = this.generateDiffSummary(diff);
@@ -605,12 +624,16 @@ class AnalysisReportAggregator {
     const diff = {
       fixed: [],
       new: [],
-      vulnerabilityChange: 0
+      vulnerabilityChange: 0,
     };
 
     if (previous.vulnerabilities && current.vulnerabilities) {
-      const previousIds = new Set(previous.vulnerabilities.map(v => `${v.file}:${v.rule}:${v.line}`));
-      const currentIds = new Set(current.vulnerabilities.map(v => `${v.file}:${v.rule}:${v.line}`));
+      const previousIds = new Set(
+        previous.vulnerabilities.map((v) => `${v.file}:${v.rule}:${v.line}`)
+      );
+      const currentIds = new Set(
+        current.vulnerabilities.map((v) => `${v.file}:${v.rule}:${v.line}`)
+      );
 
       for (const id of previousIds) {
         if (!currentIds.has(id)) {
@@ -651,7 +674,7 @@ class AnalysisReportAggregator {
   compareCodeQualityReports(previous, current) {
     const diff = {
       improvements: [],
-      regressions: []
+      regressions: [],
     };
 
     if (previous.coverage && current.coverage) {
@@ -696,15 +719,15 @@ class AnalysisReportAggregator {
   compareDependencyReports(previous, current) {
     const diff = {
       newOutdated: 0,
-      fixed: 0
+      fixed: 0,
     };
 
     if (previous.outdated?.npm && current.outdated?.npm) {
       const previousPackages = Object.keys(previous.outdated.npm);
       const currentPackages = Object.keys(current.outdated.npm);
 
-      diff.fixed = previousPackages.filter(p => !currentPackages.includes(p)).length;
-      diff.newOutdated = currentPackages.filter(p => !previousPackages.includes(p)).length;
+      diff.fixed = previousPackages.filter((p) => !currentPackages.includes(p)).length;
+      diff.newOutdated = currentPackages.filter((p) => !previousPackages.includes(p)).length;
     }
 
     return diff;
@@ -714,7 +737,7 @@ class AnalysisReportAggregator {
     const summary = {
       improvements: [],
       regressions: [],
-      neutral: []
+      neutral: [],
     };
 
     if (diff.security) {
@@ -742,7 +765,9 @@ class AnalysisReportAggregator {
         if (diff.codeQuality.coverageChange > 0) {
           summary.improvements.push(`Coverage increased by ${diff.codeQuality.coverageChange}%`);
         } else if (diff.codeQuality.coverageChange < 0) {
-          summary.regressions.push(`Coverage decreased by ${Math.abs(diff.codeQuality.coverageChange)}%`);
+          summary.regressions.push(
+            `Coverage decreased by ${Math.abs(diff.codeQuality.coverageChange)}%`
+          );
         }
       }
     }
