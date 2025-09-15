@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 
-// Mock fs module
+// Create mock functions
 const mockFs = {
   readFile: jest.fn(),
   writeFile: jest.fn(),
@@ -14,6 +14,7 @@ const mockFs = {
   readdir: jest.fn(),
 };
 
+// Mock fs module
 jest.mock('fs', () => ({
   promises: mockFs,
 }));
@@ -67,7 +68,11 @@ describe.skip('CredentialManager', () => {
     });
 
     it('should handle missing credentials gracefully', async () => {
+<<<<<<< HEAD
       mockFs.readFile.mockRejectedValue(new Error('ENOENT'));
+=======
+      mockFs.readFile.mockRejectedValue({ code: 'ENOENT' })
+>>>>>>> 9063040 (fix: Address failing tests and convert modules to ES6)
 
       const result = await credential_manager.get_credentials('non-existent');
       expect(result).toBeNull();

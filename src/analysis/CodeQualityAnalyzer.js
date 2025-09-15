@@ -1,10 +1,10 @@
-const fs = require('fs').promises;
-const path = require('path');
-const { execSync } = require('child_process');
-const glob = require('glob');
-const { promisify } = require('util');
-const parser = require('@babel/parser');
-const traverse = require('@babel/traverse').default;
+import { promises as fs } from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import glob from 'glob';
+import { promisify } from 'util';
+import parser from '@babel/parser';
+import traverse from '@babel/traverse';
 
 const globAsync = promisify(glob);
 
@@ -546,4 +546,4 @@ class CodeQualityAnalyzer {
   }
 }
 
-module.exports = CodeQualityAnalyzer;
+export { CodeQualityAnalyzer };

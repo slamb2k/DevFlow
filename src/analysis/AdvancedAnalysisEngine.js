@@ -1,10 +1,10 @@
-const SecurityScanner = require('./SecurityScanner');
-const PerformanceProfiler = require('./PerformanceProfiler');
-const CodeQualityAnalyzer = require('./CodeQualityAnalyzer');
-const DependencyAnalyzer = require('./DependencyAnalyzer');
-const AnalysisReportAggregator = require('./AnalysisReportAggregator');
-const fs = require('fs').promises;
-const path = require('path');
+import { SecurityScanner } from './SecurityScanner.js';
+import { PerformanceProfiler } from './PerformanceProfiler.js';
+import { CodeQualityAnalyzer } from './CodeQualityAnalyzer.js';
+import { DependencyAnalyzer } from './DependencyAnalyzer.js';
+import { AnalysisReportAggregator } from './AnalysisReportAggregator.js';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 class AdvancedAnalysisEngine {
   constructor(projectPath) {
@@ -100,4 +100,9 @@ class AdvancedAnalysisEngine {
   }
 }
 
-module.exports = AdvancedAnalysisEngine;
+export { AdvancedAnalysisEngine };
+export { SecurityScanner };
+export { PerformanceProfiler };
+export { CodeQualityAnalyzer };
+export { DependencyAnalyzer };
+export { AnalysisReportAggregator };
