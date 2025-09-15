@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+        env:
+          NODE_OPTIONS: '--experimental-vm-modules'
+      - run: npm run build
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npm run build
+      - name: Check if version changed
+        id: version
+        run: |
+          PUBLISHED_VERSION=$(npm view devflow version 2>/dev/null || echo "0.0.0")
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          if [ "$PUBLISHED_VERSION" != "$CURRENT_VERSION" ]; then
+            echo "publish=true" >> $GITHUB_OUTPUT
+            echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "publish=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Publish to NPM
+        if: steps.version.outputs.publish == 'true'
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Create GitHub Release
+        if: steps.version.outputs.publish == 'true'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          release_name: Release v${{ steps.version.outputs.version }}
+          body: |
+            Released version ${{ steps.version.outputs.version }} to npm.
+
+            Install with: `npm install devflow@${{ steps.version.outputs.version }}`
+          draft: false
+          prerelease: false

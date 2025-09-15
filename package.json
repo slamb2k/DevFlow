@@ -17,7 +17,12 @@
     "format:check": "prettier --check \"src/**/*.{ts,js,json}\"",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist coverage",
-    "precommit": "npm run lint && npm run typecheck && npm run test"
+    "precommit": "npm run lint && npm run typecheck && npm run test",
+    "ci:validate": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
+    "ci:local": "npm run ci:validate",
+    "prepublishOnly": "npm run ci:validate",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
   },
   "keywords": [
     "devops",
