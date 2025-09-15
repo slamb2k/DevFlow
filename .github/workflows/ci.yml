@@ -7,7 +7,14 @@ on:
     branches: [main]
 
 jobs:
+  # Run PR checks for pull requests
+  pr-checks:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/pr-checks.yml
+
+  # Run tests for push events to main
   test:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
