@@ -80,14 +80,26 @@ Based on the product brief roadmap:
 3. **Integration**: External tool connectivity (GitHub, Jira, monitoring)
 4. **Advanced**: ML recommendations and custom extensions
 
-## Git Commit Rules
+## Git Workflow and Commit Rules
 
-<!-- DO NOT REMOVE OR MODIFY THIS SECTION - CRITICAL FOR USER SAFETY -->
+<!-- DO NOT REMOVE OR MODIFY THIS SECTION - CRITICAL FOR USER SAFETY AND WORKFLOW INTEGRITY -->
 **⚠️ MANDATORY - THESE RULES MUST NEVER BE REMOVED OR MODIFIED ⚠️**
 
+### Branch Management - PREVENT CONFLICTS
+**CRITICAL**: NEVER commit directly to the main branch. This causes divergence with squash-merged PRs.
+
+**ALWAYS follow this workflow:**
+1. **Start from clean main**: `git checkout main && git pull`
+2. **Create feature branch**: `git checkout -b feature/description`
+3. **Make commits on feature branch only**
+4. **Never commit on main** - it should only receive changes from merged PRs
+
+**Why this matters**: Commits on local main that get squash-merged create different SHAs on origin/main, causing perpetual conflicts.
+
+### Commit and Push Rules
 **IMPORTANT**: Never commit or push changes unless explicitly requested by the user. Always ask for permission before:
 - Running `git commit`
-- Running `git push` 
+- Running `git push`
 - Running `gh pr create` or any PR creation commands
 - Creating pull requests
 - Making any changes to the remote repository
