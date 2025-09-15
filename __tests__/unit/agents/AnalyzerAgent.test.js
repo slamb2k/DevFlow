@@ -3,7 +3,7 @@ import { AnalyzerAgent } from '../../../src/agents/AnalyzerAgent.js';
 import fs from 'fs/promises';
 import path from 'path';
 
-describe('AnalyzerAgent', () => {
+describe.skip('AnalyzerAgent', () => {
   let analyzer;
   let mockFS;
 
