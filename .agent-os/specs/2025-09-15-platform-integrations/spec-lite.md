@@ -1,0 +1,3 @@
+# Spec Summary (Lite)
+
+Implement platform integrations for GitHub, GitLab, Jira, and Slack to enable DevFlow to work seamlessly within existing DevOps toolchains. The integration layer will support repository management, issue tracking, CI/CD automation, and team notifications through unified APIs and webhook handlers, allowing teams to maintain their current tools while adding intelligent automation capabilities.
