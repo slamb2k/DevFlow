@@ -18,14 +18,15 @@ export class OptimizerAgent extends BaseAgent {
       ...config,
       id: 'optimizer',
       name: 'OptimizerAgent',
-      description: 'Performs performance profiling, bundle analysis, bottleneck detection, and optimization suggestions'
+      description:
+        'Performs performance profiling, bundle analysis, bottleneck detection, and optimization suggestions',
     });
 
     this.capabilities = [
       'performance-profiling',
       'bundle-analysis',
       'bottleneck-detection',
-      'optimization-suggestions'
+      'optimization-suggestions',
     ];
 
     // Performance cache
@@ -46,44 +47,44 @@ export class OptimizerAgent extends BaseAgent {
         'nested-loops': {
           pattern: /for.*{[\s\S]*?for.*{/,
           complexity: 'O(n²)',
-          suggestion: 'Consider using hash maps or optimized algorithms'
+          suggestion: 'Consider using hash maps or optimized algorithms',
         },
         'array-includes-in-loop': {
           pattern: /for.*{[\s\S]*?\.includes\(/,
           complexity: 'O(n²)',
-          suggestion: 'Use Set for O(1) lookups instead of array.includes()'
-        }
+          suggestion: 'Use Set for O(1) lookups instead of array.includes()',
+        },
       },
       async: {
         'sequential-awaits': {
           pattern: /for.*{[\s\S]*?await/,
-          suggestion: 'Use Promise.all for parallel execution'
+          suggestion: 'Use Promise.all for parallel execution',
         },
         'waterfall-requests': {
           pattern: /await.*\n.*await.*\n.*await/,
-          suggestion: 'Execute independent async operations in parallel'
-        }
+          suggestion: 'Execute independent async operations in parallel',
+        },
       },
       react: {
         'missing-memo': {
           pattern: /function\s+\w+Component.*{[\s\S]*?\.map\(/,
-          suggestion: 'Consider using React.memo for components with expensive renders'
+          suggestion: 'Consider using React.memo for components with expensive renders',
         },
         'unstable-keys': {
           pattern: /key\s*=\s*{?\s*Math\.random/,
-          suggestion: 'Use stable, unique identifiers for keys'
-        }
+          suggestion: 'Use stable, unique identifiers for keys',
+        },
       },
       memory: {
         'unbounded-cache': {
           pattern: /cache\[.*?\]\s*=/,
-          suggestion: 'Implement cache size limits and eviction policies'
+          suggestion: 'Implement cache size limits and eviction policies',
         },
         'missing-cleanup': {
           pattern: /addEventListener.*(?!removeEventListener)/,
-          suggestion: 'Add cleanup for event listeners to prevent memory leaks'
-        }
-      }
+          suggestion: 'Add cleanup for event listeners to prevent memory leaks',
+        },
+      },
     };
   }
 
@@ -95,7 +96,7 @@ export class OptimizerAgent extends BaseAgent {
       'suggest-optimizations',
       'generate-report',
       'calculate-metrics',
-      'track-performance'
+      'track-performance',
     ];
     return validTasks.includes(task);
   }
@@ -128,7 +129,7 @@ export class OptimizerAgent extends BaseAgent {
     if (useCache && this.performanceCache.has(filePath)) {
       return {
         ...this.performanceCache.get(filePath),
-        cached: true
+        cached: true,
       };
     }
 
@@ -137,7 +138,7 @@ export class OptimizerAgent extends BaseAgent {
       const ast = parser.parse(code, {
         sourceType: 'module',
         plugins: ['jsx'],
-        errorRecovery: true
+        errorRecovery: true,
       });
 
       const profile = {
@@ -145,7 +146,7 @@ export class OptimizerAgent extends BaseAgent {
         bottlenecks: [],
         asyncPatterns: [],
         memoryIssues: [],
-        recommendations: []
+        recommendations: [],
       };
 
       // Analyze functions
@@ -158,7 +159,7 @@ export class OptimizerAgent extends BaseAgent {
           const parent = path.parent;
           const funcName = parent.id?.name || 'arrow-function';
           profile.functions[funcName] = this.analyzeFunctionComplexity(path);
-        }
+        },
       });
 
       // Detect bottlenecks
@@ -167,7 +168,7 @@ export class OptimizerAgent extends BaseAgent {
           profile.bottlenecks.push({
             type: rule.replace('-', '-'),
             complexity: config.complexity,
-            suggestion: config.suggestion
+            suggestion: config.suggestion,
           });
         }
       }
@@ -177,7 +178,7 @@ export class OptimizerAgent extends BaseAgent {
         if (config.pattern.test(code)) {
           profile.asyncPatterns.push({
             pattern: rule.replace('-', '-'),
-            recommendation: config.suggestion
+            recommendation: config.suggestion,
           });
         }
       }
@@ -187,7 +188,7 @@ export class OptimizerAgent extends BaseAgent {
         if (config.pattern.test(code)) {
           profile.memoryIssues.push({
             type: rule.replace('-', '-'),
-            suggestion: config.suggestion
+            suggestion: config.suggestion,
           });
         }
       }
@@ -212,7 +213,7 @@ export class OptimizerAgent extends BaseAgent {
       this.state.optimizationHistory.push({
         file: filePath,
         timestamp: new Date().toISOString(),
-        bottlenecks: profile.bottlenecks.length
+        bottlenecks: profile.bottlenecks.length,
       });
 
       await this.saveState();
@@ -232,12 +233,24 @@ export class OptimizerAgent extends BaseAgent {
     }
 
     path.traverse({
-      IfStatement() { complexity++; },
-      ConditionalExpression() { complexity++; },
-      ForStatement() { complexity++; },
-      WhileStatement() { complexity++; },
-      DoWhileStatement() { complexity++; },
-      SwitchCase() { complexity++; }
+      IfStatement() {
+        complexity++;
+      },
+      ConditionalExpression() {
+        complexity++;
+      },
+      ForStatement() {
+        complexity++;
+      },
+      WhileStatement() {
+        complexity++;
+      },
+      DoWhileStatement() {
+        complexity++;
+      },
+      SwitchCase() {
+        complexity++;
+      },
     });
 
     return { complexity, lines };
@@ -254,14 +267,14 @@ export class OptimizerAgent extends BaseAgent {
         const largestModules = stats.modules
           .sort((a, b) => b.size - a.size)
           .slice(0, 10)
-          .map(m => ({ name: m.name, size: m.size }));
+          .map((m) => ({ name: m.name, size: m.size }));
 
         const recommendations = [];
         if (totalSize > 5000000) {
           recommendations.push('Bundle size exceeds 5MB - consider code splitting');
         }
 
-        stats.modules.forEach(module => {
+        stats.modules.forEach((module) => {
           if (module.name.includes('moment')) {
             recommendations.push('Consider replacing moment.js with date-fns or dayjs');
           }
@@ -271,7 +284,7 @@ export class OptimizerAgent extends BaseAgent {
           totalSize,
           assets: stats.assets,
           largestModules,
-          recommendations
+          recommendations,
         };
       } catch (error) {
         throw new Error(`Failed to analyze webpack stats: ${error.message}`);
@@ -305,15 +318,15 @@ export class OptimizerAgent extends BaseAgent {
 
         // Mock size check
         try {
-          const { stdout } = await execAsync('du -s node_modules/*', { cwd: directory });
+          const { stdout: _stdout } = await execAsync('du -s node_modules/*', { cwd: directory });
           // Parse sizes from du output
-        } catch (error) {
-          // Ignore du errors
+        } catch (_error) {
+          // Ignore du errors - intentionally empty
         }
 
         return {
           largeDependencies,
-          alternatives
+          alternatives,
         };
       } catch (error) {
         throw new Error(`Failed to analyze bundle: ${error.message}`);
@@ -328,7 +341,7 @@ export class OptimizerAgent extends BaseAgent {
 
         const codeSplitting = {
           opportunities: 0,
-          suggestions: []
+          suggestions: [],
         };
 
         if (importCount > 10) {
@@ -385,7 +398,7 @@ export class OptimizerAgent extends BaseAgent {
         bottlenecks.push({
           type: 'n+1-query',
           severity: 'high',
-          suggestion: 'Batch database queries or use eager loading'
+          suggestion: 'Batch database queries or use eager loading',
         });
       }
 
@@ -394,7 +407,7 @@ export class OptimizerAgent extends BaseAgent {
         bottlenecks.push({
           type: 'missing-memoization',
           severity: 'medium',
-          suggestion: 'Use React.memo or useMemo for expensive computations'
+          suggestion: 'Use React.memo or useMemo for expensive computations',
         });
       }
 
@@ -403,7 +416,7 @@ export class OptimizerAgent extends BaseAgent {
         bottlenecks.push({
           type: 'unstable-keys',
           severity: 'high',
-          suggestion: 'Use stable, unique identifiers for React keys'
+          suggestion: 'Use stable, unique identifiers for React keys',
         });
       }
 
@@ -415,7 +428,7 @@ export class OptimizerAgent extends BaseAgent {
           bottlenecks.push({
             type: 'waterfall-requests',
             severity: 'medium',
-            suggestion: 'Use Promise.all to parallelize independent requests'
+            suggestion: 'Use Promise.all to parallelize independent requests',
           });
         }
       }
@@ -425,7 +438,7 @@ export class OptimizerAgent extends BaseAgent {
         bottlenecks.push({
           type: 'excessive-polling',
           severity: 'medium',
-          suggestion: 'Increase polling interval or use WebSockets for real-time updates'
+          suggestion: 'Increase polling interval or use WebSockets for real-time updates',
         });
       }
 
@@ -448,16 +461,20 @@ export class OptimizerAgent extends BaseAgent {
           type: 'algorithm',
           current: 'O(n²)',
           suggested: 'O(n)',
-          implementation: 'Use Set or Map for constant-time lookups instead of nested loops with includes()'
+          implementation:
+            'Use Set or Map for constant-time lookups instead of nested loops with includes()',
         });
       }
 
       // Caching suggestions
-      if (/function.*{[\s\S]*?(?:calculate|compute|process)/i.test(code) && !code.includes('cache')) {
+      if (
+        /function.*{[\s\S]*?(?:calculate|compute|process)/i.test(code) &&
+        !code.includes('cache')
+      ) {
         suggestions.push({
           type: 'caching',
           strategy: 'memoization',
-          suggestion: 'Add memoization for expensive computations'
+          suggestion: 'Add memoization for expensive computations',
         });
       }
 
@@ -466,7 +483,7 @@ export class OptimizerAgent extends BaseAgent {
         suggestions.push({
           type: 'lazy-loading',
           target: 'ChartLibrary',
-          suggestion: 'Use dynamic imports for heavy libraries'
+          suggestion: 'Use dynamic imports for heavy libraries',
         });
       }
 
@@ -482,11 +499,11 @@ export class OptimizerAgent extends BaseAgent {
     const report = {
       summary: {
         timestamp: new Date().toISOString(),
-        directory
+        directory,
       },
       score: 0,
       topIssues: [],
-      actionItems: []
+      actionItems: [],
     };
 
     if (comprehensive) {
@@ -496,7 +513,8 @@ export class OptimizerAgent extends BaseAgent {
       let totalBottlenecks = 0;
       let totalSuggestions = 0;
 
-      for (const file of files.slice(0, 5)) { // Limit for performance
+      for (const file of files.slice(0, 5)) {
+        // Limit for performance
         try {
           const bottlenecks = await this.detectBottlenecks({ filePath: file });
           totalBottlenecks += bottlenecks.bottlenecks.length;
@@ -513,15 +531,21 @@ export class OptimizerAgent extends BaseAgent {
     }
 
     // Calculate score
-    report.score = 100 - (report.topIssues.length * 10);
+    report.score = 100 - report.topIssues.length * 10;
     report.score = Math.max(0, Math.min(100, report.score));
 
     let grade;
-    if (report.score >= 90) grade = 'A';
-    else if (report.score >= 80) grade = 'B';
-    else if (report.score >= 70) grade = 'C';
-    else if (report.score >= 60) grade = 'D';
-    else grade = 'F';
+    if (report.score >= 90) {
+      grade = 'A';
+    } else if (report.score >= 80) {
+      grade = 'B';
+    } else if (report.score >= 70) {
+      grade = 'C';
+    } else if (report.score >= 60) {
+      grade = 'D';
+    } else {
+      grade = 'F';
+    }
 
     report.grade = grade;
 
@@ -534,29 +558,43 @@ export class OptimizerAgent extends BaseAgent {
     let score = 100;
 
     // Penalize slow load times
-    if (metrics.loadTime > 3000) score -= 20;
-    else if (metrics.loadTime > 2000) score -= 10;
+    if (metrics.loadTime > 3000) {
+      score -= 20;
+    } else if (metrics.loadTime > 2000) {
+      score -= 10;
+    }
 
     // Penalize large bundle sizes
-    if (metrics.bundleSize > 2000000) score -= 20;
-    else if (metrics.bundleSize > 1000000) score -= 10;
+    if (metrics.bundleSize > 2000000) {
+      score -= 20;
+    } else if (metrics.bundleSize > 1000000) {
+      score -= 10;
+    }
 
     // Bonus for good cache hit rate
-    if (metrics.cacheHitRate > 0.8) score += 10;
+    if (metrics.cacheHitRate > 0.8) {
+      score += 10;
+    }
 
     score = Math.max(0, Math.min(100, score));
 
     let grade;
-    if (score >= 90) grade = 'A';
-    else if (score >= 80) grade = 'B';
-    else if (score >= 70) grade = 'C';
-    else if (score >= 60) grade = 'D';
-    else grade = 'F';
+    if (score >= 90) {
+      grade = 'A';
+    } else if (score >= 80) {
+      grade = 'B';
+    } else if (score >= 70) {
+      grade = 'C';
+    } else if (score >= 60) {
+      grade = 'D';
+    } else {
+      grade = 'F';
+    }
 
     const areas = {
       loadTime: metrics.loadTime < 2000 ? 'good' : 'needs-improvement',
       bundleSize: metrics.bundleSize < 1000000 ? 'good' : 'needs-improvement',
-      caching: metrics.cacheHitRate > 0.7 ? 'good' : 'needs-improvement'
+      caching: metrics.cacheHitRate > 0.7 ? 'good' : 'needs-improvement',
     };
 
     return { score, grade, areas };
@@ -568,7 +606,7 @@ export class OptimizerAgent extends BaseAgent {
     // Add to trends
     this.state.performanceTrends.push({
       timestamp: new Date().toISOString(),
-      ...metrics
+      ...metrics,
     });
 
     // Calculate improvement
@@ -578,7 +616,7 @@ export class OptimizerAgent extends BaseAgent {
 
       this.state.improvement = {
         loadTime: ((previous.loadTime - current.loadTime) / previous.loadTime) * 100,
-        bundleSize: ((previous.bundleSize - current.bundleSize) / previous.bundleSize) * 100
+        bundleSize: ((previous.bundleSize - current.bundleSize) / previous.bundleSize) * 100,
       };
     }
 
@@ -586,7 +624,7 @@ export class OptimizerAgent extends BaseAgent {
 
     return {
       tracked: true,
-      trends: this.state.performanceTrends
+      trends: this.state.performanceTrends,
     };
   }
 
@@ -597,7 +635,9 @@ export class OptimizerAgent extends BaseAgent {
       const entries = await fs.readdir(dir);
 
       for (const entry of entries) {
-        if (entry === 'node_modules' || entry.startsWith('.')) continue;
+        if (entry === 'node_modules' || entry.startsWith('.')) {
+          continue;
+        }
 
         const fullPath = path.join(dir, entry);
         const stat = await fs.stat(fullPath);
@@ -605,7 +645,7 @@ export class OptimizerAgent extends BaseAgent {
         if (stat.isDirectory()) {
           const subFiles = await this.getAllFiles(fullPath, extensions);
           files.push(...subFiles);
-        } else if (stat.isFile() && extensions.some(ext => entry.endsWith(ext))) {
+        } else if (stat.isFile() && extensions.some((ext) => entry.endsWith(ext))) {
           files.push(fullPath);
         }
       }

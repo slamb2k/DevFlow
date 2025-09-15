@@ -14,14 +14,15 @@ export class ArchitectAgent extends BaseAgent {
       ...config,
       id: 'architect',
       name: 'ArchitectAgent',
-      description: 'Performs design pattern recognition, architecture validation, and diagram generation'
+      description:
+        'Performs design pattern recognition, architecture validation, and diagram generation',
     });
 
     this.capabilities = [
       'design-pattern-recognition',
       'architecture-validation',
       'diagram-generation',
-      'structure-analysis'
+      'structure-analysis',
     ];
 
     // Cache for architecture validations
@@ -39,43 +40,43 @@ export class ArchitectAgent extends BaseAgent {
       {
         name: 'Singleton',
         indicators: ['getInstance', 'instance', 'constructor.*throw.*instance'],
-        confidence: 0.9
+        confidence: 0.9,
       },
       {
         name: 'Factory',
         indicators: ['create', 'factory', 'switch.*type', 'if.*type.*return.*new'],
-        confidence: 0.85
+        confidence: 0.85,
       },
       {
         name: 'Observer',
         indicators: ['subscribe', 'unsubscribe', 'notify', 'observers', 'listeners'],
-        confidence: 0.85
+        confidence: 0.85,
       },
       {
         name: 'Strategy',
         indicators: ['strategy', 'setStrategy', 'executeStrategy', 'algorithm'],
-        confidence: 0.8
+        confidence: 0.8,
       },
       {
         name: 'Decorator',
         indicators: ['wrapper', 'decorate', 'enhance', 'wrap'],
-        confidence: 0.75
+        confidence: 0.75,
       },
       {
         name: 'Adapter',
         indicators: ['adapt', 'adapter', 'convert', 'translate'],
-        confidence: 0.75
+        confidence: 0.75,
       },
       {
         name: 'Command',
         indicators: ['execute', 'undo', 'redo', 'command', 'invoker'],
-        confidence: 0.8
+        confidence: 0.8,
       },
       {
         name: 'Iterator',
         indicators: ['next', 'hasNext', 'current', 'iterator', 'Symbol.iterator'],
-        confidence: 0.85
-      }
+        confidence: 0.85,
+      },
     ];
   }
 
@@ -84,7 +85,7 @@ export class ArchitectAgent extends BaseAgent {
       'recognize-patterns',
       'validate-architecture',
       'generate-diagram',
-      'analyze-structure'
+      'analyze-structure',
     ];
     return validTasks.includes(task);
   }
@@ -130,7 +131,7 @@ export class ArchitectAgent extends BaseAgent {
               name: pattern.name,
               confidence: Number(confidence.toFixed(2)),
               matchedIndicators: matchCount,
-              totalIndicators
+              totalIndicators,
             });
           }
         }
@@ -143,7 +144,7 @@ export class ArchitectAgent extends BaseAgent {
       const historyEntry = {
         file: filePath,
         patterns,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       this.state.recognitionHistory.push(historyEntry);
@@ -163,7 +164,7 @@ export class ArchitectAgent extends BaseAgent {
     if (useCache && this.validationCache.has(cacheKey)) {
       return {
         ...this.validationCache.get(cacheKey),
-        cached: true
+        cached: true,
       };
     }
 
@@ -213,10 +214,14 @@ export class ArchitectAgent extends BaseAgent {
           valid,
           architecture: 'layered',
           layers,
-          violations: valid ? [] : [{
-            type: 'missing-layers',
-            message: 'Layered architecture requires at least 3 distinct layers'
-          }]
+          violations: valid
+            ? []
+            : [
+                {
+                  type: 'missing-layers',
+                  message: 'Layered architecture requires at least 3 distinct layers',
+                },
+              ],
         };
       } catch (error) {
         throw new Error(`Failed to validate layered architecture: ${error.message}`);
@@ -233,7 +238,7 @@ export class ArchitectAgent extends BaseAgent {
           violations.push({
             type: 'layer-violation',
             message: 'Controller accessing repository directly, should go through service layer',
-            file: filePath
+            file: filePath,
           });
         }
       }
@@ -244,14 +249,14 @@ export class ArchitectAgent extends BaseAgent {
           violations.push({
             type: 'layer-violation',
             message: 'Service should not depend on controller layer',
-            file: filePath
+            file: filePath,
           });
         }
       }
 
       return {
         valid: violations.length === 0,
-        violations
+        violations,
       };
     }
   }
@@ -280,7 +285,7 @@ export class ArchitectAgent extends BaseAgent {
         architecture: 'microservices',
         services,
         apiGateway,
-        sharedLibraries: entries.includes('shared') || entries.includes('common')
+        sharedLibraries: entries.includes('shared') || entries.includes('common'),
       };
     } catch (error) {
       throw new Error(`Failed to validate microservices architecture: ${error.message}`);
@@ -311,7 +316,7 @@ export class ArchitectAgent extends BaseAgent {
         architecture: 'hexagonal',
         core,
         ports,
-        adapters
+        adapters,
       };
     } catch (error) {
       throw new Error(`Failed to validate hexagonal architecture: ${error.message}`);
@@ -339,8 +344,8 @@ export class ArchitectAgent extends BaseAgent {
     try {
       const files = await fs.readdir(directory);
       const components = files
-        .filter(f => f.endsWith('.js') || f.endsWith('.jsx'))
-        .map(f => f.replace(/\.(js|jsx)$/, ''));
+        .filter((f) => f.endsWith('.js') || f.endsWith('.jsx'))
+        .map((f) => f.replace(/\.(js|jsx)$/, ''));
 
       let diagram = 'graph TD\n';
 
@@ -367,7 +372,7 @@ export class ArchitectAgent extends BaseAgent {
       return {
         diagram,
         format: 'mermaid',
-        components
+        components,
       };
     } catch (error) {
       throw new Error(`Failed to generate component diagram: ${error.message}`);
@@ -380,7 +385,7 @@ export class ArchitectAgent extends BaseAgent {
       const ast = parser.parse(code, {
         sourceType: 'module',
         plugins: ['jsx'],
-        errorRecovery: true
+        errorRecovery: true,
       });
 
       let diagram = 'classDiagram\n';
@@ -402,39 +407,39 @@ export class ArchitectAgent extends BaseAgent {
           path.traverse({
             ClassMethod(methodPath) {
               const methodName = methodPath.node.key.name;
-              const params = methodPath.node.params.map(p => p.name || 'param').join(', ');
+              const params = methodPath.node.params.map((p) => p.name || 'param').join(', ');
               methods.push(`+${methodName}(${params})`);
             },
             ClassProperty(propPath) {
               const propName = propPath.node.key.name;
               properties.push(`+${propName}`);
-            }
+            },
           });
 
           classes.set(className, { methods, properties });
-        }
+        },
       });
 
       // Build class definitions
       for (const [className, details] of classes.entries()) {
         diagram += `    class ${className} {\n`;
-        details.properties.forEach(prop => {
+        details.properties.forEach((prop) => {
           diagram += `        ${prop}\n`;
         });
-        details.methods.forEach(method => {
+        details.methods.forEach((method) => {
           diagram += `        ${method}\n`;
         });
         diagram += '    }\n';
       }
 
       // Add inheritance relationships
-      inheritance.forEach(rel => {
+      inheritance.forEach((rel) => {
         diagram += `    ${rel}\n`;
       });
 
       return {
         diagram,
-        format: 'mermaid'
+        format: 'mermaid',
       };
     } catch (error) {
       throw new Error(`Failed to generate class diagram: ${error.message}`);
@@ -453,27 +458,27 @@ export class ArchitectAgent extends BaseAgent {
       while ((match = servicePattern.exec(code)) !== null) {
         matches.push({
           service: match[1],
-          method: match[2]
+          method: match[2],
         });
       }
 
       let diagram = 'sequenceDiagram\n';
       diagram += '    participant Client\n';
 
-      const services = [...new Set(matches.map(m => m.service))];
-      services.forEach(service => {
+      const services = [...new Set(matches.map((m) => m.service))];
+      services.forEach((service) => {
         diagram += `    participant ${service}\n`;
       });
 
       // Generate sequence
-      matches.forEach(m => {
+      matches.forEach((m) => {
         diagram += `    Client->>+${m.service}: ${m.method}()\n`;
         diagram += `    ${m.service}-->>-Client: response\n`;
       });
 
       return {
         diagram,
-        format: 'mermaid'
+        format: 'mermaid',
       };
     } catch (error) {
       throw new Error(`Failed to generate sequence diagram: ${error.message}`);
@@ -517,7 +522,7 @@ export class ArchitectAgent extends BaseAgent {
       return {
         diagram,
         format: 'mermaid',
-        type: 'architecture-overview'
+        type: 'architecture-overview',
       };
     } catch (error) {
       throw new Error(`Failed to generate architecture overview: ${error.message}`);
@@ -537,7 +542,7 @@ export class ArchitectAgent extends BaseAgent {
         structure,
         metrics,
         issues,
-        recommendations
+        recommendations,
       };
     } catch (error) {
       throw new Error(`Failed to analyze structure: ${error.message}`);
@@ -549,7 +554,7 @@ export class ArchitectAgent extends BaseAgent {
       name: path.basename(dir),
       type: 'directory',
       level,
-      children: []
+      children: [],
     };
 
     if (level >= maxLevel) {
@@ -560,7 +565,9 @@ export class ArchitectAgent extends BaseAgent {
       const entries = await fs.readdir(dir);
 
       for (const entry of entries) {
-        if (entry === 'node_modules' || entry.startsWith('.')) continue;
+        if (entry === 'node_modules' || entry.startsWith('.')) {
+          continue;
+        }
 
         const fullPath = path.join(dir, entry);
         const stat = await fs.stat(fullPath);
@@ -572,7 +579,7 @@ export class ArchitectAgent extends BaseAgent {
           structure.children.push({
             name: entry,
             type: 'file',
-            level: level + 1
+            level: level + 1,
           });
         }
       }
@@ -584,11 +591,11 @@ export class ArchitectAgent extends BaseAgent {
   }
 
   calculateStructureMetrics(structure) {
-    let metrics = {
+    const metrics = {
       directories: 0,
       files: 0,
       maxDepth: 0,
-      avgFilesPerDir: 0
+      avgFilesPerDir: 0,
     };
 
     const traverse = (node, depth = 0) => {
@@ -596,10 +603,10 @@ export class ArchitectAgent extends BaseAgent {
         metrics.directories++;
         metrics.maxDepth = Math.max(metrics.maxDepth, depth);
 
-        const fileCount = node.children.filter(c => c.type === 'file').length;
+        const fileCount = node.children.filter((c) => c.type === 'file').length;
         metrics.avgFilesPerDir += fileCount;
 
-        node.children.forEach(child => traverse(child, depth + 1));
+        node.children.forEach((child) => traverse(child, depth + 1));
       } else {
         metrics.files++;
       }
@@ -622,20 +629,20 @@ export class ArchitectAgent extends BaseAgent {
       issues.push({
         type: 'deep-nesting',
         severity: 'medium',
-        message: `Directory structure is nested ${metrics.maxDepth} levels deep`
+        message: `Directory structure is nested ${metrics.maxDepth} levels deep`,
       });
     }
 
     // Check for too many files in single directory
     const checkFlatStructure = (node) => {
       if (node.type === 'directory') {
-        const fileCount = node.children.filter(c => c.type === 'file').length;
+        const fileCount = node.children.filter((c) => c.type === 'file').length;
         if (fileCount > 20) {
           issues.push({
             type: 'too-many-files',
             severity: 'low',
             directory: node.name,
-            fileCount
+            fileCount,
           });
         }
         node.children.forEach(checkFlatStructure);
@@ -650,24 +657,24 @@ export class ArchitectAgent extends BaseAgent {
   generateRecommendations(issues, metrics) {
     const recommendations = [];
 
-    if (issues.some(i => i.type === 'deep-nesting')) {
+    if (issues.some((i) => i.type === 'deep-nesting')) {
       recommendations.push({
         type: 'flatten-structure',
-        message: 'Consider flattening the directory structure to improve maintainability'
+        message: 'Consider flattening the directory structure to improve maintainability',
       });
     }
 
-    if (issues.some(i => i.type === 'too-many-files')) {
+    if (issues.some((i) => i.type === 'too-many-files')) {
       recommendations.push({
         type: 'organize-files',
-        message: 'Consider organizing files into subdirectories by feature or type'
+        message: 'Consider organizing files into subdirectories by feature or type',
       });
     }
 
     if (metrics.avgFilesPerDir > 15) {
       recommendations.push({
         type: 'split-directories',
-        message: 'Consider splitting large directories into smaller, focused modules'
+        message: 'Consider splitting large directories into smaller, focused modules',
       });
     }
 

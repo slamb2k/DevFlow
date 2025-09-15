@@ -14,7 +14,7 @@ export class ExpertFormatter extends BaseFormatter {
       verbose: false,
       includeExamples: false,
       includeExplanations: false,
-      colors: false
+      colors: false,
     });
   }
 
@@ -36,7 +36,7 @@ export class ExpertFormatter extends BaseFormatter {
     if (data.command) {
       sections.push(data.command);
       if (data.options && Array.isArray(data.options)) {
-        sections[0] += ' ' + data.options.join(' ');
+        sections[0] += ` ${data.options.join(' ')}`;
       }
       if (data.output) {
         sections.push(data.output);
@@ -46,9 +46,8 @@ export class ExpertFormatter extends BaseFormatter {
 
     // Error format
     if (data.error) {
-      const errorLine = data.file && data.line
-        ? `${data.file}:${data.line}: ${data.error}`
-        : data.error;
+      const errorLine =
+        data.file && data.line ? `${data.file}:${data.line}: ${data.error}` : data.error;
       sections.push(errorLine);
       if (data.stack && opts.verbose) {
         sections.push(data.stack);
@@ -64,7 +63,7 @@ export class ExpertFormatter extends BaseFormatter {
     // Code snippet
     if (data.code) {
       const language = data.language || 'javascript';
-      sections.push('```' + language);
+      sections.push(`\`\`\`${language}`);
       sections.push(data.code);
       sections.push('```');
       return sections.join('\n');
@@ -94,7 +93,7 @@ export class ExpertFormatter extends BaseFormatter {
 
     // List format
     if (Array.isArray(data)) {
-      return data.map(item => this.formatValue(item)).join('\n');
+      return data.map((item) => this.formatValue(item)).join('\n');
     }
 
     // Object format
@@ -135,7 +134,7 @@ export class ExpertFormatter extends BaseFormatter {
    */
   formatResults(results) {
     if (Array.isArray(results)) {
-      return results.map(r => this.formatValue(r)).join('\n');
+      return results.map((r) => this.formatValue(r)).join('\n');
     }
     if (typeof results === 'object' && results !== null) {
       return this.formatObject(results);
@@ -188,7 +187,7 @@ export class ExpertFormatter extends BaseFormatter {
           lines.push(`${key}: [${value.join(', ')}]`);
         } else {
           lines.push(`${key}:`);
-          value.forEach(item => {
+          value.forEach((item) => {
             lines.push(`  ${this.formatValue(item)}`);
           });
         }
@@ -209,12 +208,24 @@ export class ExpertFormatter extends BaseFormatter {
    * @returns {string} Formatted value
    */
   formatValue(value) {
-    if (value === null) return 'null';
-    if (value === undefined) return 'undefined';
-    if (typeof value === 'boolean') return String(value);
-    if (typeof value === 'number') return String(value);
-    if (typeof value === 'string') return value;
-    if (Array.isArray(value)) return `[${value.length} items]`;
+    if (value === null) {
+      return 'null';
+    }
+    if (value === undefined) {
+      return 'undefined';
+    }
+    if (typeof value === 'boolean') {
+      return String(value);
+    }
+    if (typeof value === 'number') {
+      return String(value);
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return `[${value.length} items]`;
+    }
     if (typeof value === 'object') {
       const keys = Object.keys(value);
       return `{${keys.length} fields}`;

@@ -14,7 +14,7 @@ export class GuideFormatter extends BaseFormatter {
       verbose: true,
       includeExamples: true,
       includeExplanations: true,
-      colors: true
+      colors: true,
     });
   }
 
@@ -81,7 +81,7 @@ export class GuideFormatter extends BaseFormatter {
     if (data.code) {
       const language = data.language || 'javascript';
       sections.push(this.applyColor('💻 Code:', 'magenta', opts));
-      sections.push('```' + language);
+      sections.push(`\`\`\`${language}`);
       sections.push(data.code);
       sections.push('```');
       sections.push('');
@@ -90,7 +90,7 @@ export class GuideFormatter extends BaseFormatter {
     // Tips
     if (data.tips && Array.isArray(data.tips)) {
       sections.push(this.applyColor('💡 Tips:', 'yellow', opts));
-      data.tips.forEach(tip => {
+      data.tips.forEach((tip) => {
         sections.push(`  • ${tip}`);
       });
       sections.push('');
@@ -113,7 +113,7 @@ export class GuideFormatter extends BaseFormatter {
     // Commands
     if (data.commands && Array.isArray(data.commands)) {
       sections.push(this.applyColor('🔧 Commands to run:', 'green', opts));
-      data.commands.forEach(cmd => {
+      data.commands.forEach((cmd) => {
         sections.push(`  $ ${cmd}`);
       });
       sections.push('');
@@ -166,7 +166,7 @@ export class GuideFormatter extends BaseFormatter {
         sections.push(this.applyColor(`${formattedKey}:`, 'bold', options));
 
         if (Array.isArray(value)) {
-          value.forEach(item => {
+          value.forEach((item) => {
             sections.push(`  • ${this.formatValue(item)}`);
           });
         } else if (typeof value === 'object' && value !== null) {
@@ -196,7 +196,7 @@ export class GuideFormatter extends BaseFormatter {
       .replace(/([A-Z])/g, ' $1')
       .trim()
       .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   }
 

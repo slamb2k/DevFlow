@@ -18,13 +18,13 @@ export class AnalyzeCommand extends BaseCommand {
       options: {
         '--deep': 'Perform deep analysis',
         '--format': 'Output format (json, text, visual)',
-        '--save': 'Save analysis to project memory'
+        '--save': 'Save analysis to project memory',
       },
       examples: [
         'devflow-analyze',
         'devflow-analyze --deep --format visual',
-        'devflow-analyze --save'
-      ]
+        'devflow-analyze --save',
+      ],
     };
   }
 
@@ -49,7 +49,7 @@ export class AnalyzeCommand extends BaseCommand {
       structure,
       metrics,
       issues,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     // Save to memory if requested
@@ -74,12 +74,24 @@ export class AnalyzeCommand extends BaseCommand {
       const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
       const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
 
-      if (deps.react) return { name: 'React', version: deps.react };
-      if (deps.next) return { name: 'Next.js', version: deps.next };
-      if (deps.vue) return { name: 'Vue', version: deps.vue };
-      if (deps.angular) return { name: 'Angular', version: deps.angular };
-      if (deps.express) return { name: 'Express', version: deps.express };
-      if (deps.fastify) return { name: 'Fastify', version: deps.fastify };
+      if (deps.react) {
+        return { name: 'React', version: deps.react };
+      }
+      if (deps.next) {
+        return { name: 'Next.js', version: deps.next };
+      }
+      if (deps.vue) {
+        return { name: 'Vue', version: deps.vue };
+      }
+      if (deps.angular) {
+        return { name: 'Angular', version: deps.angular };
+      }
+      if (deps.express) {
+        return { name: 'Express', version: deps.express };
+      }
+      if (deps.fastify) {
+        return { name: 'Fastify', version: deps.fastify };
+      }
 
       return { name: 'Node.js', version: process.version };
     } catch {
@@ -96,7 +108,7 @@ export class AnalyzeCommand extends BaseCommand {
         production: Object.keys(packageJson.dependencies || {}).length,
         development: Object.keys(packageJson.devDependencies || {}).length,
         total: Object.keys({ ...packageJson.dependencies, ...packageJson.devDependencies }).length,
-        outdated: [] // Would need npm outdated check
+        outdated: [], // Would need npm outdated check
       };
     } catch {
       return { production: 0, development: 0, total: 0, outdated: [] };
@@ -112,19 +124,19 @@ export class AnalyzeCommand extends BaseCommand {
       '**/*.css',
       '**/*.scss',
       '**/*.json',
-      '**/*.md'
+      '**/*.md',
     ];
 
     const files = await fastGlob(patterns, {
       cwd: projectRoot,
       ignore: ['node_modules', 'dist', 'build', '.git'],
-      onlyFiles: true
+      onlyFiles: true,
     });
 
     const structure = {
       totalFiles: files.length,
       byType: {},
-      directories: new Set()
+      directories: new Set(),
     };
 
     for (const file of files) {
@@ -146,7 +158,7 @@ export class AnalyzeCommand extends BaseCommand {
     const files = await fastGlob('**/*.{js,jsx,ts,tsx}', {
       cwd: projectRoot,
       ignore: ['node_modules', 'dist', 'build'],
-      onlyFiles: true
+      onlyFiles: true,
     });
 
     let totalLines = 0;
@@ -162,11 +174,11 @@ export class AnalyzeCommand extends BaseCommand {
       files: files.length,
       lines: totalLines,
       size: `${(totalSize / 1024).toFixed(2)} KB`,
-      avgLinesPerFile: files.length ? Math.round(totalLines / files.length) : 0
+      avgLinesPerFile: files.length ? Math.round(totalLines / files.length) : 0,
     };
   }
 
-  async detectIssues(projectRoot, { deep }) {
+  async detectIssues(projectRoot, { deep: _deep }) {
     const issues = [];
 
     // Check for missing files
@@ -178,7 +190,7 @@ export class AnalyzeCommand extends BaseCommand {
         issues.push({
           type: 'missing',
           severity: 'warning',
-          message: `Missing ${file}`
+          message: `Missing ${file}`,
         });
       }
     }
@@ -193,7 +205,7 @@ export class AnalyzeCommand extends BaseCommand {
         issues.push({
           type: 'quality',
           severity: 'warning',
-          message: 'No test script defined'
+          message: 'No test script defined',
         });
       }
 
@@ -201,10 +213,12 @@ export class AnalyzeCommand extends BaseCommand {
         issues.push({
           type: 'quality',
           severity: 'info',
-          message: 'No lint script defined'
+          message: 'No lint script defined',
         });
       }
-    } catch {}
+    } catch {
+      // Ignore JSON parse errors - intentionally empty
+    }
 
     return issues;
   }
@@ -245,6 +259,6 @@ export class AnalyzeCommand extends BaseCommand {
       console.log(chalk.green('\n✅ No issues detected!'));
     }
 
-    console.log(chalk.cyan('\n' + '═'.repeat(50) + '\n'));
+    console.log(chalk.cyan(`\n${'═'.repeat(50)}\n`));
   }
 }

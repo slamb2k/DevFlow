@@ -88,7 +88,7 @@ export class TemplateEngine {
     const template = this.templates.get(name);
     const mergedContext = {
       ...this.defaultContext,
-      ...context
+      ...context,
     };
 
     return template(mergedContext);
@@ -176,7 +176,7 @@ export class TemplateEngine {
 
     // Pluralize helper
     this.registerHelper('pluralize', (count, singular, plural) => {
-      return count === 1 ? singular : (plural || singular + 's');
+      return count === 1 ? singular : plural || `${singular}s`;
     });
 
     // Truncate helper
@@ -184,7 +184,7 @@ export class TemplateEngine {
       if (!str || str.length <= length) {
         return str;
       }
-      return str.substring(0, length - 3) + '...';
+      return `${str.substring(0, length - 3)}...`;
     });
 
     // Pad left helper
@@ -207,10 +207,10 @@ export class TemplateEngine {
     // Box drawing helper
     this.registerHelper('box', (content, width = 40) => {
       const lines = String(content).split('\n');
-      const top = '┌' + '─'.repeat(width - 2) + '┐';
-      const bottom = '└' + '─'.repeat(width - 2) + '┘';
+      const top = `┌${'─'.repeat(width - 2)}┐`;
+      const bottom = `└${'─'.repeat(width - 2)}┘`;
 
-      const boxedLines = lines.map(line => {
+      const boxedLines = lines.map((line) => {
         const padding = width - line.length - 4;
         const rightPad = ' '.repeat(Math.max(0, padding));
         return `│ ${line}${rightPad} │`;
@@ -228,25 +228,21 @@ export class TemplateEngine {
       // Calculate column widths
       const widths = headers.map((h, i) => {
         const headerWidth = h.length;
-        const maxRowWidth = Math.max(...rows.map(r => String(r[i] || '').length));
+        const maxRowWidth = Math.max(...rows.map((r) => String(r[i] || '').length));
         return Math.max(headerWidth, maxRowWidth);
       });
 
       // Create separator
-      const separator = '├' + widths.map(w => '─'.repeat(w + 2)).join('┼') + '┤';
-      const top = '┌' + widths.map(w => '─'.repeat(w + 2)).join('┬') + '┐';
-      const bottom = '└' + widths.map(w => '─'.repeat(w + 2)).join('┴') + '┘';
+      const separator = `├${widths.map((w) => '─'.repeat(w + 2)).join('┼')}┤`;
+      const top = `┌${widths.map((w) => '─'.repeat(w + 2)).join('┬')}┐`;
+      const bottom = `└${widths.map((w) => '─'.repeat(w + 2)).join('┴')}┘`;
 
       // Format header
-      const headerRow = '│' + headers.map((h, i) =>
-        ` ${h.padEnd(widths[i])} `
-      ).join('│') + '│';
+      const headerRow = `│${headers.map((h, i) => ` ${h.padEnd(widths[i])} `).join('│')}│`;
 
       // Format rows
-      const dataRows = rows.map(row =>
-        '│' + row.map((cell, i) =>
-          ` ${String(cell || '').padEnd(widths[i])} `
-        ).join('│') + '│'
+      const dataRows = rows.map(
+        (row) => `│${row.map((cell, i) => ` ${String(cell || '').padEnd(widths[i])} `).join('│')}│`
       );
 
       return [top, headerRow, separator, ...dataRows, bottom].join('\n');
@@ -269,7 +265,7 @@ export class TemplateEngine {
    */
   async loadTemplatesFromDirectory(dirPath) {
     const files = await fs.readdir(dirPath);
-    const templateFiles = files.filter(f => f.endsWith('.hbs'));
+    const templateFiles = files.filter((f) => f.endsWith('.hbs'));
 
     for (const file of templateFiles) {
       const name = path.basename(file, '.hbs');
@@ -331,7 +327,7 @@ export class TemplateEngine {
 
     return {
       valid: missing.length === 0,
-      missing
+      missing,
     };
   }
 
@@ -377,7 +373,7 @@ export class TemplateEngine {
     return {
       templates,
       partials,
-      helpers: Array.from(this.helpers.keys())
+      helpers: Array.from(this.helpers.keys()),
     };
   }
 

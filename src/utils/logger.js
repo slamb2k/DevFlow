@@ -19,47 +19,49 @@ const logLevels = {
     warn: 1,
     info: 2,
     debug: 3,
-    verbose: 4
+    verbose: 4,
   },
   colors: {
     error: 'red',
     warn: 'yellow',
     info: 'cyan',
     debug: 'gray',
-    verbose: 'magenta'
-  }
+    verbose: 'magenta',
+  },
 };
 
 // Console format with colors
-const consoleFormat = winston.format.printf(({ level, message, timestamp, ...meta }) => {
-  const colorize = {
-    error: chalk.red,
-    warn: chalk.yellow,
-    info: chalk.cyan,
-    debug: chalk.gray,
-    verbose: chalk.magenta
-  };
+const consoleFormat = winston.format.printf(
+  ({ level, message, timestamp: _timestamp, ...meta }) => {
+    const colorize = {
+      error: chalk.red,
+      warn: chalk.yellow,
+      info: chalk.cyan,
+      debug: chalk.gray,
+      verbose: chalk.magenta,
+    };
 
-  const icon = {
-    error: '❌',
-    warn: '⚠️',
-    info: 'ℹ️',
-    debug: '🔍',
-    verbose: '📝'
-  };
+    const icon = {
+      error: '❌',
+      warn: '⚠️',
+      info: 'ℹ️',
+      debug: '🔍',
+      verbose: '📝',
+    };
 
-  const color = colorize[level] || chalk.white;
-  const prefix = `${icon[level] || '•'} ${color.bold(level.toUpperCase())}`;
+    const color = colorize[level] || chalk.white;
+    const prefix = `${icon[level] || '•'} ${color.bold(level.toUpperCase())}`;
 
-  let output = `${prefix} ${message}`;
+    let output = `${prefix} ${message}`;
 
-  // Add metadata if present
-  if (Object.keys(meta).length > 0 && process.env.DEBUG) {
-    output += chalk.gray(`\n  ${JSON.stringify(meta, null, 2)}`);
+    // Add metadata if present
+    if (Object.keys(meta).length > 0 && process.env.DEBUG) {
+      output += chalk.gray(`\n  ${JSON.stringify(meta, null, 2)}`);
+    }
+
+    return output;
   }
-
-  return output;
-});
+);
 
 // File format (JSON)
 const fileFormat = winston.format.combine(
@@ -81,20 +83,20 @@ const winstonLogger = winston.createLogger({
     // Console transport
     new winston.transports.Console({
       format: consoleFormat,
-      silent: process.env.NODE_ENV === 'test'
+      silent: process.env.NODE_ENV === 'test',
     }),
     // File transport for errors
     new winston.transports.File({
       filename: path.join(logsDir, 'error.log'),
       level: 'error',
-      format: fileFormat
+      format: fileFormat,
     }),
     // File transport for all logs
     new winston.transports.File({
       filename: path.join(logsDir, 'devflow.log'),
-      format: fileFormat
-    })
-  ]
+      format: fileFormat,
+    }),
+  ],
 });
 
 // Add colors to winston
@@ -207,7 +209,7 @@ class Logger {
       warn: (msg, meta = {}) => this.warn(msg, { ...defaultMeta, ...meta }),
       debug: (msg, meta = {}) => this.debug(msg, { ...defaultMeta, ...meta }),
       verbose: (msg, meta = {}) => this.verbose(msg, { ...defaultMeta, ...meta }),
-      success: (msg, meta = {}) => this.success(msg, { ...defaultMeta, ...meta })
+      success: (msg, meta = {}) => this.success(msg, { ...defaultMeta, ...meta }),
     };
   }
 
@@ -264,12 +266,12 @@ class Logger {
           label,
           current,
           total,
-          percentage
+          percentage,
         });
       },
       complete: () => {
         this.success(`${label}: Complete!`, { label, total });
-      }
+      },
     };
   }
 
@@ -294,9 +296,6 @@ class Logger {
 // Export singleton instance
 const logger = new Logger();
 
-export {
-  logger as Logger,
-  logger
-};
+export { logger as Logger, logger };
 
 export const createLogger = (defaultMeta) => logger.child(defaultMeta);

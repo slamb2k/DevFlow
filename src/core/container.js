@@ -24,7 +24,7 @@ class Container {
     this.services.set(name, {
       ServiceClass,
       dependencies: options.dependencies || [],
-      singleton: false
+      singleton: false,
     });
   }
 
@@ -42,7 +42,7 @@ class Container {
     this.services.set(name, {
       ServiceClass,
       dependencies: options.dependencies || [],
-      singleton: true
+      singleton: true,
     });
   }
 
@@ -111,7 +111,7 @@ class Container {
    * @returns {any[]} Resolved dependencies
    */
   resolveDependencies(dependencies) {
-    return dependencies.map(dep => {
+    return dependencies.map((dep) => {
       if (typeof dep === 'string') {
         return this.resolve(dep);
       }
@@ -125,9 +125,7 @@ class Container {
    * @returns {boolean}
    */
   has(name) {
-    return this.services.has(name) ||
-           this.singletons.has(name) ||
-           this.factories.has(name);
+    return this.services.has(name) || this.singletons.has(name) || this.factories.has(name);
   }
 
   /**
@@ -177,7 +175,7 @@ class Container {
     const names = new Set([
       ...this.services.keys(),
       ...this.singletons.keys(),
-      ...this.factories.keys()
+      ...this.factories.keys(),
     ]);
     return Array.from(names);
   }

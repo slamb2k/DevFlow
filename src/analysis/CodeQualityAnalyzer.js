@@ -19,7 +19,7 @@ class CodeQualityAnalyzer {
       coverage: await this.analyzeCoverage(),
       duplication: await this.detectDuplication(),
       maintainability: await this.calculateMaintainabilityIndex(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     results.summary = this.generateSummary(results);
@@ -32,7 +32,14 @@ class CodeQualityAnalyzer {
     try {
       const jsFiles = await globAsync('**/*.{js,jsx}', {
         cwd: this.projectPath,
-        ignore: ['node_modules/**', 'dist/**', 'build/**', 'coverage/**', '__tests__/**', '*.test.js']
+        ignore: [
+          'node_modules/**',
+          'dist/**',
+          'build/**',
+          'coverage/**',
+          '__tests__/**',
+          '*.test.js',
+        ],
       });
 
       if (jsFiles.length === 0) {
@@ -44,7 +51,7 @@ class CodeQualityAnalyzer {
         averageComplexity: 0,
         functions: [],
         highComplexity: [],
-        files: {}
+        files: {},
       };
 
       for (const file of jsFiles) {
@@ -56,11 +63,13 @@ class CodeQualityAnalyzer {
           complexityData.totalComplexity += fileComplexity.complexity;
           complexityData.functions.push(...fileComplexity.functions);
 
-          const highComplexityFunctions = fileComplexity.functions.filter(f => f.complexity > 10);
-          complexityData.highComplexity.push(...highComplexityFunctions.map(f => ({
-            ...f,
-            file
-          })));
+          const highComplexityFunctions = fileComplexity.functions.filter((f) => f.complexity > 10);
+          complexityData.highComplexity.push(
+            ...highComplexityFunctions.map((f) => ({
+              ...f,
+              file,
+            }))
+          );
         }
       }
 
@@ -84,7 +93,7 @@ class CodeQualityAnalyzer {
       const ast = parser.parse(code, {
         sourceType: 'module',
         plugins: ['jsx', 'typescript'],
-        errorRecovery: true
+        errorRecovery: true,
       });
 
       const functions = [];
@@ -98,17 +107,18 @@ class CodeQualityAnalyzer {
           functions.push({
             name: functionName,
             complexity,
-            line: path.node.loc?.start?.line
+            line: path.node.loc?.start?.line,
           });
 
           fileComplexity += complexity;
-        }
+        },
       });
 
       return {
         complexity: fileComplexity,
         functions,
-        averageComplexity: functions.length > 0 ? (fileComplexity / functions.length).toFixed(2) : 0
+        averageComplexity:
+          functions.length > 0 ? (fileComplexity / functions.length).toFixed(2) : 0,
       };
     } catch (error) {
       return { error: error.message, complexity: 0, functions: [] };
@@ -118,19 +128,26 @@ class CodeQualityAnalyzer {
   calculateCyclomaticComplexity(node) {
     let complexity = 1;
 
-    traverse(node, {
-      'IfStatement|ConditionalExpression|SwitchCase|ForStatement|WhileStatement|DoWhileStatement': () => {
-        complexity++;
-      },
-      LogicalExpression: (path) => {
-        if (path.node.operator === '&&' || path.node.operator === '||') {
+    traverse(
+      node,
+      {
+        'IfStatement|ConditionalExpression|SwitchCase|ForStatement|WhileStatement|DoWhileStatement':
+          () => {
+            complexity++;
+          },
+        LogicalExpression: (path) => {
+          if (path.node.operator === '&&' || path.node.operator === '||') {
+            complexity++;
+          }
+        },
+        CatchClause: () => {
           complexity++;
-        }
+        },
       },
-      CatchClause: () => {
-        complexity++;
-      }
-    }, null, null, true);
+      null,
+      null,
+      true
+    );
 
     return complexity;
   }
@@ -183,15 +200,15 @@ class CodeQualityAnalyzer {
             lines: total.lines,
             statements: total.statements,
             functions: total.functions,
-            branches: total.branches
-          }
+            branches: total.branches,
+          },
         };
       } catch (error) {
         try {
           execSync('npm test -- --coverage --coverageReporters=json-summary', {
             cwd: this.projectPath,
             encoding: 'utf8',
-            stdio: 'pipe'
+            stdio: 'pipe',
           });
 
           const coverageData = await fs.readFile(coveragePath, 'utf8');
@@ -203,7 +220,7 @@ class CodeQualityAnalyzer {
             statements: total.statements.pct,
             functions: total.functions.pct,
             branches: total.branches.pct,
-            overall: ((total.lines.pct + total.functions.pct + total.branches.pct) / 3).toFixed(2)
+            overall: ((total.lines.pct + total.functions.pct + total.branches.pct) / 3).toFixed(2),
           };
         } catch (testError) {
           return { skipped: true, reason: 'Coverage data not available' };
@@ -218,7 +235,14 @@ class CodeQualityAnalyzer {
     try {
       const jsFiles = await globAsync('**/*.{js,jsx}', {
         cwd: this.projectPath,
-        ignore: ['node_modules/**', 'dist/**', 'build/**', 'coverage/**', '__tests__/**', '*.test.js']
+        ignore: [
+          'node_modules/**',
+          'dist/**',
+          'build/**',
+          'coverage/**',
+          '__tests__/**',
+          '*.test.js',
+        ],
       });
 
       if (jsFiles.length === 0) {
@@ -243,7 +267,9 @@ class CodeQualityAnalyzer {
 
       for (const file1 of Object.keys(fileContents)) {
         for (const file2 of Object.keys(fileContents)) {
-          if (file1 >= file2) continue;
+          if (file1 >= file2) {
+            continue;
+          }
 
           const duplicateBlocks = this.findDuplicateBlocks(
             fileContents[file1],
@@ -260,7 +286,7 @@ class CodeQualityAnalyzer {
                 lines: block.lines,
                 startLine1: block.startLine1,
                 startLine2: block.startLine2,
-                tokens: block.lines * 10
+                tokens: block.lines * 10,
               });
               duplicateLines += block.lines * 2;
             }
@@ -274,7 +300,7 @@ class CodeQualityAnalyzer {
         duplicates: duplicates.sort((a, b) => b.lines - a.lines),
         percentage: parseFloat(percentage),
         totalDuplicateLines: duplicateLines,
-        totalLines
+        totalLines,
       };
     } catch (error) {
       return { error: error.message };
@@ -291,7 +317,8 @@ class CodeQualityAnalyzer {
         while (
           i + matchLength < lines1.length &&
           j + matchLength < lines2.length &&
-          this.normalizeCode(lines1[i + matchLength]) === this.normalizeCode(lines2[j + matchLength])
+          this.normalizeCode(lines1[i + matchLength]) ===
+            this.normalizeCode(lines2[j + matchLength])
         ) {
           matchLength++;
         }
@@ -302,7 +329,7 @@ class CodeQualityAnalyzer {
             startLine1: i + 1,
             startLine2: j + 1,
             lines: matchLength,
-            content
+            content,
           });
 
           i += matchLength - 1;
@@ -340,18 +367,28 @@ class CodeQualityAnalyzer {
         0,
         Math.min(
           100,
-          171 - 5.2 * Math.log(halsteadVolume) - 0.23 * cyclomaticComplexity - 16.2 * Math.log(linesOfCode)
+          171 -
+            5.2 * Math.log(halsteadVolume) -
+            0.23 * cyclomaticComplexity -
+            16.2 * Math.log(linesOfCode)
         )
       );
 
-      const adjustedIndex = maintainabilityIndex * 0.8 + (coverage.overall ? parseFloat(coverage.overall) * 0.2 : 0);
+      const adjustedIndex =
+        maintainabilityIndex * 0.8 + (coverage.overall ? parseFloat(coverage.overall) * 0.2 : 0);
 
       let grade;
-      if (adjustedIndex >= 80) grade = 'A';
-      else if (adjustedIndex >= 60) grade = 'B';
-      else if (adjustedIndex >= 40) grade = 'C';
-      else if (adjustedIndex >= 20) grade = 'D';
-      else grade = 'F';
+      if (adjustedIndex >= 80) {
+        grade = 'A';
+      } else if (adjustedIndex >= 60) {
+        grade = 'B';
+      } else if (adjustedIndex >= 40) {
+        grade = 'C';
+      } else if (adjustedIndex >= 20) {
+        grade = 'D';
+      } else {
+        grade = 'F';
+      }
 
       return {
         index: parseFloat(adjustedIndex.toFixed(2)),
@@ -360,8 +397,8 @@ class CodeQualityAnalyzer {
           complexity: cyclomaticComplexity,
           coverage: coverage.overall || 0,
           volume: halsteadVolume,
-          linesOfCode
-        }
+          linesOfCode,
+        },
       };
     } catch (error) {
       return { error: error.message };
@@ -373,14 +410,16 @@ class CodeQualityAnalyzer {
       overallQuality: 'Unknown',
       issues: [],
       strengths: [],
-      metrics: {}
+      metrics: {},
     };
 
     if (results.complexity && !results.complexity.skipped) {
       summary.metrics.averageComplexity = results.complexity.averageComplexity;
 
       if (results.complexity.highComplexity.length > 0) {
-        summary.issues.push(`${results.complexity.highComplexity.length} functions with high complexity`);
+        summary.issues.push(
+          `${results.complexity.highComplexity.length} functions with high complexity`
+        );
       }
 
       if (parseFloat(results.complexity.averageComplexity) < 5) {
@@ -389,7 +428,7 @@ class CodeQualityAnalyzer {
     }
 
     if (results.coverage && !results.coverage.skipped) {
-      summary.metrics.coverage = results.coverage.overall + '%';
+      summary.metrics.coverage = `${results.coverage.overall}%`;
 
       if (results.coverage.overall < 60) {
         summary.issues.push('Low test coverage');
@@ -403,7 +442,7 @@ class CodeQualityAnalyzer {
     }
 
     if (results.duplication && !results.duplication.skipped) {
-      summary.metrics.duplication = results.duplication.percentage + '%';
+      summary.metrics.duplication = `${results.duplication.percentage}%`;
 
       if (results.duplication.percentage > 5) {
         summary.issues.push('High code duplication');
@@ -445,12 +484,14 @@ class CodeQualityAnalyzer {
       if (results.complexity.highComplexity.length > 0) {
         const topComplex = results.complexity.highComplexity.slice(0, 3);
         recommendations.push(
-          `Refactor high complexity functions: ${topComplex.map(f => `${f.name} (${f.complexity})`).join(', ')}`
+          `Refactor high complexity functions: ${topComplex.map((f) => `${f.name} (${f.complexity})`).join(', ')}`
         );
       }
 
       if (parseFloat(results.complexity.averageComplexity) > 10) {
-        recommendations.push('Consider breaking down complex functions into smaller, more focused functions');
+        recommendations.push(
+          'Consider breaking down complex functions into smaller, more focused functions'
+        );
       }
     }
 
@@ -477,7 +518,7 @@ class CodeQualityAnalyzer {
         if (results.duplication.duplicates.length > 0) {
           const topDuplicates = results.duplication.duplicates.slice(0, 3);
           recommendations.push(
-            `Review duplicate blocks in: ${topDuplicates.map(d => d.files.join(' & ')).join(', ')}`
+            `Review duplicate blocks in: ${topDuplicates.map((d) => d.files.join(' & ')).join(', ')}`
           );
         }
       }
@@ -485,11 +526,15 @@ class CodeQualityAnalyzer {
 
     if (results.maintainability && !results.maintainability.skipped) {
       if (results.maintainability.grade === 'C' || results.maintainability.grade === 'D') {
-        recommendations.push('Improve code maintainability through refactoring and better documentation');
+        recommendations.push(
+          'Improve code maintainability through refactoring and better documentation'
+        );
       }
 
       if (results.maintainability.grade === 'F') {
-        recommendations.push('Critical: Code maintainability is very poor - consider major refactoring');
+        recommendations.push(
+          'Critical: Code maintainability is very poor - consider major refactoring'
+        );
       }
     }
 

@@ -13,8 +13,8 @@ export class RoadmapCommand extends BaseCommand {
       usage: 'devflow-roadmap [options]',
       options: {
         '--weeks': 'Number of weeks for roadmap (default: 12)',
-        '--format': 'Output format (visual, json, markdown)'
-      }
+        '--format': 'Output format (visual, json, markdown)',
+      },
     };
   }
 
@@ -29,7 +29,7 @@ export class RoadmapCommand extends BaseCommand {
     const roadmap = {
       phases,
       duration: `${weeks} weeks`,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     if (format === 'visual') {
@@ -48,8 +48,8 @@ export class RoadmapCommand extends BaseCommand {
           'Set up development environment',
           'Configure CI/CD pipeline',
           'Implement core architecture',
-          'Set up testing framework'
-        ]
+          'Set up testing framework',
+        ],
       },
       {
         name: 'Core Features',
@@ -58,29 +58,19 @@ export class RoadmapCommand extends BaseCommand {
           'Implement authentication',
           'Build main user flows',
           'Create data models',
-          'Develop API endpoints'
-        ]
+          'Develop API endpoints',
+        ],
       },
       {
         name: 'Enhancement',
         weeks: Math.floor(weeks * 0.2),
-        tasks: [
-          'Add advanced features',
-          'Optimize performance',
-          'Improve UX/UI',
-          'Add analytics'
-        ]
+        tasks: ['Add advanced features', 'Optimize performance', 'Improve UX/UI', 'Add analytics'],
       },
       {
         name: 'Production Ready',
         weeks: Math.floor(weeks * 0.2),
-        tasks: [
-          'Security audit',
-          'Performance testing',
-          'Documentation',
-          'Deployment setup'
-        ]
-      }
+        tasks: ['Security audit', 'Performance testing', 'Documentation', 'Deployment setup'],
+      },
     ];
 
     return phases;
@@ -99,7 +89,7 @@ export class RoadmapCommand extends BaseCommand {
       }
     }
 
-    console.log(chalk.cyan('\n' + '═'.repeat(60)));
+    console.log(chalk.cyan(`\n${'═'.repeat(60)}`));
     console.log(chalk.green(`\n✨ Total Duration: ${roadmap.duration}\n`));
   }
 }

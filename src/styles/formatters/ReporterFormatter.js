@@ -14,7 +14,7 @@ export class ReporterFormatter extends BaseFormatter {
       verbose: true,
       includeMetrics: true,
       includeTimestamps: true,
-      colors: true
+      colors: true,
     });
   }
 
@@ -87,10 +87,14 @@ export class ReporterFormatter extends BaseFormatter {
           sections.push(`  Total Issues: ${data.summary.total_issues}`);
         }
         if (data.summary.critical !== undefined) {
-          sections.push(`  ${this.applyColor('❌ Critical:', 'red', opts)} ${data.summary.critical}`);
+          sections.push(
+            `  ${this.applyColor('❌ Critical:', 'red', opts)} ${data.summary.critical}`
+          );
         }
         if (data.summary.warnings !== undefined) {
-          sections.push(`  ${this.applyColor('⚠️ Warnings:', 'yellow', opts)} ${data.summary.warnings}`);
+          sections.push(
+            `  ${this.applyColor('⚠️ Warnings:', 'yellow', opts)} ${data.summary.warnings}`
+          );
         }
         if (data.summary.info !== undefined) {
           sections.push(`  ${this.applyColor('ℹ️ Info:', 'blue', opts)} ${data.summary.info}`);
@@ -128,7 +132,7 @@ export class ReporterFormatter extends BaseFormatter {
     // Action items / Insights
     if (data.insights && Array.isArray(data.insights)) {
       sections.push(this.applyColor('🎯 Action Items', 'green', opts));
-      data.insights.forEach(insight => {
+      data.insights.forEach((insight) => {
         if (typeof insight === 'object' && insight.priority && insight.action) {
           const priority = this.formatPriority(insight.priority, opts);
           sections.push(`  ${priority} ${insight.action}`);
@@ -142,7 +146,7 @@ export class ReporterFormatter extends BaseFormatter {
     // Timeline
     if (data.timeline && Array.isArray(data.timeline)) {
       sections.push(this.applyColor('📅 Timeline', 'blue', opts));
-      data.timeline.forEach(event => {
+      data.timeline.forEach((event) => {
         if (typeof event === 'object' && event.date && event.description) {
           sections.push(`  ${event.date}: ${event.description}`);
         } else {
@@ -224,7 +228,7 @@ export class ReporterFormatter extends BaseFormatter {
   formatSectionTitle(title) {
     return title
       .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   }
 
@@ -257,7 +261,7 @@ export class ReporterFormatter extends BaseFormatter {
     return key
       .replace(/_/g, ' ')
       .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
 
@@ -273,7 +277,7 @@ export class ReporterFormatter extends BaseFormatter {
     const colors = {
       HIGH: 'red',
       MEDIUM: 'yellow',
-      LOW: 'green'
+      LOW: 'green',
     };
 
     const color = colors[level] || 'white';
@@ -287,7 +291,7 @@ export class ReporterFormatter extends BaseFormatter {
    * @param {object} options - Formatting options
    * @returns {string} Formatted performance metrics
    */
-  formatPerformanceMetrics(performance, options) {
+  formatPerformanceMetrics(performance, _options) {
     const lines = [];
 
     if (performance.load_time) {
@@ -320,7 +324,7 @@ export class ReporterFormatter extends BaseFormatter {
    * @param {object} options - Formatting options
    * @returns {string} Formatted coverage report
    */
-  formatCoverageReport(coverage, options) {
+  formatCoverageReport(coverage, _options) {
     const lines = [];
 
     if (coverage.statements) {

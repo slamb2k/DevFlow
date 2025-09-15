@@ -34,7 +34,7 @@ class FeedbackManager {
     const entry = {
       ...feedback,
       timestamp: feedback.timestamp || new Date(),
-      id: this.generateFeedbackId()
+      id: this.generateFeedbackId(),
     };
 
     this.feedbackHistory.push(entry);
@@ -62,7 +62,9 @@ class FeedbackManager {
 
     for (const feedback of this.feedbackHistory) {
       const category = feedback.category;
-      if (!category) continue;
+      if (!category) {
+        continue;
+      }
 
       if (!this.categoryStats[category]) {
         this.categoryStats[category] = {
@@ -72,7 +74,7 @@ class FeedbackManager {
           acceptanceRate: 0,
           reasons: [],
           avgConfidence: 0,
-          avgImpact: { high: 0, medium: 0, low: 0 }
+          avgImpact: { high: 0, medium: 0, low: 0 },
         };
       }
 
@@ -111,13 +113,15 @@ class FeedbackManager {
 
     for (const feedback of this.feedbackHistory) {
       const type = feedback.type || feedback.recommendationType;
-      if (!type) continue;
+      if (!type) {
+        continue;
+      }
 
       if (!typeStats[type]) {
         typeStats[type] = {
           total: 0,
           accepted: 0,
-          acceptanceRate: 0
+          acceptanceRate: 0,
         };
       }
 
@@ -140,18 +144,20 @@ class FeedbackManager {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - days);
 
-    return this.feedbackHistory.filter(feedback => {
+    return this.feedbackHistory.filter((feedback) => {
       const feedbackDate = new Date(feedback.timestamp);
       return feedbackDate >= cutoff;
     });
   }
 
   async getAcceptanceRateOverTime(bucketSizeDays = 7) {
-    if (this.feedbackHistory.length === 0) return [];
+    if (this.feedbackHistory.length === 0) {
+      return [];
+    }
 
     // Sort feedback by timestamp
-    const sorted = [...this.feedbackHistory].sort((a, b) =>
-      new Date(a.timestamp) - new Date(b.timestamp)
+    const sorted = [...this.feedbackHistory].sort(
+      (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
     );
 
     const buckets = [];
@@ -160,7 +166,7 @@ class FeedbackManager {
       end: null,
       total: 0,
       accepted: 0,
-      rate: 0
+      rate: 0,
     };
 
     for (const feedback of sorted) {
@@ -170,8 +176,8 @@ class FeedbackManager {
       if (daysSinceStart > bucketSizeDays) {
         // Finish current bucket
         currentBucket.end = feedbackDate;
-        currentBucket.rate = currentBucket.total > 0 ?
-          currentBucket.accepted / currentBucket.total : 0;
+        currentBucket.rate =
+          currentBucket.total > 0 ? currentBucket.accepted / currentBucket.total : 0;
         buckets.push(currentBucket);
 
         // Start new bucket
@@ -180,7 +186,7 @@ class FeedbackManager {
           end: null,
           total: 0,
           accepted: 0,
-          rate: 0
+          rate: 0,
         };
       }
 
@@ -242,7 +248,9 @@ class FeedbackManager {
     const adjusted = { ...initialWeights };
 
     for (const [category, stats] of Object.entries(feedbackStats)) {
-      if (!stats || typeof stats !== 'object') continue;
+      if (!stats || typeof stats !== 'object') {
+        continue;
+      }
 
       const acceptanceRate = stats.accepted / (stats.accepted + stats.rejected);
 
@@ -260,7 +268,7 @@ class FeedbackManager {
   }
 
   async getRecommendationEffectiveness(recommendationId) {
-    const feedback = this.feedbackHistory.find(f => f.recommendationId === recommendationId);
+    const feedback = this.feedbackHistory.find((f) => f.recommendationId === recommendationId);
 
     if (!feedback) {
       return null;
@@ -289,7 +297,7 @@ class FeedbackManager {
       accepted: feedback.accepted,
       implemented: feedback.implemented || false,
       impactRealized: feedback.impactRealized || false,
-      feedback: feedback.additionalFeedback || null
+      feedback: feedback.additionalFeedback || null,
     };
   }
 
@@ -299,7 +307,7 @@ class FeedbackManager {
       stats: await this.getCategoryStats(),
       successfulTypes: await this.getMostSuccessfulTypes(),
       rejectionReasons: await this.getRejectionReasons(),
-      exportDate: new Date()
+      exportDate: new Date(),
     };
 
     switch (format) {
@@ -328,9 +336,9 @@ class FeedbackManager {
         feedback.type || '',
         feedback.accepted ? 'Yes' : 'No',
         feedback.reason || '',
-        feedback.confidence || ''
+        feedback.confidence || '',
       ];
-      rows.push(row.map(cell => `"${cell}"`).join(','));
+      rows.push(row.map((cell) => `"${cell}"`).join(','));
     }
 
     return rows.join('\n');

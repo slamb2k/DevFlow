@@ -18,13 +18,13 @@ export class InitCommand extends BaseCommand {
         '--force': 'Overwrite existing configuration',
         '--template': 'Project template (react, node, python)',
         '--name': 'Project name',
-        '--skip-git': 'Skip git initialization'
+        '--skip-git': 'Skip git initialization',
       },
       examples: [
         'devflow-init',
         'devflow-init --template react',
-        'devflow-init --name my-app --template node'
-      ]
+        'devflow-init --name my-app --template node',
+      ],
     };
   }
 
@@ -46,7 +46,7 @@ export class InitCommand extends BaseCommand {
       if (!force) {
         return {
           success: false,
-          message: 'DevFlow is already initialized. Use --force to reinitialize.'
+          message: 'DevFlow is already initialized. Use --force to reinitialize.',
         };
       }
     } catch {
@@ -73,8 +73,8 @@ export class InitCommand extends BaseCommand {
         cicd: true,
         testing: true,
         linting: true,
-        docker: false
-      }
+        docker: false,
+      },
     };
 
     await memory.updateConfig(config);
@@ -84,7 +84,7 @@ export class InitCommand extends BaseCommand {
       initialized: true,
       currentPhase: 'setup',
       completedTasks: [],
-      activeFeatures: []
+      activeFeatures: [],
     };
 
     await memory.setState(state);
@@ -107,7 +107,7 @@ export class InitCommand extends BaseCommand {
       success: true,
       message: `DevFlow initialized for ${projectName}`,
       config,
-      projectType
+      projectType,
     };
   }
 
@@ -179,11 +179,7 @@ fi
 echo "✅ Pre-commit checks passed!"
 `;
 
-      await fs.writeFile(
-        path.join(hooksDir, 'pre-commit'),
-        preCommitHook,
-        { mode: 0o755 }
-      );
+      await fs.writeFile(path.join(hooksDir, 'pre-commit'), preCommitHook, { mode: 0o755 });
 
       this.log('🔗 Git hooks configured', 'info');
     } catch {
@@ -196,18 +192,18 @@ echo "✅ Pre-commit checks passed!"
       'github-actions': {
         name: 'GitHub Actions CI/CD',
         type: 'cicd',
-        content: this.getGitHubActionsTemplate(projectType)
+        content: this.getGitHubActionsTemplate(projectType),
       },
-      'dockerfile': {
+      dockerfile: {
         name: 'Dockerfile',
         type: 'docker',
-        content: this.getDockerfileTemplate(projectType)
+        content: this.getDockerfileTemplate(projectType),
       },
-      'readme': {
+      readme: {
         name: 'README template',
         type: 'documentation',
-        content: this.getReadmeTemplate()
-      }
+        content: this.getReadmeTemplate(),
+      },
     };
 
     for (const [key, template] of Object.entries(templates)) {
@@ -254,7 +250,7 @@ jobs:
       with:
         python-version: '3.9'
     - run: pip install -r requirements.txt
-    - run: pytest`
+    - run: pytest`,
     };
 
     return templates[projectType] || templates.node;
@@ -275,7 +271,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-CMD ["python", "app.py"]`
+CMD ["python", "app.py"]`,
     };
 
     return templates[projectType] || templates.node;

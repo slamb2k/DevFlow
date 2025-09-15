@@ -13,7 +13,7 @@ class DependencyAnalyzer {
       licenses: await this.checkLicenses(),
       tree: await this.generateDependencyTree(),
       circular: await this.detectCircularDependencies(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     results.summary = this.generateSummary(results);
@@ -70,7 +70,7 @@ class DependencyAnalyzer {
           wanted: info.wanted,
           latest: info.latest,
           type: info.type,
-          homepage: info.homepage
+          homepage: info.homepage,
         };
       }
 
@@ -96,7 +96,7 @@ class DependencyAnalyzer {
         packages[pkg.name] = {
           current: pkg.version,
           latest: pkg.latest_version,
-          type: pkg.latest_filetype
+          type: pkg.latest_filetype,
         };
       }
 
@@ -114,7 +114,7 @@ class DependencyAnalyzer {
       compatible: [],
       incompatible: [],
       unlicensed: [],
-      summary: {}
+      summary: {},
     };
 
     try {
@@ -152,12 +152,7 @@ class DependencyAnalyzer {
 
       if (tree.dependencies) {
         for (const [name, info] of Object.entries(tree.dependencies)) {
-          const packageJsonPath = path.join(
-            this.projectPath,
-            'node_modules',
-            name,
-            'package.json'
-          );
+          const packageJsonPath = path.join(this.projectPath, 'node_modules', name, 'package.json');
 
           try {
             const packageData = await fs.readFile(packageJsonPath, 'utf8');
@@ -166,13 +161,13 @@ class DependencyAnalyzer {
             licenses.push({
               name,
               version: info.version,
-              license: packageJson.license || packageJson.licenses
+              license: packageJson.license || packageJson.licenses,
             });
           } catch {
             licenses.push({
               name,
               version: info.version,
-              license: null
+              license: null,
             });
           }
         }
@@ -186,11 +181,11 @@ class DependencyAnalyzer {
 
   isLicenseCompatible(license, targetLicense) {
     const compatibilityMatrix = {
-      'MIT': ['MIT', 'BSD', 'Apache-2.0', 'ISC'],
+      MIT: ['MIT', 'BSD', 'Apache-2.0', 'ISC'],
       'Apache-2.0': ['Apache-2.0', 'MIT', 'BSD', 'ISC'],
       'GPL-3.0': ['GPL-3.0', 'GPL-2.0'],
-      'BSD': ['BSD', 'MIT', 'Apache-2.0', 'ISC'],
-      'ISC': ['ISC', 'MIT', 'BSD', 'Apache-2.0']
+      BSD: ['BSD', 'MIT', 'Apache-2.0', 'ISC'],
+      ISC: ['ISC', 'MIT', 'BSD', 'Apache-2.0'],
     };
 
     const normalizedLicense = this.normalizeLicense(license);
@@ -211,14 +206,14 @@ class DependencyAnalyzer {
     const normalized = license.toUpperCase().replace(/[^A-Z0-9]/g, '');
 
     const mapping = {
-      'MIT': 'MIT',
-      'APACHE20': 'Apache-2.0',
-      'APACHE2': 'Apache-2.0',
-      'GPL3': 'GPL-3.0',
-      'GPL30': 'GPL-3.0',
-      'BSD': 'BSD',
-      'BSD3': 'BSD',
-      'ISC': 'ISC'
+      MIT: 'MIT',
+      APACHE20: 'Apache-2.0',
+      APACHE2: 'Apache-2.0',
+      GPL3: 'GPL-3.0',
+      GPL30: 'GPL-3.0',
+      BSD: 'BSD',
+      BSD3: 'BSD',
+      ISC: 'ISC',
     };
 
     return mapping[normalized] || license;
@@ -248,7 +243,7 @@ class DependencyAnalyzer {
         depth: this.calculateTreeDepth(tree),
         totalPackages: this.countPackages(tree),
         directDependencies: Object.keys(tree.dependencies || {}).length,
-        problems: tree.problems || []
+        problems: tree.problems || [],
       };
 
       return analysis;
@@ -268,7 +263,7 @@ class DependencyAnalyzer {
       simplified[name] = {
         version: info.version,
         resolved: info.resolved,
-        dependencies: this.simplifyTree(info, maxDepth, currentDepth + 1)
+        dependencies: this.simplifyTree(info, maxDepth, currentDepth + 1),
       };
     }
 
@@ -368,7 +363,7 @@ class DependencyAnalyzer {
       licenseIssues: 0,
       circularDependencies: 0,
       totalDependencies: 0,
-      health: 'Unknown'
+      health: 'Unknown',
     };
 
     if (results.outdated) {
@@ -376,13 +371,18 @@ class DependencyAnalyzer {
         summary.outdatedCount += Object.keys(results.outdated.npm).length;
       }
 
-      if (results.outdated.python && !results.outdated.python.skipped && !results.outdated.python.upToDate) {
+      if (
+        results.outdated.python &&
+        !results.outdated.python.skipped &&
+        !results.outdated.python.upToDate
+      ) {
         summary.outdatedCount += Object.keys(results.outdated.python).length;
       }
     }
 
     if (results.licenses) {
-      summary.licenseIssues = results.licenses.incompatible.length + results.licenses.unlicensed.length;
+      summary.licenseIssues =
+        results.licenses.incompatible.length + results.licenses.unlicensed.length;
     }
 
     if (results.circular && !results.circular.error) {
@@ -394,10 +394,11 @@ class DependencyAnalyzer {
       summary.dependencyDepth = results.tree.depth;
     }
 
-    const score = 100
-      - (summary.outdatedCount * 2)
-      - (summary.licenseIssues * 5)
-      - (summary.circularDependencies * 10);
+    const score =
+      100 -
+      summary.outdatedCount * 2 -
+      summary.licenseIssues * 5 -
+      summary.circularDependencies * 10;
 
     if (score >= 90) {
       summary.health = 'Excellent';
@@ -466,7 +467,9 @@ class DependencyAnalyzer {
       }
 
       if (results.tree.problems && results.tree.problems.length > 0) {
-        recommendations.push(`Dependency problems detected: ${results.tree.problems.length} issues`);
+        recommendations.push(
+          `Dependency problems detected: ${results.tree.problems.length} issues`
+        );
       }
     }
 

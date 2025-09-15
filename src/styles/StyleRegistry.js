@@ -56,9 +56,7 @@ export class StyleRegistry extends EventEmitter {
     }
 
     // Remove context mappings for this style
-    this.contextMappings = this.contextMappings.filter(
-      mapping => mapping.style !== name
-    );
+    this.contextMappings = this.contextMappings.filter((mapping) => mapping.style !== name);
 
     this.emit('style:unregistered', name);
     return true;
@@ -121,7 +119,7 @@ export class StyleRegistry extends EventEmitter {
 
     this.contextMappings.push({
       context,
-      style: styleName
+      style: styleName,
     });
   }
 
@@ -247,7 +245,7 @@ export class StyleRegistry extends EventEmitter {
     return {
       defaultStyle: this.defaultStyle,
       registeredStyles: this.list(),
-      contextMappings: this.contextMappings.map(m => ({ ...m }))
+      contextMappings: this.contextMappings.map((m) => ({ ...m })),
     };
   }
 
@@ -265,7 +263,7 @@ export class StyleRegistry extends EventEmitter {
         if (this.styles.has(mapping.style)) {
           this.contextMappings.push({
             context: { ...mapping.context },
-            style: mapping.style
+            style: mapping.style,
           });
         }
       }

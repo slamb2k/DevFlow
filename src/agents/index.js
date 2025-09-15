@@ -22,7 +22,7 @@ export {
   agentSchemas,
   getDefaultConfig,
   validateConfig,
-  mergeWithDefaults
+  mergeWithDefaults,
 } from './config/agent-schemas.js';
 
 // Re-export enhanced command registry for convenience

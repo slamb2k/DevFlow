@@ -32,7 +32,7 @@ export class EnhancedCommandRegistry extends CommandRegistry {
   async initializeAgents() {
     // This will be expanded when specialized agents are implemented
     // For now, just set up the registry
-    this.agentRegistry.on('agent:registered', ({ id, agent }) => {
+    this.agentRegistry.on('agent:registered', ({ id, agent: _agent }) => {
       console.log(`Agent registered: ${id}`);
     });
 
@@ -55,7 +55,7 @@ export class EnhancedCommandRegistry extends CommandRegistry {
 
     this.agentCommands.set(name, {
       agentId,
-      options
+      options,
     });
 
     // Register aliases
@@ -76,12 +76,7 @@ export class EnhancedCommandRegistry extends CommandRegistry {
     const agentCommand = this.agentCommands.get(name);
 
     if (agentCommand) {
-      return await this.executeAgentCommand(
-        name,
-        agentCommand.agentId,
-        args,
-        context
-      );
+      return await this.executeAgentCommand(name, agentCommand.agentId, args, context);
     }
 
     // Fall back to regular command execution
@@ -102,7 +97,7 @@ export class EnhancedCommandRegistry extends CommandRegistry {
     const task = {
       command: commandName,
       args,
-      type: 'command-execution'
+      type: 'command-execution',
     };
 
     // Execute via agent
@@ -162,14 +157,10 @@ export class EnhancedCommandRegistry extends CommandRegistry {
     const task = {
       command,
       args,
-      type: 'capability-execution'
+      type: 'capability-execution',
     };
 
-    return await this.agentRegistry.executeWithCapability(
-      capability,
-      task,
-      context
-    );
+    return await this.agentRegistry.executeWithCapability(capability, task, context);
   }
 
   /**
@@ -205,7 +196,7 @@ export class EnhancedCommandRegistry extends CommandRegistry {
         description: agentCommand.options.description || 'Agent-powered command',
         usage: agentCommand.options.usage || `/${name} [options]`,
         agent: agentCommand.agentId,
-        options: agentCommand.options.helpOptions || []
+        options: agentCommand.options.helpOptions || [],
       };
     }
 
@@ -219,7 +210,7 @@ export class EnhancedCommandRegistry extends CommandRegistry {
     const help = super.getAllHelp();
 
     // Add agent command help
-    for (const [name, agentCommand] of this.agentCommands) {
+    for (const [name, _agentCommand] of this.agentCommands) {
       help[name] = this.getHelp(name);
     }
 
@@ -270,24 +261,14 @@ export class EnhancedCommandRegistry extends CommandRegistry {
     this.execute = async (name, args = [], context = {}) => {
       // Check if agent mode is requested
       if (context.useAgent && context.agentId) {
-        return await this.executeAgentCommand(
-          name,
-          context.agentId,
-          args,
-          context
-        );
+        return await this.executeAgentCommand(name, context.agentId, args, context);
       }
 
       // Check if there's a preferred agent for this command type
       const preferredAgent = this.findPreferredAgent(name);
       if (preferredAgent && context.autoAgent !== false) {
         context.agentId = preferredAgent;
-        return await this.executeAgentCommand(
-          name,
-          preferredAgent,
-          args,
-          context
-        );
+        return await this.executeAgentCommand(name, preferredAgent, args, context);
       }
 
       return await originalExecute(name, args, context);
@@ -304,7 +285,7 @@ export class EnhancedCommandRegistry extends CommandRegistry {
       'devflow-analyze': 'analyzer',
       'devflow-optimize': 'optimizer',
       'devflow-security': 'security',
-      'devflow-architect': 'architect'
+      'devflow-architect': 'architect',
     };
 
     const agentId = preferences[commandName];

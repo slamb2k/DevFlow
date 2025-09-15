@@ -21,13 +21,7 @@ export class BaseAgent extends EventEmitter {
     this.capabilities = [];
 
     // State persistence path
-    this.statePath = path.join(
-      process.cwd(),
-      '.devflow',
-      'agents',
-      this.id,
-      'state.json'
-    );
+    this.statePath = path.join(process.cwd(), '.devflow', 'agents', this.id, 'state.json');
   }
 
   /**
@@ -94,7 +88,7 @@ export class BaseAgent extends EventEmitter {
         agent: this.id,
         task,
         result,
-        executionTime
+        executionTime,
       });
 
       return {
@@ -102,8 +96,8 @@ export class BaseAgent extends EventEmitter {
         result,
         metrics: {
           executionTime,
-          agentId: this.id
-        }
+          agentId: this.id,
+        },
       };
     } catch (error) {
       this.status = 'ready';
@@ -113,8 +107,8 @@ export class BaseAgent extends EventEmitter {
         success: false,
         error: error.message,
         metrics: {
-          agentId: this.id
-        }
+          agentId: this.id,
+        },
       };
     }
   }
@@ -123,7 +117,7 @@ export class BaseAgent extends EventEmitter {
    * Task execution implementation
    * Must be overridden in subclasses
    */
-  async onExecute(task, context) {
+  async onExecute(_task, _context) {
     throw new Error(`Agent ${this.id} must implement onExecute method`);
   }
 
@@ -131,7 +125,7 @@ export class BaseAgent extends EventEmitter {
    * Check if agent can handle a task
    * @param {string} task - Task identifier
    */
-  canHandle(task) {
+  canHandle(_task) {
     // Default implementation - override in subclasses
     return true;
   }
@@ -151,7 +145,7 @@ export class BaseAgent extends EventEmitter {
       id: this.id,
       name: this.name,
       status: this.status,
-      capabilities: this.getCapabilities()
+      capabilities: this.getCapabilities(),
     };
   }
 
@@ -179,11 +173,7 @@ export class BaseAgent extends EventEmitter {
     try {
       const stateDir = path.dirname(this.statePath);
       await fs.mkdir(stateDir, { recursive: true });
-      await fs.writeFile(
-        this.statePath,
-        JSON.stringify(this.state, null, 2),
-        'utf-8'
-      );
+      await fs.writeFile(this.statePath, JSON.stringify(this.state, null, 2), 'utf-8');
       this.emit('state:saved', { agent: this.id, state: this.state });
     } catch (error) {
       console.error(`Failed to save state for agent ${this.id}:`, error.message);
@@ -247,7 +237,7 @@ export class BaseAgent extends EventEmitter {
     this.emit('message:send', {
       from: this.id,
       to: targetAgent,
-      message
+      message,
     });
 
     // Message sending will be handled by AgentRegistry
@@ -255,7 +245,7 @@ export class BaseAgent extends EventEmitter {
       sent: true,
       from: this.id,
       to: targetAgent,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -266,7 +256,7 @@ export class BaseAgent extends EventEmitter {
   async receiveMessage(message) {
     this.emit('message:received', {
       agent: this.id,
-      message
+      message,
     });
 
     // Handle message - override in subclasses for custom handling
@@ -276,7 +266,7 @@ export class BaseAgent extends EventEmitter {
   /**
    * Message handling hook for subclasses
    */
-  async onMessage(message) {
+  async onMessage(_message) {
     // Override in subclasses
     return { received: true };
   }

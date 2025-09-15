@@ -3,13 +3,13 @@ class ScoringAlgorithm {
     this.impactWeights = {
       high: 1.0,
       medium: 0.6,
-      low: 0.3
+      low: 0.3,
     };
 
     this.effortWeights = {
       low: 1.0,
       medium: 0.6,
-      high: 0.3
+      high: 0.3,
     };
 
     this.categoryBoosts = {
@@ -17,7 +17,7 @@ class ScoringAlgorithm {
       performance: 1.2,
       workflow: 1.0,
       codeQuality: 1.1,
-      dependencies: 0.9
+      dependencies: 0.9,
     };
   }
 
@@ -34,7 +34,7 @@ class ScoringAlgorithm {
     const confidence = recommendation.confidence || 0.5;
 
     // Calculate base score
-    score = (impactScore * 0.4) + (effortScore * 0.3) + (confidence * 0.3);
+    score = impactScore * 0.4 + effortScore * 0.3 + confidence * 0.3;
 
     // Apply category boost
     const categoryBoost = this.categoryBoosts[recommendation.category] || 1.0;
@@ -50,7 +50,9 @@ class ScoringAlgorithm {
   }
 
   calculateBaseConfidence(dataPoints, totalPossible) {
-    if (totalPossible === 0) return 0.5;
+    if (totalPossible === 0) {
+      return 0.5;
+    }
     return Math.min(1.0, dataPoints / totalPossible);
   }
 
@@ -58,29 +60,41 @@ class ScoringAlgorithm {
     // Historical accuracy influences confidence
     // If past recommendations were accurate, boost confidence
     const weight = 0.3; // How much historical accuracy influences the score
-    return baseScore * (1 - weight) + (baseScore * historicalAccuracy * weight);
+    return baseScore * (1 - weight) + baseScore * historicalAccuracy * weight;
   }
 
   applyRecencyBoost(score, daysOld) {
     // More recent data gets a confidence boost
-    const recencyFactor = Math.max(0, 1 - (daysOld / 30)); // Decay over 30 days
+    const recencyFactor = Math.max(0, 1 - daysOld / 30); // Decay over 30 days
     const boost = recencyFactor * 0.2; // Max 20% boost for very recent data
     return Math.min(1.0, score + boost);
   }
 
   calculateComplexityPenalty(complexity) {
     // Higher complexity reduces confidence
-    if (complexity < 5) return 0;
-    if (complexity < 10) return 0.05;
-    if (complexity < 20) return 0.1;
+    if (complexity < 5) {
+      return 0;
+    }
+    if (complexity < 10) {
+      return 0.05;
+    }
+    if (complexity < 20) {
+      return 0.1;
+    }
     return 0.2;
   }
 
   calculateCoverageBoost(coverage) {
     // Higher test coverage increases confidence
-    if (coverage > 80) return 0.15;
-    if (coverage > 60) return 0.1;
-    if (coverage > 40) return 0.05;
+    if (coverage > 80) {
+      return 0.15;
+    }
+    if (coverage > 60) {
+      return 0.1;
+    }
+    if (coverage > 40) {
+      return 0.05;
+    }
     return 0;
   }
 
@@ -89,9 +103,13 @@ class ScoringAlgorithm {
 
     // Frequency-based scoring
     if (pattern.frequency) {
-      if (pattern.frequency > 10) score += 0.2;
-      else if (pattern.frequency > 5) score += 0.1;
-      else if (pattern.frequency > 2) score += 0.05;
+      if (pattern.frequency > 10) {
+        score += 0.2;
+      } else if (pattern.frequency > 5) {
+        score += 0.1;
+      } else if (pattern.frequency > 2) {
+        score += 0.05;
+      }
     }
 
     // Confidence from pattern
@@ -110,9 +128,9 @@ class ScoringAlgorithm {
 
   rankRecommendations(recommendations) {
     // Calculate scores for all recommendations
-    const scored = recommendations.map(rec => ({
+    const scored = recommendations.map((rec) => ({
       ...rec,
-      score: this.calculatePriority(rec)
+      score: this.calculatePriority(rec),
     }));
 
     // Sort by score (highest first)
@@ -153,7 +171,10 @@ class ScoringAlgorithm {
 
     // Calculate simple linear trend
     const n = historicalScores.length;
-    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    let sumX = 0,
+      sumY = 0,
+      sumXY = 0,
+      sumX2 = 0;
 
     for (let i = 0; i < n; i++) {
       sumX += i;
@@ -206,13 +227,19 @@ class ScoringAlgorithm {
       // If scores are very close, use secondary criteria
 
       // Prefer security over other categories
-      if (rec1.category === 'security' && rec2.category !== 'security') return -1;
-      if (rec2.category === 'security' && rec1.category !== 'security') return 1;
+      if (rec1.category === 'security' && rec2.category !== 'security') {
+        return -1;
+      }
+      if (rec2.category === 'security' && rec1.category !== 'security') {
+        return 1;
+      }
 
       // Prefer lower effort for similar impact
       const effort1 = this.effortWeights[rec1.effort] || 0.5;
       const effort2 = this.effortWeights[rec2.effort] || 0.5;
-      if (effort1 !== effort2) return effort2 - effort1;
+      if (effort1 !== effort2) {
+        return effort2 - effort1;
+      }
 
       // Prefer higher confidence
       return (rec2.confidence || 0) - (rec1.confidence || 0);

@@ -9,7 +9,7 @@ class PatternRecognizer {
       commits: {},
       files: {},
       workflow: {},
-      structure: {}
+      structure: {},
     };
   }
 
@@ -18,7 +18,7 @@ class PatternRecognizer {
       commits: await this.analyzeCommitHistory(),
       files: await this.analyzeFilePatterns(),
       workflow: await this.analyzeWorkflowPatterns(),
-      structure: await this.analyzeProjectStructure()
+      structure: await this.analyzeProjectStructure(),
     };
 
     this.patterns = patterns;
@@ -56,7 +56,7 @@ class PatternRecognizer {
           author,
           email,
           date: new Date(date),
-          files: []
+          files: [],
         };
       } else if (line.trim() && currentCommit) {
         currentCommit.files.push(line.trim());
@@ -77,7 +77,7 @@ class PatternRecognizer {
       commitTopics: {},
       authorPatterns: {},
       timePatterns: {},
-      coChangedFiles: []
+      coChangedFiles: [],
     };
 
     // Analyze frequently changed files
@@ -87,7 +87,7 @@ class PatternRecognizer {
       }
 
       // Analyze commit types (conventional commits)
-      const typeMatch = commit.message.match(/^(\w+)(?:\([\w\-]+\))?:/);
+      const typeMatch = commit.message.match(/^(\w+)(?:\([\w-]+\))?:/);
       if (typeMatch) {
         const type = typeMatch[1];
         patterns.commitTypes[type] = (patterns.commitTypes[type] || 0) + 1;
@@ -106,7 +106,8 @@ class PatternRecognizer {
       const hour = commit.date.getHours();
       const dayOfWeek = commit.date.getDay();
       patterns.timePatterns[`hour_${hour}`] = (patterns.timePatterns[`hour_${hour}`] || 0) + 1;
-      patterns.timePatterns[`day_${dayOfWeek}`] = (patterns.timePatterns[`day_${dayOfWeek}`] || 0) + 1;
+      patterns.timePatterns[`day_${dayOfWeek}`] =
+        (patterns.timePatterns[`day_${dayOfWeek}`] || 0) + 1;
     }
 
     // Find co-changed files
@@ -122,7 +123,16 @@ class PatternRecognizer {
 
   extractTopics(message) {
     const topics = [];
-    const keywords = ['security', 'performance', 'bug', 'feature', 'refactor', 'test', 'docs', 'style'];
+    const keywords = [
+      'security',
+      'performance',
+      'bug',
+      'feature',
+      'refactor',
+      'test',
+      'docs',
+      'style',
+    ];
 
     for (const keyword of keywords) {
       if (message.toLowerCase().includes(keyword)) {
@@ -150,7 +160,7 @@ class PatternRecognizer {
       .filter(([_, count]) => count > 2)
       .map(([pair, count]) => ({
         files: pair.split('|'),
-        count
+        count,
       }))
       .sort((a, b) => b.count - a.count);
   }
@@ -161,7 +171,7 @@ class PatternRecognizer {
         fileTypes: {},
         largeFiles: [],
         recentlyModified: [],
-        staleFiles: []
+        staleFiles: [],
       };
 
       // Get file statistics
@@ -175,11 +185,12 @@ class PatternRecognizer {
         const fileInfo = {
           path: path.relative(this.projectPath, file),
           size: stats.size,
-          modified: stats.mtime
+          modified: stats.mtime,
         };
 
         // Track large files
-        if (stats.size > 1048576) { // > 1MB
+        if (stats.size > 1048576) {
+          // > 1MB
           patterns.largeFiles.push(fileInfo);
         }
 
@@ -208,17 +219,17 @@ class PatternRecognizer {
       branchingStrategy: null,
       prFrequency: null,
       mergeStrategy: null,
-      cicdPipeline: null
+      cicdPipeline: null,
     };
 
     try {
       // Analyze branching strategy
       const branches = execSync('git branch -r', { cwd: this.projectPath, encoding: 'utf8' });
-      const branchLines = branches.split('\n').filter(b => b.trim());
+      const branchLines = branches.split('\n').filter((b) => b.trim());
 
-      if (branchLines.some(b => b.includes('feature/'))) {
+      if (branchLines.some((b) => b.includes('feature/'))) {
         patterns.branchingStrategy = 'feature-branch';
-      } else if (branchLines.some(b => b.includes('develop'))) {
+      } else if (branchLines.some((b) => b.includes('develop'))) {
         patterns.branchingStrategy = 'git-flow';
       } else {
         patterns.branchingStrategy = 'trunk-based';
@@ -228,12 +239,12 @@ class PatternRecognizer {
       try {
         const prList = execSync('gh pr list --state all --limit 50 --json createdAt', {
           cwd: this.projectPath,
-          encoding: 'utf8'
+          encoding: 'utf8',
         });
         const prs = JSON.parse(prList);
 
         if (prs.length > 0) {
-          const dates = prs.map(pr => new Date(pr.createdAt));
+          const dates = prs.map((pr) => new Date(pr.createdAt));
           const daysBetween = [];
 
           for (let i = 1; i < dates.length; i++) {
@@ -263,17 +274,23 @@ class PatternRecognizer {
         '.gitlab-ci.yml',
         'Jenkinsfile',
         '.circleci/config.yml',
-        'azure-pipelines.yml'
+        'azure-pipelines.yml',
       ];
 
       for (const ciFile of ciFiles) {
         try {
           await fs.access(path.join(this.projectPath, ciFile));
-          patterns.cicdPipeline = ciFile.includes('github') ? 'github-actions' :
-                                 ciFile.includes('gitlab') ? 'gitlab-ci' :
-                                 ciFile.includes('Jenkins') ? 'jenkins' :
-                                 ciFile.includes('circle') ? 'circleci' :
-                                 ciFile.includes('azure') ? 'azure-devops' : 'unknown';
+          patterns.cicdPipeline = ciFile.includes('github')
+            ? 'github-actions'
+            : ciFile.includes('gitlab')
+              ? 'gitlab-ci'
+              : ciFile.includes('Jenkins')
+                ? 'jenkins'
+                : ciFile.includes('circle')
+                  ? 'circleci'
+                  : ciFile.includes('azure')
+                    ? 'azure-devops'
+                    : 'unknown';
           break;
         } catch {
           // File doesn't exist
@@ -294,7 +311,7 @@ class PatternRecognizer {
       buildTool: null,
       packageManager: null,
       dependencies: [],
-      devDependencies: []
+      devDependencies: [],
     };
 
     try {
@@ -303,8 +320,11 @@ class PatternRecognizer {
 
       if (files.includes('package.json')) {
         patterns.projectType = 'node';
-        patterns.packageManager = files.includes('yarn.lock') ? 'yarn' :
-                                 files.includes('pnpm-lock.yaml') ? 'pnpm' : 'npm';
+        patterns.packageManager = files.includes('yarn.lock')
+          ? 'yarn'
+          : files.includes('pnpm-lock.yaml')
+            ? 'pnpm'
+            : 'npm';
 
         // Analyze package.json
         const packageJson = JSON.parse(
@@ -346,9 +366,10 @@ class PatternRecognizer {
       }
 
       // Check for tests
-      patterns.hasTests = files.some(f => f.includes('test')) ||
-                        files.includes('__tests__') ||
-                        files.includes('spec');
+      patterns.hasTests =
+        files.some((f) => f.includes('test')) ||
+        files.includes('__tests__') ||
+        files.includes('spec');
 
       return patterns;
     } catch (error) {
@@ -361,7 +382,7 @@ class PatternRecognizer {
       hasTests: false,
       componentStructure: null,
       depth: 0,
-      fileCount: 0
+      fileCount: 0,
     };
 
     function analyzeTree(tree, depth = 0) {
@@ -397,12 +418,12 @@ class PatternRecognizer {
   analyzeCommitMessages(commits) {
     const patterns = {
       commonTypes: {},
-      commonTopics: []
+      commonTopics: [],
     };
 
     for (const commit of commits) {
       // Extract commit type
-      const typeMatch = commit.message.match(/^(\w+)(?:\([\w\-]+\))?:/);
+      const typeMatch = commit.message.match(/^(\w+)(?:\([\w-]+\))?:/);
       if (typeMatch) {
         const type = typeMatch[1];
         patterns.commonTypes[type] = (patterns.commonTypes[type] || 0) + 1;
@@ -426,7 +447,12 @@ class PatternRecognizer {
       const fullPath = path.join(dir, item.name);
 
       // Skip common directories to ignore
-      if (item.name === 'node_modules' || item.name === '.git' || item.name === 'dist' || item.name === 'build') {
+      if (
+        item.name === 'node_modules' ||
+        item.name === '.git' ||
+        item.name === 'dist' ||
+        item.name === 'build'
+      ) {
         continue;
       }
 

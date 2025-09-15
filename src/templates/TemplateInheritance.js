@@ -54,7 +54,7 @@ class TemplateInheritance {
       // Preserve child's identity
       id: child.id,
       name: child.name,
-      parent: child.parent
+      parent: child.parent,
     };
 
     // Merge variables
@@ -89,7 +89,7 @@ class TemplateInheritance {
           ...parent,
           ...variable,
           // Preserve parent's validation if child doesn't override
-          validation: variable.validation || parent.validation
+          validation: variable.validation || parent.validation,
         });
       } else {
         merged.set(variable.name, { ...variable });
@@ -136,7 +136,7 @@ class TemplateInheritance {
         merged = merged.replace('{{#content}}', childWithoutBlocks);
       } else {
         // Append to end if no placeholder
-        merged += '\n' + childWithoutBlocks;
+        merged += `\n${childWithoutBlocks}`;
       }
     }
 
@@ -149,7 +149,7 @@ class TemplateInheritance {
     let match;
 
     while ((match = blockPattern.exec(content)) !== null) {
-      const [fullMatch, blockName, blockContent] = match;
+      const [_fullMatch, blockName, blockContent] = match;
       blocks.set(blockName, blockContent.trim());
     }
 
@@ -234,12 +234,12 @@ class TemplateInheritance {
         valid: true,
         chain,
         depth: chain.length,
-        resolved
+        resolved,
       };
     } catch (error) {
       return {
         valid: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -247,7 +247,7 @@ class TemplateInheritance {
   async getInheritanceTree(templateId) {
     const tree = {
       id: templateId,
-      children: []
+      children: [],
     };
 
     // Find all templates that inherit from this one
@@ -289,7 +289,7 @@ class TemplateInheritance {
         impacts.push({
           templateId: child.id,
           templateName: child.name,
-          ...impact
+          ...impact,
         });
       }
     }
@@ -301,18 +301,18 @@ class TemplateInheritance {
     const child = await this.templateManager.getTemplate(childId);
     const impact = {
       hasImpact: false,
-      changes: []
+      changes: [],
     };
 
     // Check if child overrides any updated fields
     if (parentUpdates.variables) {
       for (const variable of parentUpdates.variables) {
-        const childVar = child.variables?.find(v => v.name === variable.name);
+        const childVar = child.variables?.find((v) => v.name === variable.name);
         if (!childVar) {
           impact.hasImpact = true;
           impact.changes.push({
             type: 'new_variable',
-            name: variable.name
+            name: variable.name,
           });
         }
       }
@@ -322,7 +322,7 @@ class TemplateInheritance {
       impact.hasImpact = true;
       impact.changes.push({
         type: 'content_change',
-        description: 'Parent content changed, child inherits'
+        description: 'Parent content changed, child inherits',
       });
     }
 

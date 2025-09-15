@@ -117,7 +117,7 @@ export class AgentRegistry extends EventEmitter {
    * List all registered agents
    */
   list() {
-    return Array.from(this.agents.values()).map(agent => agent.getStatus());
+    return Array.from(this.agents.values()).map((agent) => agent.getStatus());
   }
 
   /**
@@ -171,14 +171,14 @@ export class AgentRegistry extends EventEmitter {
         metrics: {
           ...result.metrics,
           executionTime,
-          registryTime: Date.now() - startTime
-        }
+          registryTime: Date.now() - startTime,
+        },
       };
 
       this.emit('agent:completed', {
         id,
         task,
-        result: enhancedResult
+        result: enhancedResult,
       });
 
       return enhancedResult;
@@ -214,7 +214,7 @@ export class AgentRegistry extends EventEmitter {
    */
   getAllStatuses() {
     const statuses = {};
-    for (const [id, agent] of this.agents.entries()) {
+    for (const [id, _agent] of this.agents.entries()) {
       statuses[id] = this.getStatus(id);
     }
     return statuses;
@@ -233,9 +233,9 @@ export class AgentRegistry extends EventEmitter {
     }
 
     const shutdownPromises = [];
-    for (const [id, agent] of this.agents.entries()) {
+    for (const [id, _agent] of this.agents.entries()) {
       shutdownPromises.push(
-        this.unregister(id).catch(error => {
+        this.unregister(id).catch((error) => {
           console.error(`Failed to shutdown agent ${id}:`, error);
         })
       );
@@ -300,7 +300,7 @@ export class AgentRegistry extends EventEmitter {
       this.emit('message:failed', {
         from,
         to,
-        reason: `Target agent ${to} not found`
+        reason: `Target agent ${to} not found`,
       });
       return;
     }
@@ -310,7 +310,7 @@ export class AgentRegistry extends EventEmitter {
       from,
       to,
       message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     this.emit('message:queued', { from, to });
@@ -333,18 +333,18 @@ export class AgentRegistry extends EventEmitter {
         await targetAgent.receiveMessage({
           from: message.from,
           content: message.message,
-          timestamp: message.timestamp
+          timestamp: message.timestamp,
         });
 
         this.emit('message:delivered', {
           from: message.from,
-          to: message.to
+          to: message.to,
         });
       } catch (error) {
         this.emit('message:failed', {
           from: message.from,
           to: message.to,
-          error: error.message
+          error: error.message,
         });
       }
     } else {
@@ -364,14 +364,16 @@ export class AgentRegistry extends EventEmitter {
     for (const [id, agent] of this.agents.entries()) {
       if (id !== sender) {
         promises.push(
-          agent.receiveMessage({
-            from: sender,
-            content: message,
-            timestamp: new Date().toISOString(),
-            broadcast: true
-          }).catch(error => {
-            console.error(`Failed to broadcast to agent ${id}:`, error);
-          })
+          agent
+            .receiveMessage({
+              from: sender,
+              content: message,
+              timestamp: new Date().toISOString(),
+              broadcast: true,
+            })
+            .catch((error) => {
+              console.error(`Failed to broadcast to agent ${id}:`, error);
+            })
         );
       }
     }

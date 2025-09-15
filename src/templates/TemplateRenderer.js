@@ -13,8 +13,7 @@ class TemplateRenderer {
       return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
     });
     this.registerHelper('camelCase', (str) => {
-      return String(str)
-        .replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : '');
+      return String(str).replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''));
     });
     this.registerHelper('kebabCase', (str) => {
       return String(str)
@@ -80,8 +79,8 @@ class TemplateRenderer {
 
   render(template, variables = {}) {
     // Merge with parent template if exists
-    let content = template.content;
-    let mergedVariables = { ...variables };
+    const content = template.content;
+    const mergedVariables = { ...variables };
 
     if (template.parent) {
       // This would need access to TemplateManager to get parent template
@@ -128,7 +127,7 @@ class TemplateRenderer {
       }
 
       // Apply helper chain
-      const helpers = helperChain.split('|').map(h => h.trim());
+      const helpers = helperChain.split('|').map((h) => h.trim());
       for (const helperCall of helpers) {
         value = this.applyHelper(helperCall, value, variables);
       }
@@ -158,7 +157,7 @@ class TemplateRenderer {
         rendered[renderedKey] = this.renderString(value, variables);
       } else if (typeof value === 'object' && value !== null) {
         if (Array.isArray(value)) {
-          rendered[renderedKey] = value.map(item => {
+          rendered[renderedKey] = value.map((item) => {
             if (typeof item === 'string') {
               return this.renderString(item, variables);
             } else if (typeof item === 'object') {
@@ -236,7 +235,7 @@ class TemplateRenderer {
 
   parseArguments(argsString, variables) {
     const args = [];
-    const parts = argsString.split(',').map(s => s.trim());
+    const parts = argsString.split(',').map((s) => s.trim());
 
     for (const part of parts) {
       // String literal
@@ -282,12 +281,18 @@ class TemplateRenderer {
       const rightValue = this.parseValue(right.trim(), variables);
 
       switch (operator) {
-        case '==': return leftValue == rightValue;
-        case '!=': return leftValue != rightValue;
-        case '>': return leftValue > rightValue;
-        case '>=': return leftValue >= rightValue;
-        case '<': return leftValue < rightValue;
-        case '<=': return leftValue <= rightValue;
+        case '==':
+          return leftValue === rightValue;
+        case '!=':
+          return leftValue !== rightValue;
+        case '>':
+          return leftValue > rightValue;
+        case '>=':
+          return leftValue >= rightValue;
+        case '<':
+          return leftValue < rightValue;
+        case '<=':
+          return leftValue <= rightValue;
       }
     }
 
@@ -330,7 +335,7 @@ class TemplateRenderer {
           item,
           index: i,
           first: i === 0,
-          last: i === array.length - 1
+          last: i === array.length - 1,
         };
 
         // If item is an object, spread its properties
@@ -345,10 +350,10 @@ class TemplateRenderer {
     });
   }
 
-  processIncludes(content, variables) {
+  processIncludes(content, _variables) {
     const includePattern = /\{\{>\s*([^}]+)\}\}/g;
 
-    return content.replace(includePattern, (match, templateName) => {
+    return content.replace(includePattern, (_match, templateName) => {
       // This would need access to TemplateManager to include other templates
       // For now, we'll just return a placeholder
       console.warn(`Template include not implemented: ${templateName}`);
@@ -362,10 +367,10 @@ class TemplateRenderer {
       '<': '&lt;',
       '>': '&gt;',
       '"': '&quot;',
-      "'": '&#39;'
+      "'": '&#39;',
     };
 
-    return String(str).replace(/[&<>"']/g, char => escapeMap[char]);
+    return String(str).replace(/[&<>"']/g, (char) => escapeMap[char]);
   }
 }
 

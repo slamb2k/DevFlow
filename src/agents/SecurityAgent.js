@@ -16,14 +16,15 @@ export class SecurityAgent extends BaseAgent {
       ...config,
       id: 'security',
       name: 'SecurityAgent',
-      description: 'Performs vulnerability scanning, SAST analysis, dependency auditing, and secret detection'
+      description:
+        'Performs vulnerability scanning, SAST analysis, dependency auditing, and secret detection',
     });
 
     this.capabilities = [
       'vulnerability-scanning',
       'sast-analysis',
       'dependency-audit',
-      'secret-detection'
+      'secret-detection',
     ];
   }
 
@@ -42,34 +43,34 @@ export class SecurityAgent extends BaseAgent {
           patterns: [
             /query\s*\(\s*["'`].*?\+.*?["'`]/,
             /execute\s*\(\s*["'`].*?\+.*?["'`]/,
-            /WHERE.*?\+.*?(?:req\.|request\.|params\.|query\.)/
+            /WHERE.*?\+.*?(?:req\.|request\.|params\.|query\.)/,
           ],
-          severity: 'high'
+          severity: 'high',
         },
-        'xss': {
+        xss: {
           patterns: [
             /innerHTML\s*=.*?(?:req\.|request\.|params\.|query\.)/,
             /document\.write\s*\(.*?(?:req\.|request\.|params\.)/,
-            /res\.send\s*\(\s*['"`].*?\+.*?req\./
+            /res\.send\s*\(\s*['"`].*?\+.*?req\./,
           ],
-          severity: 'high'
+          severity: 'high',
         },
         'path-traversal': {
           patterns: [
             /path\.join\s*\(.*?(?:req\.|request\.|params\.|query\.)/,
             /readFile.*?(?:req\.|request\.|params\.|query\.)/,
-            /sendFile.*?(?:req\.|request\.|params\.|query\.)/
+            /sendFile.*?(?:req\.|request\.|params\.|query\.)/,
           ],
-          severity: 'high'
+          severity: 'high',
         },
         'command-injection': {
           patterns: [
             /exec\s*\(.*?\+.*?(?:req\.|request\.|params\.|query\.)/,
             /spawn\s*\(.*?\+.*?(?:req\.|request\.|params\.|query\.)/,
-            /execSync\s*\(.*?\+.*?(?:req\.|request\.|params\.|query\.)/
+            /execSync\s*\(.*?\+.*?(?:req\.|request\.|params\.|query\.)/,
           ],
-          severity: 'critical'
-        }
+          severity: 'critical',
+        },
       },
       secrets: {
         'api-key': /(?:api[_-]?key|apikey)[\s:=]+['"]?([a-zA-Z0-9\-_]{20,})['"]?/i,
@@ -78,21 +79,21 @@ export class SecurityAgent extends BaseAgent {
         'private-key': /-----BEGIN\s+(?:RSA\s+)?PRIVATE\s+KEY-----/,
         'database-url': /(?:mongodb|postgresql|mysql):\/\/[^:]+:[^@]+@[^/]+/,
         'github-token': /ghp_[a-zA-Z0-9]{36}/,
-        'jwt-secret': /(?:jwt[_-]?secret|secret[_-]?key)[\s:=]+['"]([^'"]{10,})['"]?/i
+        'jwt-secret': /(?:jwt[_-]?secret|secret[_-]?key)[\s:=]+['"]([^'"]{10,})['"]?/i,
       },
       weakCrypto: {
-        'md5': /createHash\s*\(\s*['"]md5['"]/,
-        'sha1': /createHash\s*\(\s*['"]sha1['"]/,
-        'weak-random': /Math\.random\s*\(\s*\)/
-      }
+        md5: /createHash\s*\(\s*['"]md5['"]/,
+        sha1: /createHash\s*\(\s*['"]sha1['"]/,
+        'weak-random': /Math\.random\s*\(\s*\)/,
+      },
     };
   }
 
   loadVulnerabilityDatabase() {
     return {
-      'minimist': { versions: ['< 1.2.6'], severity: 'high', cve: 'CVE-2021-44906' },
+      minimist: { versions: ['< 1.2.6'], severity: 'high', cve: 'CVE-2021-44906' },
       'serialize-javascript': { versions: ['< 3.1.0'], severity: 'high', cve: 'CVE-2020-7660' },
-      'lodash': { versions: ['< 4.17.21'], severity: 'high', cve: 'CVE-2021-23337' }
+      lodash: { versions: ['< 4.17.21'], severity: 'high', cve: 'CVE-2021-23337' },
     };
   }
 
@@ -103,7 +104,7 @@ export class SecurityAgent extends BaseAgent {
       'audit-dependencies',
       'detect-secrets',
       'generate-report',
-      'calculate-score'
+      'calculate-score',
     ];
     return validTasks.includes(task);
   }
@@ -145,7 +146,7 @@ export class SecurityAgent extends BaseAgent {
               severity: config.severity,
               line: lines.length,
               file: filePath,
-              snippet: matches[0].substring(0, 100)
+              snippet: matches[0].substring(0, 100),
             });
           }
         }
@@ -156,15 +157,15 @@ export class SecurityAgent extends BaseAgent {
         type: 'scan-vulnerabilities',
         file: filePath,
         timestamp: new Date().toISOString(),
-        vulnerabilities: vulnerabilities.length
+        vulnerabilities: vulnerabilities.length,
       });
 
       // Track trends
       this.state.vulnerabilityTrends.push({
         timestamp: new Date().toISOString(),
         count: vulnerabilities.length,
-        critical: vulnerabilities.filter(v => v.severity === 'critical').length,
-        high: vulnerabilities.filter(v => v.severity === 'high').length
+        critical: vulnerabilities.filter((v) => v.severity === 'critical').length,
+        high: vulnerabilities.filter((v) => v.severity === 'high').length,
       });
 
       await this.saveState();
@@ -188,7 +189,7 @@ export class SecurityAgent extends BaseAgent {
           issues.push({
             type: 'weak-crypto',
             message: `Weak cryptography detected: ${weakness}`,
-            severity: 'medium'
+            severity: 'medium',
           });
         }
       }
@@ -198,7 +199,7 @@ export class SecurityAgent extends BaseAgent {
         issues.push({
           type: 'weak-random',
           message: 'Math.random() is not cryptographically secure',
-          severity: 'low'
+          severity: 'low',
         });
       }
 
@@ -207,7 +208,7 @@ export class SecurityAgent extends BaseAgent {
         issues.push({
           type: 'insecure-cors',
           message: 'CORS configured with wildcard origin',
-          severity: 'medium'
+          severity: 'medium',
         });
       }
 
@@ -215,7 +216,7 @@ export class SecurityAgent extends BaseAgent {
         issues.push({
           type: 'disabled-security-feature',
           message: 'Content Security Policy is disabled',
-          severity: 'medium'
+          severity: 'medium',
         });
       }
 
@@ -254,7 +255,7 @@ export class SecurityAgent extends BaseAgent {
         critical: 0,
         high: 0,
         moderate: 0,
-        low: 0
+        low: 0,
       };
 
       const vulnerabilities = [];
@@ -270,13 +271,18 @@ export class SecurityAgent extends BaseAgent {
             package: pkg,
             version,
             severity: vuln.severity,
-            cve: vuln.cve
+            cve: vuln.cve,
           });
 
-          if (vuln.severity === 'critical') summary.critical++;
-          else if (vuln.severity === 'high') summary.high++;
-          else if (vuln.severity === 'moderate') summary.moderate++;
-          else summary.low++;
+          if (vuln.severity === 'critical') {
+            summary.critical++;
+          } else if (vuln.severity === 'high') {
+            summary.high++;
+          } else if (vuln.severity === 'moderate') {
+            summary.moderate++;
+          } else {
+            summary.low++;
+          }
         }
       }
 
@@ -297,7 +303,7 @@ export class SecurityAgent extends BaseAgent {
             vulnerabilities.push({
               module: advisory.module_name,
               severity: advisory.severity,
-              title: advisory.title
+              title: advisory.title,
             });
           }
         }
@@ -334,7 +340,7 @@ export class SecurityAgent extends BaseAgent {
         vulnerabilities,
         knownVulnerabilities,
         outdated,
-        recommendations
+        recommendations,
       };
     } catch (error) {
       throw new Error(`Failed to audit dependencies: ${error.message}`);
@@ -364,7 +370,7 @@ export class SecurityAgent extends BaseAgent {
       return {
         filesScanned: files.length,
         totalSecrets,
-        secrets: allSecrets
+        secrets: allSecrets,
       };
     }
 
@@ -378,7 +384,7 @@ export class SecurityAgent extends BaseAgent {
         type: 'detect-secrets',
         file: filePath,
         timestamp: new Date().toISOString(),
-        secretsFound: secrets.length
+        secretsFound: secrets.length,
       });
 
       await this.saveState();
@@ -399,7 +405,7 @@ export class SecurityAgent extends BaseAgent {
           type,
           severity: type === 'private-key' || type === 'api-key' ? 'critical' : 'high',
           file: filePath,
-          count: matches.length
+          count: matches.length,
         });
       }
     }
@@ -413,20 +419,21 @@ export class SecurityAgent extends BaseAgent {
     const report = {
       summary: {
         timestamp: new Date().toISOString(),
-        directory
+        directory,
       },
       vulnerabilities: [],
       dependencies: {},
       secrets: [],
       recommendations: [],
-      score: 0
+      score: 0,
     };
 
     if (includeAll) {
       // Comprehensive scan
       const files = await this.getAllFiles(directory);
 
-      for (const file of files.slice(0, 10)) { // Limit for performance
+      for (const file of files.slice(0, 10)) {
+        // Limit for performance
         if (file.endsWith('.js') || file.endsWith('.jsx')) {
           try {
             const vulns = await this.scanVulnerabilities({ filePath: file });
@@ -458,17 +465,17 @@ export class SecurityAgent extends BaseAgent {
     const scoreData = await this.calculateSecurityScore({
       metrics: {
         vulnerabilities: {
-          critical: report.vulnerabilities.filter(v => v.severity === 'critical').length,
-          high: report.vulnerabilities.filter(v => v.severity === 'high').length,
-          medium: report.vulnerabilities.filter(v => v.severity === 'medium').length,
-          low: report.vulnerabilities.filter(v => v.severity === 'low').length
+          critical: report.vulnerabilities.filter((v) => v.severity === 'critical').length,
+          high: report.vulnerabilities.filter((v) => v.severity === 'high').length,
+          medium: report.vulnerabilities.filter((v) => v.severity === 'medium').length,
+          low: report.vulnerabilities.filter((v) => v.severity === 'low').length,
         },
         coverage: {
           sast: true,
           dependencies: true,
-          secrets: report.secrets.length === 0
-        }
-      }
+          secrets: report.secrets.length === 0,
+        },
+      },
     });
 
     report.score = scoreData.score;
@@ -476,10 +483,14 @@ export class SecurityAgent extends BaseAgent {
 
     // Generate recommendations
     if (report.vulnerabilities.length > 0) {
-      report.recommendations.push('Fix identified vulnerabilities, prioritizing critical and high severity issues');
+      report.recommendations.push(
+        'Fix identified vulnerabilities, prioritizing critical and high severity issues'
+      );
     }
     if (report.secrets.length > 0) {
-      report.recommendations.push('Remove hardcoded secrets and use environment variables or secret management systems');
+      report.recommendations.push(
+        'Remove hardcoded secrets and use environment variables or secret management systems'
+      );
     }
     if (report.dependencies.summary && report.dependencies.summary.high > 0) {
       report.recommendations.push('Update vulnerable dependencies using npm audit fix');
@@ -500,18 +511,30 @@ export class SecurityAgent extends BaseAgent {
     score -= metrics.vulnerabilities.low * 2;
 
     // Bonus for coverage
-    if (metrics.coverage.sast) score += 5;
-    if (metrics.coverage.dependencies) score += 5;
-    if (metrics.coverage.secrets) score += 5;
+    if (metrics.coverage.sast) {
+      score += 5;
+    }
+    if (metrics.coverage.dependencies) {
+      score += 5;
+    }
+    if (metrics.coverage.secrets) {
+      score += 5;
+    }
 
     score = Math.max(0, Math.min(100, score));
 
     let grade;
-    if (score >= 90) grade = 'A';
-    else if (score >= 80) grade = 'B';
-    else if (score >= 70) grade = 'C';
-    else if (score >= 60) grade = 'D';
-    else grade = 'F';
+    if (score >= 90) {
+      grade = 'A';
+    } else if (score >= 80) {
+      grade = 'B';
+    } else if (score >= 70) {
+      grade = 'C';
+    } else if (score >= 60) {
+      grade = 'D';
+    } else {
+      grade = 'F';
+    }
 
     return { score, grade };
   }
@@ -523,7 +546,9 @@ export class SecurityAgent extends BaseAgent {
       const entries = await fs.readdir(dir);
 
       for (const entry of entries) {
-        if (entry === 'node_modules' || entry.startsWith('.git')) continue;
+        if (entry === 'node_modules' || entry.startsWith('.git')) {
+          continue;
+        }
 
         const fullPath = path.join(dir, entry);
         try {
@@ -532,7 +557,10 @@ export class SecurityAgent extends BaseAgent {
           if (stat.isDirectory()) {
             const subFiles = await this.getAllFiles(fullPath, extensions);
             files.push(...subFiles);
-          } else if (stat.isFile() && (extensions.length === 0 || extensions.some(ext => entry.endsWith(ext)))) {
+          } else if (
+            stat.isFile() &&
+            (extensions.length === 0 || extensions.some((ext) => entry.endsWith(ext)))
+          ) {
             files.push(fullPath);
           }
         } catch (error) {
