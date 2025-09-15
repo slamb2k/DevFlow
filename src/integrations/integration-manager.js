@@ -111,14 +111,14 @@ export class IntegrationManager extends EventEmitter {
    * Register a plugin in the manager
    */
   register_plugin(plugin) {
-    const name = plugin.name || plugin.get_name();
-    const platform = plugin.platform || plugin.get_platform();
+    const name = plugin.name || (plugin.get_name ? plugin.get_name() : 'unnamed');
+    const platform = plugin.platform || (plugin.get_platform ? plugin.get_platform() : 'unknown');
 
     this.plugins.set(name, plugin);
     this.plugin_registry[name] = {
       name,
       platform,
-      version: plugin.version || plugin.get_version(),
+      version: plugin.version || (plugin.get_version ? plugin.get_version() : '1.0.0'),
       status: 'registered',
       registered_at: Date.now(),
     };

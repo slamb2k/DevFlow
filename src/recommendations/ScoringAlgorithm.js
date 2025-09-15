@@ -98,6 +98,21 @@ class ScoringAlgorithm {
     return 0;
   }
 
+  getRecencyBoost(date) {
+    // Calculate boost based on how recent the date is
+    const now = new Date();
+    const daysDiff = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+    if (daysDiff <= 1) {
+      return 0.3; // Very recent - high boost
+    } else if (daysDiff <= 7) {
+      return 0.2; // Within a week
+    } else if (daysDiff <= 30) {
+      return 0.1; // Within a month
+    }
+    return 0.05; // Older than a month
+  }
+
   scorePattern(pattern) {
     let score = 0.5; // Base score
 
