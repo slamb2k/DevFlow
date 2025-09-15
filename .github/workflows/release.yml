@@ -1,0 +1,214 @@
+name: Release Management
+
+on:
+  workflow_call:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: false
+        default: 'auto'
+        type: string
+      prerelease_id:
+        description: 'Prerelease identifier'
+        required: false
+        default: 'beta'
+        type: string
+    secrets:
+      NPM_TOKEN:
+        required: true
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+          - auto
+      prerelease_id:
+        description: 'Prerelease identifier (beta, alpha, rc)'
+        required: false
+        default: 'beta'
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Determine version bump
+        id: version
+        run: |
+          RELEASE_TYPE="${{ inputs.release_type }}"
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+
+          # If skip, version was already bumped manually
+          if [[ "$RELEASE_TYPE" == "skip" ]]; then
+            echo "Using existing version (already bumped): $CURRENT_VERSION"
+            VERSION="v$CURRENT_VERSION"
+            RELEASE_TYPE="manual"
+          # If auto, determine from commit messages
+          elif [[ "$RELEASE_TYPE" == "auto" ]]; then
+            echo "Analyzing commits for automatic version bump..."
+
+            # Check for breaking changes
+            if git log --format=%B -n 50 | grep -q "^BREAKING CHANGE:\|^[a-z]*!:"; then
+              RELEASE_TYPE="major"
+            # Check for features
+            elif git log --format=%B -n 50 | grep -q "^feat:\|^feature:"; then
+              RELEASE_TYPE="minor"
+            # Default to patch
+            else
+              RELEASE_TYPE="patch"
+            fi
+
+            echo "Auto-detected release type: $RELEASE_TYPE"
+            VERSION=$(npm version $RELEASE_TYPE --no-git-tag-version)
+          # Manual specific version bump
+          elif [[ "$RELEASE_TYPE" == "prerelease" ]]; then
+            VERSION=$(npm version prerelease --preid=${{ inputs.prerelease_id }} --no-git-tag-version)
+          else
+            VERSION=$(npm version $RELEASE_TYPE --no-git-tag-version)
+          fi
+
+          echo "version=${VERSION#v}" >> $GITHUB_OUTPUT
+          echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+          echo "New version: ${VERSION#v} (type: $RELEASE_TYPE)"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          # Generate changelog based on commit messages
+          if [ -z "$LAST_TAG" ]; then
+            COMMITS=$(git log --format="- %s (%h)" --no-merges | head -50)
+          else
+            COMMITS=$(git log --format="- %s (%h)" --no-merges ${LAST_TAG}..HEAD)
+          fi
+
+          # Categorize commits
+          echo "## Changelog" > CHANGELOG_TEMP.md
+          echo "" >> CHANGELOG_TEMP.md
+
+          # Features
+          FEATURES=$(echo "$COMMITS" | grep -E "^- feat:|^- feature:" || true)
+          if [ -n "$FEATURES" ]; then
+            echo "### ✨ Features" >> CHANGELOG_TEMP.md
+            echo "$FEATURES" >> CHANGELOG_TEMP.md
+            echo "" >> CHANGELOG_TEMP.md
+          fi
+
+          # Bug fixes
+          FIXES=$(echo "$COMMITS" | grep -E "^- fix:|^- bugfix:" || true)
+          if [ -n "$FIXES" ]; then
+            echo "### 🐛 Bug Fixes" >> CHANGELOG_TEMP.md
+            echo "$FIXES" >> CHANGELOG_TEMP.md
+            echo "" >> CHANGELOG_TEMP.md
+          fi
+
+          # Documentation
+          DOCS=$(echo "$COMMITS" | grep -E "^- docs:|^- doc:" || true)
+          if [ -n "$DOCS" ]; then
+            echo "### 📚 Documentation" >> CHANGELOG_TEMP.md
+            echo "$DOCS" >> CHANGELOG_TEMP.md
+            echo "" >> CHANGELOG_TEMP.md
+          fi
+
+          # Other changes
+          OTHERS=$(echo "$COMMITS" | grep -vE "^- (feat|feature|fix|bugfix|docs|doc):" || true)
+          if [ -n "$OTHERS" ]; then
+            echo "### 🔄 Other Changes" >> CHANGELOG_TEMP.md
+            echo "$OTHERS" >> CHANGELOG_TEMP.md
+            echo "" >> CHANGELOG_TEMP.md
+          fi
+
+          cat CHANGELOG_TEMP.md
+
+      - name: Run tests
+        run: npm test
+        env:
+          NODE_OPTIONS: '--experimental-vm-modules'
+
+      - name: Build project
+        run: npm run build
+
+      - name: Commit version bump
+        if: steps.version.outputs.release_type != 'manual'
+        run: |
+          git add package.json package-lock.json
+          git commit -m "chore(release): v${{ steps.version.outputs.version }} [skip ci]"
+          git push origin main
+
+      - name: Publish to NPM
+        id: npm_publish
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
+          if [[ "${{ steps.version.outputs.release_type }}" == "prerelease" ]]; then
+            npm publish --tag ${{ inputs.prerelease_id }} --access public
+          else
+            npm publish --access public
+          fi
+
+          # Get package URL
+          PACKAGE_URL="https://www.npmjs.com/package/devflow/v/${{ steps.version.outputs.version }}"
+          echo "package_url=$PACKAGE_URL" >> $GITHUB_OUTPUT
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          release_name: v${{ steps.version.outputs.version }}
+          body_path: CHANGELOG_TEMP.md
+          draft: false
+          prerelease: ${{ steps.version.outputs.release_type == 'prerelease' }}
+
+      - name: Post release summary
+        run: |
+          echo "## 🎉 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Version Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Type**: ${{ github.event.inputs.release_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
+          echo "- [NPM Package](${{ steps.npm_publish.outputs.package_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [GitHub Release](https://github.com/slamb2k/DevFlow/releases/tag/v${{ steps.version.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📥 Installation" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "npm install devflow@${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
