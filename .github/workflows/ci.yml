@@ -24,45 +24,48 @@ jobs:
           NODE_OPTIONS: '--experimental-vm-modules'
       - run: npm run build
 
-  publish:
+  # Check if we should create a release
+  check-release:
     needs: test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    outputs:
+      should_release: ${{ steps.check.outputs.should_release }}
+      current_version: ${{ steps.check.outputs.current_version }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm ci
-      - run: npm run build
-      - name: Check if version changed
-        id: version
+      - name: Check for release conditions
+        id: check
         run: |
+          # Check if version was manually bumped
           PUBLISHED_VERSION=$(npm view devflow version 2>/dev/null || echo "0.0.0")
           CURRENT_VERSION=$(node -p "require('./package.json').version")
-          if [ "$PUBLISHED_VERSION" != "$CURRENT_VERSION" ]; then
-            echo "publish=true" >> $GITHUB_OUTPUT
-            echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          else
-            echo "publish=false" >> $GITHUB_OUTPUT
-          fi
-      - name: Publish to NPM
-        if: steps.version.outputs.publish == 'true'
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Create GitHub Release
-        if: steps.version.outputs.publish == 'true'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          release_name: Release v${{ steps.version.outputs.version }}
-          body: |
-            Released version ${{ steps.version.outputs.version }} to npm.
 
-            Install with: `npm install devflow@${{ steps.version.outputs.version }}`
-          draft: false
-          prerelease: false
+          if [ "$PUBLISHED_VERSION" != "$CURRENT_VERSION" ]; then
+            echo "Version manually bumped from $PUBLISHED_VERSION to $CURRENT_VERSION"
+            echo "should_release=manual" >> $GITHUB_OUTPUT
+            echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          # Check if there are releasable commits
+          elif git log --format=%B -n 50 | grep -qE "^(feat|fix|perf|BREAKING CHANGE):"; then
+            echo "Found releasable commits, will auto-release"
+            echo "should_release=auto" >> $GITHUB_OUTPUT
+            echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "No release needed"
+            echo "should_release=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Call the reusable release workflow
+  release:
+    needs: check-release
+    if: needs.check-release.outputs.should_release != 'false'
+    uses: ./.github/workflows/release.yml
+    with:
+      release_type: ${{ needs.check-release.outputs.should_release == 'manual' && 'skip' || 'auto' }}
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

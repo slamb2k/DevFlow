@@ -1,6 +1,21 @@
 name: Release Management
 
 on:
+  workflow_call:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: false
+        default: 'auto'
+        type: string
+      prerelease_id:
+        description: 'Prerelease identifier'
+        required: false
+        default: 'beta'
+        type: string
+    secrets:
+      NPM_TOKEN:
+        required: true
   workflow_dispatch:
     inputs:
       release_type:
@@ -13,6 +28,7 @@ on:
           - minor
           - major
           - prerelease
+          - auto
       prerelease_id:
         description: 'Prerelease identifier (beta, alpha, rc)'
         required: false
@@ -50,13 +66,41 @@ jobs:
       - name: Determine version bump
         id: version
         run: |
-          if [[ "${{ github.event.inputs.release_type }}" == "prerelease" ]]; then
-            VERSION=$(npm version prerelease --preid=${{ github.event.inputs.prerelease_id }} --no-git-tag-version)
+          RELEASE_TYPE="${{ inputs.release_type }}"
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+
+          # If skip, version was already bumped manually
+          if [[ "$RELEASE_TYPE" == "skip" ]]; then
+            echo "Using existing version (already bumped): $CURRENT_VERSION"
+            VERSION="v$CURRENT_VERSION"
+            RELEASE_TYPE="manual"
+          # If auto, determine from commit messages
+          elif [[ "$RELEASE_TYPE" == "auto" ]]; then
+            echo "Analyzing commits for automatic version bump..."
+
+            # Check for breaking changes
+            if git log --format=%B -n 50 | grep -q "^BREAKING CHANGE:\|^[a-z]*!:"; then
+              RELEASE_TYPE="major"
+            # Check for features
+            elif git log --format=%B -n 50 | grep -q "^feat:\|^feature:"; then
+              RELEASE_TYPE="minor"
+            # Default to patch
+            else
+              RELEASE_TYPE="patch"
+            fi
+
+            echo "Auto-detected release type: $RELEASE_TYPE"
+            VERSION=$(npm version $RELEASE_TYPE --no-git-tag-version)
+          # Manual specific version bump
+          elif [[ "$RELEASE_TYPE" == "prerelease" ]]; then
+            VERSION=$(npm version prerelease --preid=${{ inputs.prerelease_id }} --no-git-tag-version)
           else
-            VERSION=$(npm version ${{ github.event.inputs.release_type }} --no-git-tag-version)
+            VERSION=$(npm version $RELEASE_TYPE --no-git-tag-version)
           fi
+
           echo "version=${VERSION#v}" >> $GITHUB_OUTPUT
-          echo "New version: ${VERSION#v}"
+          echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+          echo "New version: ${VERSION#v} (type: $RELEASE_TYPE)"
 
       - name: Generate changelog
         id: changelog
@@ -118,6 +162,7 @@ jobs:
         run: npm run build
 
       - name: Commit version bump
+        if: steps.version.outputs.release_type != 'manual'
         run: |
           git add package.json package-lock.json
           git commit -m "chore(release): v${{ steps.version.outputs.version }} [skip ci]"
@@ -128,8 +173,8 @@ jobs:
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
-          if [[ "${{ github.event.inputs.release_type }}" == "prerelease" ]]; then
-            npm publish --tag ${{ github.event.inputs.prerelease_id }} --access public
+          if [[ "${{ steps.version.outputs.release_type }}" == "prerelease" ]]; then
+            npm publish --tag ${{ inputs.prerelease_id }} --access public
           else
             npm publish --access public
           fi
@@ -149,7 +194,7 @@ jobs:
           release_name: v${{ steps.version.outputs.version }}
           body_path: CHANGELOG_TEMP.md
           draft: false
-          prerelease: ${{ github.event.inputs.release_type == 'prerelease' }}
+          prerelease: ${{ steps.version.outputs.release_type == 'prerelease' }}
 
       - name: Post release summary
         run: |

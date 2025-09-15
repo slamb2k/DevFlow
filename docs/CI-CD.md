@@ -18,10 +18,15 @@ DevFlow uses GitHub Actions for continuous integration and deployment.
    - Unit tests (`npm test`)
    - Build (`npm run build`)
 
-2. **Publish Job** - Only on main branch pushes
-   - Checks if package version changed
-   - Publishes to npm if version is new
-   - Creates GitHub release
+2. **Check Release Job** - Only on main branch pushes
+   - Checks if version was manually bumped
+   - Checks for releasable commits (feat, fix, perf, BREAKING CHANGE)
+   - Determines if release is needed
+
+3. **Release Job** - Calls reusable release workflow
+   - Automatically triggered when release conditions are met
+   - Uses semantic versioning based on commits
+   - Publishes to npm and creates GitHub release
 
 ### PR Checks (`pr-checks.yml`)
 
@@ -36,18 +41,31 @@ DevFlow uses GitHub Actions for continuous integration and deployment.
 
 ### Release Management (`release.yml`)
 
-**Triggers**: Manual workflow dispatch
+**Triggers**:
+- Manual workflow dispatch
+- Called from CI pipeline (workflow_call)
+
+**Reusable Workflow**:
+This workflow is designed as a reusable workflow that can be:
+- Called automatically from CI when releasable commits are merged
+- Triggered manually for specific version bumps
+- Used by other workflows via `workflow_call`
 
 **Options**:
-- **Release Type**: patch, minor, major, or prerelease
+- **Release Type**:
+  - `auto` - Detect from commits (default for CI)
+  - `patch`, `minor`, `major` - Specific bumps
+  - `prerelease` - Pre-release versions
+  - `skip` - Use when version already bumped
 - **Prerelease ID**: beta, alpha, or rc (for prereleases)
 
 **Features**:
-- Automatic version bumping
-- Changelog generation from commits
+- Semantic versioning based on conventional commits
+- Automatic version detection from commit messages
+- Changelog generation with categorization
 - NPM publishing with appropriate tags
 - GitHub release creation
-- Categorized commit history (features, fixes, docs)
+- Handles both automatic and manual releases
 
 ## Setup Instructions
 
