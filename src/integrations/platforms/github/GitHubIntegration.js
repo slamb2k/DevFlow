@@ -25,7 +25,7 @@ class GitHubIntegration extends BaseIntegration {
       client_id: clientId,
       redirect_uri: redirectUri,
       scope: scopes.join(' '),
-      state: crypto.randomBytes(16).toString('hex'),
+      state: crypto.randomBytes(16).toString('hex')
     });
 
     return `https://github.com/login/oauth/authorize?${params.toString()}`;
@@ -37,25 +37,25 @@ class GitHubIntegration extends BaseIntegration {
     try {
       const auth = createOAuthAppAuth({
         clientId,
-        clientSecret,
+        clientSecret
       });
 
       const { authentication } = await auth({
         type: 'oauth-user',
-        code,
+        code
       });
 
       const credential = {
         token: authentication.token,
         type: 'oauth',
         scope: authentication.scope,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date().toISOString()
       };
 
       await this.credentialManager.storeCredential('github', credential);
 
       this.octokit = new Octokit({
-        auth: authentication.token,
+        auth: authentication.token
       });
 
       return credential;
@@ -67,13 +67,13 @@ class GitHubIntegration extends BaseIntegration {
   // Personal Access Token Authentication
   async authenticateWithToken(token) {
     this.octokit = new Octokit({
-      auth: token,
+      auth: token
     });
 
     const credential = {
       token,
       type: 'personal_access_token',
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
     };
 
     await this.credentialManager.storeCredential('github', credential);
@@ -88,7 +88,7 @@ class GitHubIntegration extends BaseIntegration {
       const { headers } = await tempOctokit.rest.users.getAuthenticated();
       const grantedScopes = headers['x-oauth-scopes'] ? headers['x-oauth-scopes'].split(', ') : [];
 
-      return requiredScopes.every((scope) => grantedScopes.includes(scope));
+      return requiredScopes.every(scope => grantedScopes.includes(scope));
     } catch (error) {
       return false;
     }
@@ -101,7 +101,7 @@ class GitHubIntegration extends BaseIntegration {
     const auth = createAppAuth({
       appId,
       privateKey,
-      installationId,
+      installationId
     });
 
     this.octokit = new Octokit({
@@ -109,15 +109,15 @@ class GitHubIntegration extends BaseIntegration {
       auth: {
         appId,
         privateKey,
-        installationId,
-      },
+        installationId
+      }
     });
 
     const credential = {
       type: 'github_app',
       appId,
       installationId,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
     };
 
     await this.credentialManager.storeCredential('github', credential);
@@ -131,7 +131,9 @@ class GitHubIntegration extends BaseIntegration {
     }
 
     try {
-      const installations = await this.octokit.paginate(this.octokit.rest.apps.listInstallations);
+      const installations = await this.octokit.paginate(
+        this.octokit.rest.apps.listInstallations
+      );
       return installations;
     } catch (error) {
       throw error;
@@ -144,14 +146,14 @@ class GitHubIntegration extends BaseIntegration {
 
     this.octokit = new Octokit({
       baseUrl,
-      auth: token,
+      auth: token
     });
 
     const credential = {
       token,
       type: 'enterprise',
       baseUrl,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
     };
 
     await this.credentialManager.storeCredential('github', credential);
@@ -178,10 +180,13 @@ class GitHubIntegration extends BaseIntegration {
   // Repository Management
   async listRepositories(options = {}) {
     return this.withRetry(async () => {
-      const repos = await this.octokit.paginate(this.octokit.rest.repos.listForAuthenticatedUser, {
-        per_page: 100,
-        ...options,
-      });
+      const repos = await this.octokit.paginate(
+        this.octokit.rest.repos.listForAuthenticatedUser,
+        {
+          per_page: 100,
+          ...options
+        }
+      );
       return repos;
     });
   }
@@ -200,7 +205,7 @@ class GitHubIntegration extends BaseIntegration {
     return {
       cloneUrl,
       localPath,
-      status: 'cloned',
+      status: 'cloned'
     };
   }
 
@@ -223,10 +228,10 @@ class GitHubIntegration extends BaseIntegration {
   }
 
   async listBranches(owner, repo) {
-    const branches = await this.octokit.paginate(this.octokit.rest.repos.listBranches, {
-      owner,
-      repo,
-    });
+    const branches = await this.octokit.paginate(
+      this.octokit.rest.repos.listBranches,
+      { owner, repo }
+    );
     return branches;
   }
 
@@ -235,13 +240,13 @@ class GitHubIntegration extends BaseIntegration {
     const { data } = await this.octokit.rest.issues.create({
       owner,
       repo,
-      ...issueData,
+      ...issueData
     });
 
     this.eventBus.emit('github:issue:created', { issue: data });
     this.eventBus.emit('integration:issue:created', {
       platform: 'github',
-      data: this.mapToStandardIssue(data),
+      data: this.mapToStandardIssue(data)
     });
 
     return data;
@@ -252,7 +257,7 @@ class GitHubIntegration extends BaseIntegration {
       owner,
       repo,
       issue_number: issueNumber,
-      ...updateData,
+      ...updateData
     });
 
     this.eventBus.emit('github:issue:updated', { issue: data });
@@ -261,11 +266,14 @@ class GitHubIntegration extends BaseIntegration {
   }
 
   async listIssues(owner, repo, filters = {}) {
-    const issues = await this.octokit.paginate(this.octokit.rest.issues.listForRepo, {
-      owner,
-      repo,
-      ...filters,
-    });
+    const issues = await this.octokit.paginate(
+      this.octokit.rest.issues.listForRepo,
+      {
+        owner,
+        repo,
+        ...filters
+      }
+    );
     return issues;
   }
 
@@ -274,7 +282,7 @@ class GitHubIntegration extends BaseIntegration {
       owner,
       repo,
       issue_number: issueNumber,
-      body: comment,
+      body: comment
     });
     return data;
   }
@@ -284,7 +292,7 @@ class GitHubIntegration extends BaseIntegration {
     const { data } = await this.octokit.rest.pulls.create({
       owner,
       repo,
-      ...prData,
+      ...prData
     });
 
     this.eventBus.emit('github:pr:created', { pullRequest: data });
@@ -297,7 +305,7 @@ class GitHubIntegration extends BaseIntegration {
       owner,
       repo,
       pull_number: pullNumber,
-      ...updateData,
+      ...updateData
     });
 
     this.eventBus.emit('github:pr:updated', { pullRequest: data });
@@ -310,7 +318,7 @@ class GitHubIntegration extends BaseIntegration {
       owner,
       repo,
       pull_number: pullNumber,
-      ...mergeOptions,
+      ...mergeOptions
     });
 
     this.eventBus.emit('github:pr:merged', { pullRequest: data });
@@ -319,11 +327,14 @@ class GitHubIntegration extends BaseIntegration {
   }
 
   async listPullRequests(owner, repo, filters = {}) {
-    const prs = await this.octokit.paginate(this.octokit.rest.pulls.list, {
-      owner,
-      repo,
-      ...filters,
-    });
+    const prs = await this.octokit.paginate(
+      this.octokit.rest.pulls.list,
+      {
+        owner,
+        repo,
+        ...filters
+      }
+    );
     return prs;
   }
 
@@ -332,7 +343,7 @@ class GitHubIntegration extends BaseIntegration {
       owner,
       repo,
       pull_number: pullNumber,
-      ...reviewData,
+      ...reviewData
     });
     return data;
   }
@@ -342,22 +353,25 @@ class GitHubIntegration extends BaseIntegration {
     await this.octokit.rest.actions.createWorkflowDispatch({
       owner,
       repo,
-      ...dispatchData,
+      ...dispatchData
     });
 
     this.eventBus.emit('github:workflow:triggered', {
       owner,
       repo,
-      workflow: dispatchData.workflow_id,
+      workflow: dispatchData.workflow_id
     });
   }
 
   async listWorkflowRuns(owner, repo, workflowId) {
-    const runs = await this.octokit.paginate(this.octokit.rest.actions.listWorkflowRuns, {
-      owner,
-      repo,
-      workflow_id: workflowId,
-    });
+    const runs = await this.octokit.paginate(
+      this.octokit.rest.actions.listWorkflowRuns,
+      {
+        owner,
+        repo,
+        workflow_id: workflowId
+      }
+    );
     return runs;
   }
 
@@ -365,16 +379,19 @@ class GitHubIntegration extends BaseIntegration {
     const { data } = await this.octokit.rest.actions.getWorkflowRun({
       owner,
       repo,
-      run_id: runId,
+      run_id: runId
     });
     return data;
   }
 
   async listWorkflows(owner, repo) {
-    const workflows = await this.octokit.paginate(this.octokit.rest.actions.listRepoWorkflows, {
-      owner,
-      repo,
-    });
+    const workflows = await this.octokit.paginate(
+      this.octokit.rest.actions.listRepoWorkflows,
+      {
+        owner,
+        repo
+      }
+    );
     return workflows;
   }
 
@@ -397,7 +414,10 @@ class GitHubIntegration extends BaseIntegration {
     hmac.update(payload);
     const expectedSignature = 'sha256=' + hmac.digest('hex');
 
-    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+    return crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSignature)
+    );
   }
 
   // Data Mapping
@@ -407,12 +427,12 @@ class GitHubIntegration extends BaseIntegration {
       title: githubIssue.title,
       description: githubIssue.body,
       status: githubIssue.state,
-      labels: githubIssue.labels ? githubIssue.labels.map((l) => l.name) : [],
-      assignees: githubIssue.assignees ? githubIssue.assignees.map((a) => a.login) : [],
+      labels: githubIssue.labels ? githubIssue.labels.map(l => l.name) : [],
+      assignees: githubIssue.assignees ? githubIssue.assignees.map(a => a.login) : [],
       platform: 'github',
       platformId: githubIssue.number,
       createdAt: githubIssue.created_at,
-      updatedAt: githubIssue.updated_at,
+      updatedAt: githubIssue.updated_at
     };
   }
 
@@ -421,7 +441,7 @@ class GitHubIntegration extends BaseIntegration {
       title: standardIssue.title,
       body: standardIssue.description,
       labels: standardIssue.labels || [],
-      assignees: standardIssue.assignees || [],
+      assignees: standardIssue.assignees || []
     };
   }
 
@@ -437,8 +457,8 @@ class GitHubIntegration extends BaseIntegration {
         'issue_tracking',
         'pull_requests',
         'actions_workflow',
-        'webhooks',
-      ],
+        'webhooks'
+      ]
     };
   }
 
@@ -478,13 +498,13 @@ class GitHubIntegration extends BaseIntegration {
           const waitTime = Math.max(0, resetTime * 1000 - Date.now());
 
           if (i < maxRetries - 1) {
-            await new Promise((resolve) => setTimeout(resolve, Math.min(waitTime, 60000)));
+            await new Promise(resolve => setTimeout(resolve, Math.min(waitTime, 60000)));
             continue;
           }
         }
 
         if (error.code === 'ECONNRESET' && i < maxRetries - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 1000 * Math.pow(2, i)));
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i)));
           continue;
         }
 
