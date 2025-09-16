@@ -101,7 +101,7 @@ if [[ "${CURRENT_BRANCH}" = "main" ]] || [[ "${CURRENT_BRANCH}" = "master" ]]; t
             fi
         else
             echo -e "  ${CROSS} Please create a feature branch first"
-            echo -e "  ${INFO} Run: ${GREEN}git checkout -b feature/your-feature${NC}"
+            echo -e "  ${INFO} The /ship command will do this automatically"
         fi
     fi
 else
@@ -120,7 +120,7 @@ if [[ -n "${UPSTREAM}" ]]; then
     if [[ "${LOCAL}" != "${REMOTE}" ]] && [[ "${LOCAL}" != "${BASE}" ]] && [[ "${REMOTE}" != "${BASE}" ]]; then
         fail_check "  ${STOP} Branch has diverged from ${UPSTREAM}!"
         echo -e "  ${THINK} This usually means the branch was already merged"
-        echo -e "  ${INFO} Consider creating a new branch with /launch"
+        echo -e "  ${INFO} Consider creating a new branch for your changes"
         if [[ "${AUTO_FIX}" = true ]] && [[ "${CREATED_BRANCH}" = false ]]; then
             echo -e "  ${YELLOW}Creating new branch...${NC}"
             git checkout main 2>/dev/null || git checkout master

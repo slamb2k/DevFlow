@@ -135,11 +135,9 @@ if [[ "${CHECK_MODE}" = "true" ]]; then
       CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
       if [[ "${CURRENT_BRANCH}" = "main" ]] || [[ "${CURRENT_BRANCH}" = "master" ]]; then
         echo -e "\n${BOLD}Issue: You're on the main branch${NC}"
-        echo -e "\n${GREEN}Resolution Options:${NC}"
-        echo -e "  1. Create a feature branch: ${CYAN}/launch feature-name${NC}"
-        echo -e "     Then run: ${CYAN}/ship${NC}"
-        echo -e "\n  2. Let ship create a branch: ${CYAN}/ship --branch-name feature-name${NC}"
-        echo -e "\n  ℹ️  Recommended: Use option 1 for cleaner workflow${NC}"
+        echo -e "\n${GREEN}Resolution:${NC}"
+        echo -e "  Run ${CYAN}/ship${NC} and it will automatically create a feature branch for you"
+        echo -e "\n  ℹ️  The /ship command handles branch creation automatically${NC}"
       fi
       
       # Check for merge conflicts
@@ -201,20 +199,13 @@ fi
 CURR_BRANCH="$(git branch --show-current 2>/dev/null || true)"
 debug "Current branch: ${CURR_BRANCH}"
 
-# Handle being on default branch - should not happen if /ship command works correctly
-if [[ "${CURR_BRANCH}" = "${DEFAULT}" ]] || [[ -z "${CURR_BRANCH}" ]]; then
-  fail "❌ Cannot ship directly from ${DEFAULT} branch"
-  echo
-  echo "The /ship command should have automatically run 'launch' to create a feature branch."
-  echo "If you're running ship-core.sh directly, please use the /ship command instead, or:"
-  echo
-  echo "  1. Run: ./claude/scripts/launch-core.sh"
-  echo "  2. Then run ship again"
-  echo
+# Note: The /ship command handles creating a feature branch if on main
+# This script assumes we're already on a feature branch
+if [[ -z "${CURR_BRANCH}" ]]; then
+  fail "❌ Not on any branch (detached HEAD state)"
   report
 fi
 
-# On feature branch - continue with shipping
 note "🌿 Using existing branch: ${CURR_BRANCH}"
 
 # Handle staged vs default mode for uncommitted changes
