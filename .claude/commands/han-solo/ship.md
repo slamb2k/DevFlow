@@ -238,10 +238,6 @@ fi
 
 If on main/master, **IMMEDIATELY** run launch:
 ```bash
-./.claude/scripts/block-text.sh -s "LAUNCHING"
-```
-Then:
-```bash
 # Determine branch name based on title flag or auto-generate
 BRANCH_NAME="feature/auto-$(date +%Y%m%d-%H%M%S)"
 ./.claude/scripts/launch-core.sh "$BRANCH_NAME"
@@ -260,7 +256,7 @@ When executing /ship, verify you have:
 - [ ] ✅ FIRST: Executed `.claude/scripts/block-text.sh -s "SHIPPING"` with Bash tool
 - [ ] ✅ SEEN: The SHIPPING banner displayed in the output
 - [ ] ✅ CHECK: Verified current branch (if main/master, run launch first)
-- [ ] ✅ LAUNCH: If on main, shown LAUNCHING banner and created feature branch
+- [ ] ✅ LAUNCH: If on main, ran launch-core.sh (which displays its own banner)
 - [ ] ✅ THEN: Called Task tool with git-shipper agent
 - [ ] ❌ NEVER: Skipped directly to Task tool without showing banner or checking branch
 
