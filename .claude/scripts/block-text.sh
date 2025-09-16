@@ -4,6 +4,11 @@
 # Based on the lolcat implementation: https://github.com/busyloop/lolcat
 # Usage: ./block-text.sh "YOUR TEXT"
 
+# Check if banner should be skipped (used by automated tools to avoid duplicate banners)
+if [[ "${SKIP_BANNER}" == "1" ]]; then
+    exit 0
+fi
+
 declare -A letters
 
 # Define each letter as 3 lines (removed trailing spaces for tighter spacing)
