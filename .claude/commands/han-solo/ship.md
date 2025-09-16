@@ -214,16 +214,17 @@ When you run `/ship --staged`:
 **MANDATORY EXECUTION ORDER - DO NOT SKIP ANY STEP:**
 
 ### Step 1: Create a new feature branch if on the Main Branch (REQUIRED)
-**FIRST CHECK IF ON THE MAIN/MASTER BRANCH** and if we are, execute the following script:
+**FIRST CHECK IF ON THE MAIN/MASTER BRANCH** and if we are:
 
-Use the Bash tool to run:
+First, inform the user by outputting:
+```
+📝 You're on the main branch. Creating a feature branch for your changes...
+```
+
+Then use the Bash tool to run:
 ```bash
 #!/bin/bash
 set -e
-
-# Inform user why we're launching
-echo "📝 You're on the main branch. Creating a feature branch for your changes..."
-echo
 
 # Display banner immediately for instant feedback
 if [ -f "./.claude/scripts/block-text.sh" ]; then
@@ -245,12 +246,15 @@ fi
 ```
 
 ### Step 2: Display SHIPPING Banner (REQUIRED)
-**AFTER ENSURING ON FEATURE BRANCH**, display the shipping banner:
+**AFTER ENSURING ON FEATURE BRANCH**:
 
-Use the Bash tool to run:
+First, inform the user by outputting:
+```
+🚢 Now shipping your changes through the PR workflow...
+```
+
+Then use the Bash tool to run:
 ```bash
-echo "🚢 Now shipping your changes through the PR workflow..."
-echo
 ./.claude/scripts/block-text.sh -s "SHIPPING"
 ```
 
