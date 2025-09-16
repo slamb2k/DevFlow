@@ -261,6 +261,7 @@ check_for_merged_pr_and_prompt() {
 }
 
 # Only check if not already handling a merged PR scenario
+SKIP_MERGED_PR_CHECK="${SKIP_MERGED_PR_CHECK:-}"
 if [[ -z "$SKIP_MERGED_PR_CHECK" ]]; then
   check_for_merged_pr_and_prompt "$CURR_BRANCH"
 fi
