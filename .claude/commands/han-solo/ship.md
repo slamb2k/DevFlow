@@ -213,21 +213,8 @@ When you run `/ship --staged`:
 
 **MANDATORY EXECUTION ORDER - DO NOT SKIP ANY STEP:**
 
-### Step 1: Display LAUNCHING Banner if on Main Branch
-**FIRST**, check if on main/master branch and display LAUNCHING banner if needed:
-
-Use the Bash tool to run:
-```bash
-CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
-if [[ "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "master" ]]; then
-  echo "📍 Currently on $CURRENT_BRANCH branch"
-  echo "🚀 Automatically running launch to create feature branch..."
-  echo ""
-  # Launch will display its own LAUNCHING banner
-  BRANCH_NAME="feature/auto-$(date +%Y%m%d-%H%M%S)"
-  ./.claude/scripts/launch-core.sh "$BRANCH_NAME"
-fi
-```
+### Step 1: Create a new feature branch if on the Main Branch (REQUIRED)
+**FIRST CHECK IF ON THE MAIN/MASTER BRANCH** then execute launch-core.sh.
 
 ### Step 2: Display SHIPPING Banner (REQUIRED)
 **AFTER ENSURING ON FEATURE BRANCH**, display the shipping banner:
@@ -249,8 +236,7 @@ This provides visual feedback that shipping is starting. If the script doesn't e
 
 ### Implementation Verification Checklist
 When executing /ship, verify you have:
-- [ ] ✅ FIRST: Checked current branch and displayed LAUNCHING banner if on main/master
-- [ ] ✅ LAUNCH: If on main, ran launch-core.sh (which shows LAUNCHING banner first)
+- [ ] ✅ FIRST: If on main, ran launch-core.sh (which shows LAUNCHING banner first)
 - [ ] ✅ THEN: Displayed SHIPPING banner with block-text.sh
 - [ ] ✅ SEEN: The SHIPPING banner displayed in the output
 - [ ] ✅ FINALLY: Called Task tool with git-shipper agent
