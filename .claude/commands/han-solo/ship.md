@@ -221,6 +221,10 @@ Use the Bash tool to run:
 #!/bin/bash
 set -e
 
+# Inform user why we're launching
+echo "📝 You're on the main branch. Creating a feature branch for your changes..."
+echo
+
 # Display banner immediately for instant feedback
 if [ -f "./.claude/scripts/block-text.sh" ]; then
   ./.claude/scripts/block-text.sh -s "LAUNCHING"
@@ -245,6 +249,8 @@ fi
 
 Use the Bash tool to run:
 ```bash
+echo "🚢 Now shipping your changes through the PR workflow..."
+echo
 ./.claude/scripts/block-text.sh -s "SHIPPING"
 ```
 
