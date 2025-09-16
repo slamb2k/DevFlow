@@ -62,19 +62,32 @@ The command will detect:
 ```
 
 ## Implementation
-The launch command displays a banner then executes the .claude/scripts/launch-core.sh script:
+
+The launch command uses smart branch name generation that:
+1. **Analyzes uncommitted changes** to determine the type of work (feat/fix/docs/test)
+2. **Checks recent commit messages** for conventional commit patterns
+3. **Only uses timestamps as last resort** when no context is available
+
+First, inform the user by outputting:
+```
+🌿 Creating a feature branch for your changes...
+
+██╗      █████╗ ██╗   ██╗███╗   ██╗ ██████╗██╗  ██╗██╗███╗   ██╗ ██████╗
+██║     ██╔══██╗██║   ██║████╗  ██║██╔════╝██║  ██║██║████╗  ██║██╔════╝
+██║     ███████║██║   ██║██╔██╗ ██║██║     ███████║██║██╔██╗ ██║██║  ███╗
+██║     ██╔══██║██║   ██║██║╚██╗██║██║     ██╔══██║██║██║╚██╗██║██║   ██║
+███████╗██║  ██║╚██████╔╝██║ ╚████║╚██████╗██║  ██║██║██║ ╚████║╚██████╔╝
+╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝
+```
+
+Then execute the launch-core.sh script:
 
 ```bash
 #!/bin/bash
 set -e
 
-# Display banner immediately for instant feedback
-if [ -f "./.claude/scripts/block-text.sh" ]; then
-  ./.claude/scripts/block-text.sh -s "LAUNCHING"
-  echo
-fi
-
 # Execute launch-core.sh with all arguments
+# The script will automatically generate smart branch names when no argument provided
 if [ -f "./.claude/scripts/launch-core.sh" ]; then
   SKIP_BANNER=1 ./.claude/scripts/launch-core.sh "$@"
 else

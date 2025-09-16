@@ -228,17 +228,16 @@ First, inform the user by outputting:
 ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝ 
 ```
 
-Then use the Bash tool to run:
+Then execute the launch-core.sh script:
+
 ```bash
 #!/bin/bash
 set -e
 
-# Determine branch name based on title flag or auto-generate
-BRANCH_NAME="feature/auto-$(date +%Y%m%d-%H%M%S)"
-
-# Execute launch-core.sh with SKIP_BANNER since we already showed it
+# Execute launch-core.sh with all arguments
+# The script will automatically generate smart branch names when no argument provided
 if [ -f "./.claude/scripts/launch-core.sh" ]; then
-  SKIP_BANNER=1 ./.claude/scripts/launch-core.sh "$BRANCH_NAME"
+  SKIP_BANNER=1 ./.claude/scripts/launch-core.sh "$@"
 else
   echo "Error: launch-core.sh script not found"
   echo "Please ensure han-solo is properly installed"
@@ -261,13 +260,21 @@ First, inform the user by outputting:
 ╚══════╝╚═╝  ╚═╝╚═╝╚═╝     ╚═╝     ╚═╝╚═╝  ╚═══╝ ╚═════╝ 
 ```
 
-### Step 3: Delegate to Agent
+### Step 3: Delegate to Agent and Display Results
 **AFTER ENSURING NOT ON MAIN**, use the Task tool with:
 - **subagent_type**: "git-shipper"
 - **description**: "Ship code changes via PR"
 - **prompt**: Pass all command arguments and flags directly to the agent
 
-**CRITICAL**: Always check for main branch first and launch if needed. The user expects proper branch management and visual feedback.
+**CRITICAL OUTPUT REQUIREMENT**: After the Task tool returns, you MUST:
+1. Display the complete agent response to the user
+2. The agent provides rich workflow information including:
+   - Detailed step-by-step progress
+   - Success/failure status for each operation
+   - PR creation details with URL
+   - Merge status and timing information
+   - Comprehensive INFO/WARN/ERR report
+3. DO NOT summarize or truncate the agent's output - show it in full
 
 ### Implementation Verification Checklist
 When executing /ship, verify you have:
@@ -276,13 +283,14 @@ When executing /ship, verify you have:
 - [ ] ✅ THEN: Displayed SHIPPING banner with block-text.sh
 - [ ] ✅ SEEN: The SHIPPING banner displayed in the output
 - [ ] ✅ FINALLY: Called Task tool with git-shipper agent
-- [ ] ❌ NEVER: Skipped branch check or banner display
+- [ ] ✅ OUTPUT: Displayed the complete agent response to the user
+- [ ] ❌ NEVER: Skipped branch check, banner display, or agent output
 
 The git-shipper agent will:
 1. Execute ship-core.sh with all provided arguments (with SKIP_BANNER=1)
 2. Handle the complete shipping workflow
 3. Run scrub cleanup automatically after successful merge
-4. Provide comprehensive INFO/WARN/ERR reporting
+4. Return comprehensive INFO/WARN/ERR reporting that MUST be shown to user
 
 ## Workflow Steps (handled by git-shipper)
 1. Validate repository state and authentication

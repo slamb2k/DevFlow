@@ -10,13 +10,72 @@ RED='\033[0;31m'
 NC='\033[0m'
 BOLD='\033[1m'
 
-# Display colorful banner
+# Display colorful banner (unless SKIP_BANNER is set)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-"${SCRIPT_DIR}/block-text.sh" -s "LAUNCHING"
+if [ -z "$SKIP_BANNER" ]; then
+  "${SCRIPT_DIR}/block-text.sh" -s "LAUNCHING"
+fi
 
-# Parse branch name argument
-# Default to auto-timestamp format matching ship's convention
-BRANCH_NAME="${1:-feature/auto-$(date +%Y%m%d-%H%M%S)}"
+# Smart branch name generation
+generate_smart_branch_name() {
+  local branch_name=""
+
+  # Priority 1: Analyze uncommitted changes
+  local changed_files=$(git status --porcelain 2>/dev/null | grep -E "^[AM ]" | cut -c4- || true)
+
+  if [ ! -z "$changed_files" ]; then
+    # Analyze file patterns to determine branch type and name
+    if echo "$changed_files" | grep -q "\.claude/commands/"; then
+      branch_name="feat/command-updates"
+    elif echo "$changed_files" | grep -q "docs/\|README\|\.md$"; then
+      branch_name="docs/documentation-updates"
+    elif echo "$changed_files" | grep -q "test/\|\.test\.\|\.spec\."; then
+      branch_name="test/test-updates"
+    elif echo "$changed_files" | grep -q "\.claude/scripts/"; then
+      branch_name="feat/script-improvements"
+    elif echo "$changed_files" | grep -q "src/.*auth\|login\|user"; then
+      branch_name="feat/auth-updates"
+    elif echo "$changed_files" | grep -q "fix\|bug\|issue"; then
+      branch_name="fix/issue-resolution"
+    elif echo "$changed_files" | grep -q "config\|\.json$\|\.yml$\|\.yaml$"; then
+      branch_name="chore/config-updates"
+    fi
+  fi
+
+  # Priority 2: Check recent commit messages
+  if [ -z "$branch_name" ]; then
+    local recent_commit=$(git log -1 --pretty=format:"%s" 2>/dev/null || true)
+    if [ ! -z "$recent_commit" ]; then
+      # Parse conventional commit format
+      if echo "$recent_commit" | grep -q "^feat:"; then
+        local feature=$(echo "$recent_commit" | sed 's/^feat:\s*//' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-\|-$//')
+        [ ! -z "$feature" ] && branch_name="feat/$feature"
+      elif echo "$recent_commit" | grep -q "^fix:"; then
+        local fix=$(echo "$recent_commit" | sed 's/^fix:\s*//' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-\|-$//')
+        [ ! -z "$fix" ] && branch_name="fix/$fix"
+      elif echo "$recent_commit" | grep -q "^docs:"; then
+        branch_name="docs/updates"
+      elif echo "$recent_commit" | grep -q "^test:"; then
+        branch_name="test/updates"
+      fi
+    fi
+  fi
+
+  # Last resort: timestamp-based
+  if [ -z "$branch_name" ]; then
+    branch_name="feature/auto-$(date +%Y%m%d-%H%M%S)"
+  fi
+
+  echo "$branch_name"
+}
+
+# Parse branch name argument or generate smart name
+if [ ! -z "$1" ]; then
+  BRANCH_NAME="$1"
+else
+  BRANCH_NAME=$(generate_smart_branch_name)
+  echo -e "${CYAN}📝 Auto-generated branch name: ${BRANCH_NAME}${NC}"
+fi
 
 # Ensure we're in a git repository
 if ! git rev-parse --git-dir > /dev/null 2>&1; then
