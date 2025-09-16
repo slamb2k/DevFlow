@@ -23,6 +23,11 @@ declare -a INFO=()
 declare -a WARN=()
 declare -a ERR=()
 
+# Initialize defensive flags
+SKIP_REBASE="${SKIP_REBASE:-false}"
+SKIP_CONFLICT_RESOLUTION="${SKIP_CONFLICT_RESOLUTION:-false}"
+SKIP_MERGED_PR_CHECK="${SKIP_MERGED_PR_CHECK:-}"
+
 # Logging functions with immediate output
 note() { INFO+=("$1"); echo -e "${GREEN}✓${NC} $1"; }
 warn() { WARN+=("$1"); echo -e "${YELLOW}⚠${NC} $1"; }
@@ -261,7 +266,6 @@ check_for_merged_pr_and_prompt() {
 }
 
 # Only check if not already handling a merged PR scenario
-SKIP_MERGED_PR_CHECK="${SKIP_MERGED_PR_CHECK:-}"
 if [[ -z "$SKIP_MERGED_PR_CHECK" ]]; then
   check_for_merged_pr_and_prompt "$CURR_BRANCH"
 fi
