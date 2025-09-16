@@ -17,15 +17,15 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 1.7 Implement rate limiting and retry logic with exponential backoff
   - [x] 1.8 Verify all integration framework tests pass
 
-- [ ] 2. Implement GitHub Integration
-  - [ ] 2.1 Write tests for GitHub integration module and API interactions
-  - [ ] 2.2 Implement OAuth 2.0 flow for GitHub authentication
-  - [ ] 2.3 Create GitHub integration plugin using Octokit SDK
-  - [ ] 2.4 Build repository management functions (list, create, clone)
-  - [ ] 2.5 Implement PR and issue creation/update capabilities
-  - [ ] 2.6 Add GitHub Actions workflow trigger support
-  - [ ] 2.7 Create webhook handlers for GitHub events
-  - [ ] 2.8 Verify all GitHub integration tests pass
+- [x] 2. Implement GitHub Integration
+  - [x] 2.1 Write tests for GitHub integration module and API interactions
+  - [x] 2.2 Implement OAuth 2.0 flow for GitHub authentication
+  - [x] 2.3 Create GitHub integration plugin using Octokit SDK
+  - [x] 2.4 Build repository management functions (list, create, clone)
+  - [x] 2.5 Implement PR and issue creation/update capabilities
+  - [x] 2.6 Add GitHub Actions workflow trigger support
+  - [x] 2.7 Create webhook handlers for GitHub events
+  - [x] 2.8 Verify all GitHub integration tests pass
 
 - [ ] 3. Implement GitLab Integration
   - [ ] 3.1 Write tests for GitLab integration module and API interactions
