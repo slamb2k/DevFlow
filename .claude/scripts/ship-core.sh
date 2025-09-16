@@ -896,9 +896,11 @@ fi
 
 # Attempt to merge (use --auto since auto-merge is now enabled on the repo)
 echo -e "\n${GREEN}Enabling auto-merge for PR...${NC}"
+AUTO_MERGE_ENABLED=false
 if gh pr merge --auto --squash --delete-branch; then
   note "🎉 Auto-merge enabled! PR will merge when checks complete."
-  MERGE_SUCCESS=true
+  AUTO_MERGE_ENABLED=true
+  MERGE_SUCCESS=false  # Not yet merged, just enabled auto-merge
 else
   # Try without --auto for backward compatibility
   if gh pr merge --squash --delete-branch; then
@@ -913,6 +915,43 @@ else
       fail "Failed to merge PR (may require manual intervention)"
       report
     fi
+  fi
+fi
+
+# If auto-merge was enabled, wait for it to complete
+if [[ "${AUTO_MERGE_ENABLED}" = true ]]; then
+  echo -e "\n${BLUE}⏳ Waiting for auto-merge to complete...${NC}"
+
+  # Poll for merge completion (max 10 minutes)
+  MERGE_WAIT_MAX=600  # 10 minutes
+  MERGE_ELAPSED=0
+  MERGE_INTERVAL=10   # Check every 10 seconds
+
+  while [[ ${MERGE_ELAPSED} -lt ${MERGE_WAIT_MAX} ]]; do
+    # Check PR state
+    PR_STATE=$(gh pr view --json state -q '.state' 2>/dev/null || echo "UNKNOWN")
+
+    if [[ "${PR_STATE}" = "MERGED" ]]; then
+      note "✅ PR has been merged by auto-merge!"
+      MERGE_SUCCESS=true
+      break
+    elif [[ "${PR_STATE}" = "CLOSED" ]]; then
+      fail "❌ PR was closed without merging"
+      break
+    else
+      echo -ne "\r${BLUE}⏳ Auto-merge pending... (${MERGE_ELAPSED}s elapsed, state: ${PR_STATE})${NC}"
+      sleep ${MERGE_INTERVAL}
+      MERGE_ELAPSED=$((MERGE_ELAPSED + MERGE_INTERVAL))
+    fi
+  done
+
+  echo  # New line after progress indicator
+
+  if [[ ${MERGE_ELAPSED} -ge ${MERGE_WAIT_MAX} ]]; then
+    warn "⚠️ Timeout waiting for auto-merge (10 minutes)"
+    warn "⚠️ PR may still merge automatically when checks complete"
+    warn "⚠️ Check PR status with: gh pr view --web"
+    # Don't set MERGE_SUCCESS=false, leave it unset
   fi
 fi
 
