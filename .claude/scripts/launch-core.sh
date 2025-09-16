@@ -9,11 +9,21 @@ CYAN='\033[0;36m'
 RED='\033[0;31m'
 NC='\033[0m'
 BOLD='\033[1m'
+DIM='\033[2m'
 
 # Display colorful banner (unless SKIP_BANNER is set)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -z "$SKIP_BANNER" ]; then
   "${SCRIPT_DIR}/block-text.sh" -s "LAUNCHING"
+fi
+
+# Handle special flags
+FROM_MERGED_PR=""
+if [[ "$1" == "--from-merged-pr" ]]; then
+  FROM_MERGED_PR="$2"
+  shift 2
+  echo -e "${CYAN}ℹ️  Launching fresh branch (PR #$FROM_MERGED_PR was merged)${NC}"
+  echo -e "${DIM}This avoids git history divergence from squash-merge${NC}\n"
 fi
 
 # Smart branch name generation

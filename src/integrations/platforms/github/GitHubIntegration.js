@@ -19,7 +19,7 @@ class GitHubIntegration extends BaseIntegration {
 
   // OAuth 2.0 Authentication
   async initiateOAuthFlow(config) {
-    const { clientId, clientSecret, redirectUri, scopes = ['repo', 'user', 'workflow'] } = config;
+    const { clientId, redirectUri, scopes = ['repo', 'user', 'workflow'] } = config;
 
     const params = new URLSearchParams({
       client_id: clientId,
@@ -34,34 +34,30 @@ class GitHubIntegration extends BaseIntegration {
   async handleOAuthCallback(code, config) {
     const { clientId, clientSecret } = config;
 
-    try {
-      const auth = createOAuthAppAuth({
-        clientId,
-        clientSecret,
-      });
+    const auth = createOAuthAppAuth({
+      clientId,
+      clientSecret,
+    });
 
-      const { authentication } = await auth({
-        type: 'oauth-user',
-        code,
-      });
+    const { authentication } = await auth({
+      type: 'oauth-user',
+      code,
+    });
 
-      const credential = {
-        token: authentication.token,
-        type: 'oauth',
-        scope: authentication.scope,
-        createdAt: new Date().toISOString(),
-      };
+    const credential = {
+      token: authentication.token,
+      type: 'oauth',
+      scope: authentication.scope,
+      createdAt: new Date().toISOString(),
+    };
 
-      await this.credentialManager.storeCredential('github', credential);
+    await this.credentialManager.storeCredential('github', credential);
 
-      this.octokit = new Octokit({
-        auth: authentication.token,
-      });
+    this.octokit = new Octokit({
+      auth: authentication.token,
+    });
 
-      return credential;
-    } catch (error) {
-      throw error;
-    }
+    return credential;
   }
 
   // Personal Access Token Authentication
@@ -98,12 +94,6 @@ class GitHubIntegration extends BaseIntegration {
   async authenticateAsApp(appConfig) {
     const { appId, privateKey, installationId } = appConfig;
 
-    const auth = createAppAuth({
-      appId,
-      privateKey,
-      installationId,
-    });
-
     this.octokit = new Octokit({
       authStrategy: createAppAuth,
       auth: {
@@ -130,12 +120,8 @@ class GitHubIntegration extends BaseIntegration {
       throw new Error('Not authenticated');
     }
 
-    try {
-      const installations = await this.octokit.paginate(this.octokit.rest.apps.listInstallations);
-      return installations;
-    } catch (error) {
-      throw error;
-    }
+    const installations = await this.octokit.paginate(this.octokit.rest.apps.listInstallations);
+    return installations;
   }
 
   // Enterprise Server Support
@@ -165,7 +151,7 @@ class GitHubIntegration extends BaseIntegration {
     }
 
     try {
-      const { data } = await this.octokit.rest.users.getAuthenticated();
+      await this.octokit.rest.users.getAuthenticated();
       return true;
     } catch (error) {
       if (error.status === 401) {
@@ -395,7 +381,7 @@ class GitHubIntegration extends BaseIntegration {
   validateWebhookSignature(payload, signature, secret) {
     const hmac = crypto.createHmac('sha256', secret);
     hmac.update(payload);
-    const expectedSignature = 'sha256=' + hmac.digest('hex');
+    const expectedSignature = `sha256=${hmac.digest('hex')}`;
 
     return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
   }

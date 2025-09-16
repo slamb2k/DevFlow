@@ -108,13 +108,24 @@ get_pr_status() {
   if ! command -v gh &> /dev/null; then
     return
   fi
-  
+
   local pr_num=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number' 2>/dev/null)
   if [ -n "$pr_num" ]; then
     local pr_state=$(gh pr view "$pr_num" --json state,mergeable --jq '.state + ":" + .mergeable' 2>/dev/null)
     case "$pr_state" in
       *MERGED*)
-        echo "${GREEN}PR#${pr_num}✓${NC}"
+        # Check if branch has commits after the merge
+        local merge_commit=$(gh pr view "$pr_num" --json mergeCommit --jq '.mergeCommit.oid' 2>/dev/null)
+        if [ -n "$merge_commit" ]; then
+          local commits_after=$(git rev-list --count "$merge_commit"..HEAD 2>/dev/null || echo 0)
+          if [ "$commits_after" -gt 0 ]; then
+            echo "${YELLOW}PR#${pr_num}✓⚠️${NC}"  # Merged but has new commits (divergence warning)
+          else
+            echo "${GREEN}PR#${pr_num}✓${NC}"     # Cleanly merged
+          fi
+        else
+          echo "${GREEN}PR#${pr_num}✓${NC}"       # Merged (can't check commits)
+        fi
         ;;
       *OPEN:MERGEABLE*)
         echo "${BLUE}PR#${pr_num}→${NC}"
