@@ -44,17 +44,23 @@ Run a comprehensive health check on your git repository to detect issues like di
    - Large uncommitted changes
 
 ## Implementation
-The health command displays a banner then executes the .claude/scripts/health-core.sh script:
+
+First, inform the user by outputting:
+```
+⛑️  Running a health check on your deployment...
+
+██╗  ██╗███████╗ █████╗ ██╗  ████████╗██╗  ██╗     ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗
+██║  ██║██╔════╝██╔══██╗██║  ╚══██╔══╝██║  ██║    ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝
+███████║█████╗  ███████║██║     ██║   ███████║    ██║     ███████║█████╗  ██║     █████╔╝ 
+██╔══██║██╔══╝  ██╔══██║██║     ██║   ██╔══██║    ██║     ██╔══██║██╔══╝  ██║     ██╔═██╗ 
+██║  ██║███████╗██║  ██║███████╗██║   ██║  ██║    ╚██████╗██║  ██║███████╗╚██████╗██║  ██╗
+╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚═╝   ╚═╝  ╚═╝     ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝
+                                                                                      
+```
 
 ```bash
 #!/bin/bash
 set -e
-
-# Display banner immediately for instant feedback
-if [ -f "./.claude/scripts/block-text.sh" ]; then
-  ./.claude/scripts/block-text.sh -s "HEALTH CHECK"
-  echo
-fi
 
 # Execute health-core.sh with all arguments
 if [ -f "./.claude/scripts/health-core.sh" ]; then
