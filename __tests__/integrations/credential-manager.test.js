@@ -68,11 +68,7 @@ describe.skip('CredentialManager', () => {
     });
 
     it('should handle missing credentials gracefully', async () => {
-<<<<<<< HEAD
-      mockFs.readFile.mockRejectedValue(new Error('ENOENT'));
-=======
-      mockFs.readFile.mockRejectedValue({ code: 'ENOENT' })
->>>>>>> 9063040 (fix: Address failing tests and convert modules to ES6)
+      mockFs.readFile.mockRejectedValue({ code: 'ENOENT' });
 
       const result = await credential_manager.get_credentials('non-existent');
       expect(result).toBeNull();
