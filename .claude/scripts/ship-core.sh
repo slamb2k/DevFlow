@@ -2,9 +2,6 @@
 # ship-core.sh - Solo-first PR shipping with automated workflow
 set -Eeuo pipefail
 
-# Mark this as an authorized ship workflow for the pre-push hook
-export SHIP_WORKFLOW_ACTIVE=true
-
 # Color output for better UX - using printf-compatible format
 RED=$'\033[0;31m'
 YELLOW=$'\033[1;33m'
@@ -204,8 +201,19 @@ fi
 CURR_BRANCH="$(git branch --show-current 2>/dev/null || true)"
 debug "Current branch: ${CURR_BRANCH}"
 
-# Handle being on default branch - create feature branch
+# Handle being on default branch - check for uncommitted changes
 if [[ "${CURR_BRANCH}" = "${DEFAULT}" ]] || [[ -z "${CURR_BRANCH}" ]]; then
+  # Check for uncommitted changes
+  if [[ -n "$(git status --porcelain)" ]]; then
+    warn "📦 You have uncommitted changes on ${DEFAULT} branch"
+    note "💡 Consider using 'launch' command first to:"
+    note "   1. Stash your changes"
+    note "   2. Create a clean feature branch"
+    note "   3. Restore your changes"
+    echo
+    note "Or ship will create a branch for you (but won't stash)"
+  fi
+
   # Switch to default and pull latest
   git switch "${DEFAULT}" >/dev/null 2>&1 || true
   if ! git pull --ff-only origin "${DEFAULT}"; then
@@ -213,7 +221,7 @@ if [[ "${CURR_BRANCH}" = "${DEFAULT}" ]] || [[ -z "${CURR_BRANCH}" ]]; then
     report
   fi
   note "📥 Synced ${DEFAULT} with origin"
-  
+
   # Determine branch name
   TARGET_BRANCH="${EXPLICIT_BRANCH_NAME}"
   if [[ -z "${TARGET_BRANCH}" ]]; then
@@ -226,7 +234,7 @@ if [[ "${CURR_BRANCH}" = "${DEFAULT}" ]] || [[ -z "${CURR_BRANCH}" ]]; then
       TARGET_BRANCH="feature/auto-$(date +%Y%m%d-%H%M%S)"
     fi
   fi
-  
+
   # Create and switch to new branch
   if git switch -c "${TARGET_BRANCH}"; then
     note "🌱 Created branch: ${TARGET_BRANCH}"
