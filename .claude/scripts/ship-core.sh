@@ -2,6 +2,9 @@
 # ship-core.sh - Solo-first PR shipping with automated workflow
 set -Eeuo pipefail
 
+# Mark this as an authorized ship workflow for the pre-push hook
+export SHIP_WORKFLOW_ACTIVE=true
+
 # Color output for better UX - using printf-compatible format
 RED=$'\033[0;31m'
 YELLOW=$'\033[1;33m'
