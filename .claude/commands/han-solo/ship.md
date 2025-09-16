@@ -219,6 +219,10 @@ When you run `/ship --staged`:
 First, inform the user by outputting:
 ```
 📝 You're on the main branch. Creating a feature branch for your changes...
+
+█   █▀█ █ █ █▀█ █▀▀ █ █ █ █▀█ █▀▀
+█   █▀█ █ █ █ █ █   █▀█ █ █ █ █ █
+▀▀▀ ▀ ▀ ▀▀▀ ▀ ▀ ▀▀▀ ▀ ▀ ▀ ▀ ▀ ▀▀▀
 ```
 
 Then use the Bash tool to run:
@@ -227,10 +231,10 @@ Then use the Bash tool to run:
 set -e
 
 # Display banner immediately for instant feedback
-if [ -f "./.claude/scripts/block-text.sh" ]; then
-  ./.claude/scripts/block-text.sh -s "LAUNCHING"
-  echo
-fi
+#if [ -f "./.claude/scripts/block-text.sh" ]; then
+#  ./.claude/scripts/block-text.sh -s "LAUNCHING"
+#  echo
+#fi
 
 # Determine branch name based on title flag or auto-generate
 BRANCH_NAME="feature/auto-$(date +%Y%m%d-%H%M%S)"
