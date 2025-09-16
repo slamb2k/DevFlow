@@ -1,26 +1,37 @@
 ---
 name: /ship
-description: "Alias for /han-solo:ship - Ship code with governed fast-path"
+description: "Ship code with governed fast-path (alias for /han-solo:ship)"
 requires_args: false
 argument-hint: "[--check] [--nowait] [--force] [--staged] [--title 'text'] [--body 'text'] [--draft]"
 allowed-tools:
   - Task
   - Bash
+  - Read
 ---
 
-## This is an alias
+## Purpose
+This is a convenience alias for `/han-solo:ship` that works regardless of where han-solo is installed (project-level or user-level).
 
-This command is an alias for `/han-solo:ship`. Please use that command instead.
+## Implementation
 
-The implementation can be found at `.claude/commands/han-solo/ship.md`
-
-## Execution
-
-When invoked, immediately redirect to the han-solo:ship command:
-
+### Step 1: Display Banner
+Use the Bash tool to run:
 ```bash
-# This is just a pointer to the actual command
-echo "Redirecting to /han-solo:ship..."
+./.claude/scripts/block-text.sh -s "SHIPPING"
 ```
 
-Then invoke `/han-solo:ship` with all provided arguments.
+If the banner script doesn't exist locally, check user-level:
+```bash
+~/.claude/scripts/block-text.sh -s "SHIPPING"
+```
+
+### Step 2: Delegate to git-shipper
+Use the Task tool with:
+- **subagent_type**: "git-shipper"
+- **description**: "Ship code changes via PR"
+- **prompt**: Pass all command arguments and flags directly to the agent
+
+## Notes
+- The git-shipper agent will use `./.claude/scripts/ship-core.sh` if available locally
+- If han-solo is installed at user-level, ensure symlinks or wrapper scripts exist
+- The actual implementation is in `/han-solo:ship` command
