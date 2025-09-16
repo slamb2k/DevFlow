@@ -105,18 +105,24 @@ Delete this branch? (y/N): n
 ```
 
 ## Implementation
-For context efficiency, this command can be executed in two ways:
 
-### Option 1: Direct Script Execution (Faster)
+First, inform the user by outputting:
+```
+🌿 Scrubbing the decks...
+
+███████╗ ██████╗██████╗ ██╗   ██╗██████╗ ██████╗ ██╗███╗   ██╗ ██████╗ 
+██╔════╝██╔════╝██╔══██╗██║   ██║██╔══██╗██╔══██╗██║████╗  ██║██╔════╝ 
+███████╗██║     ██████╔╝██║   ██║██████╔╝██████╔╝██║██╔██╗ ██║██║  ███╗
+╚════██║██║     ██╔══██╗██║   ██║██╔══██╗██╔══██╗██║██║╚██╗██║██║   ██║
+███████║╚██████╗██║  ██║╚██████╔╝██████╔╝██████╔╝██║██║ ╚████║╚██████╔╝
+╚══════╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝ 
+```
+
+Then execute the scrub-core.sh script:
+
 ```bash
 #!/bin/bash
 set -e
-
-# Display banner immediately for instant feedback
-if [ -f "./.claude/scripts/block-text.sh" ]; then
-  ./.claude/scripts/block-text.sh -s "SCRUBBING"
-  echo
-fi
 
 # Use the scrub-core.sh script for implementation
 if [ -f "./.claude/scripts/scrub-core.sh" ]; then
@@ -127,22 +133,3 @@ else
   exit 1
 fi
 ```
-
-### Option 2: Agent Delegation (More Context-Aware)
-When complex interaction is needed, delegate to a general-purpose agent with:
-- **subagent_type**: "general-purpose"
-- **description**: "Clean up merged branches"
-- **prompt**: Execute scrub-core.sh with all provided arguments
-
-The scrub-core.sh script will:
-1. Parse command flags (--force, --quiet, --dry-run)
-2. Fetch latest remote state and prune deleted references
-3. Analyze all branches for safe deletion
-4. Prompt for confirmation when needed
-5. Generate comprehensive cleanup report
-
-## Allowed tools
-- Bash
-- Glob
-- Grep
-- Read
