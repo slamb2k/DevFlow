@@ -1,8 +1,8 @@
-const { execSync } = require('child_process');
-const fs = require('fs').promises;
-const path = require('path');
-const glob = require('glob');
-const { promisify } = require('util');
+import { execSync } from 'child_process';
+import { promises as fs } from 'fs';
+import path from 'path';
+import glob from 'glob';
+import { promisify } from 'util';
 
 const globAsync = promisify(glob);
 
@@ -303,4 +303,4 @@ class SecurityScanner {
   }
 }
 
-module.exports = SecurityScanner;
+export { SecurityScanner };

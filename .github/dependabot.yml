@@ -10,19 +10,35 @@ updates:
       - "dependencies"
       - "npm"
     groups:
+      # Group all production dependencies
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Group all development dependencies
       dev-dependencies:
-        patterns:
-          - "@types/*"
-          - "eslint*"
-          - "prettier*"
-          - "jest*"
-          - "ts-*"
-          - "typescript"
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Group major version updates separately
+      major-updates:
+        update-types:
+          - "major"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     labels:
       - "dependencies"
       - "github-actions"
+    groups:
+      # Group all GitHub Actions updates
+      github-actions:
+        patterns:
+          - "*"

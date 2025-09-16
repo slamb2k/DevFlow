@@ -24,12 +24,27 @@ describe('Project Structure Validation', () => {
         'src/utils',
       ];
 
+      // First check if we're in the right directory
+      const srcExists = await fs
+        .access(path.join(rootDir, 'src'))
+        .then(() => true)
+        .catch(() => false);
+
+      if (!srcExists) {
+        console.log(`Root directory: ${rootDir}`);
+        console.log(`Current working directory: ${process.cwd()}`);
+        console.log(`Test file location: ${__dirname}`);
+      }
+
       for (const dir of requiredDirs) {
         const dirPath = path.join(rootDir, dir);
         const exists = await fs
           .access(dirPath)
           .then(() => true)
-          .catch(() => false);
+          .catch((err) => {
+            console.error(`Error accessing ${dirPath}:`, err.message);
+            return false;
+          });
         expect(exists).toBe(true);
       }
     });

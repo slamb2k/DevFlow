@@ -1,6 +1,6 @@
-const { execSync } = require('child_process');
-const fs = require('fs').promises;
-const path = require('path');
+import { execSync } from 'child_process';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 class DependencyAnalyzer {
   constructor(projectPath) {
@@ -494,4 +494,4 @@ class DependencyAnalyzer {
   }
 }
 
-module.exports = DependencyAnalyzer;
+export { DependencyAnalyzer };

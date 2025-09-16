@@ -67,6 +67,17 @@ export class RateLimiter extends EventEmitter {
       return { allowed: true };
     }
 
+    // Check if temporarily blocked
+    if (this.blocked_until && this.blocked_until.has(service)) {
+      const blocked_until = this.blocked_until.get(service);
+      if (Date.now() < blocked_until) {
+        const retry_after = Math.ceil((blocked_until - Date.now()) / 1000);
+        return { allowed: false, retry_after };
+      }
+      // Remove expired block
+      this.blocked_until.delete(service);
+    }
+
     const metrics = this.metrics.get(service);
     metrics.requests++;
 
