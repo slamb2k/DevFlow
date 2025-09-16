@@ -68,9 +68,6 @@ updates:
     reviewers:
       - "slamb2k"
 
-    # Milestone to track updates
-    milestone: 1
-
   # GitHub Actions dependencies
   - package-ecosystem: "github-actions"
     directory: "/"
