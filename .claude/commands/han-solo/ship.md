@@ -210,22 +210,33 @@ When you run `/ship --staged`:
 - Auto-deletes branches after merge
 
 ## Implementation
-This command displays a banner immediately then delegates to the git-shipper agent.
 
-First, display the banner for instant feedback:
+**MANDATORY EXECUTION ORDER - DO NOT SKIP ANY STEP:**
+
+### Step 1: IMMEDIATELY Display Banner (REQUIRED)
+**YOU MUST EXECUTE THIS FIRST** - No exceptions, no skipping:
+
+Use the Bash tool to run:
 ```bash
-#!/bin/bash
-# Display banner immediately for instant feedback
-if [ -f "./.claude/scripts/block-text.sh" ]; then
-  ./.claude/scripts/block-text.sh -s "SHIPPING"
-  echo
-fi
+./.claude/scripts/block-text.sh -s "SHIPPING"
 ```
 
-Then, use the Task tool with:
+This provides instant visual feedback. If the script doesn't exist, show an error but continue.
+
+### Step 2: THEN Delegate to Agent (ONLY AFTER BANNER)
+**ONLY AFTER THE BANNER IS DISPLAYED**, use the Task tool with:
 - **subagent_type**: "git-shipper"
 - **description**: "Ship code changes via PR"
 - **prompt**: Pass all command arguments and flags directly to the agent
+
+**CRITICAL**: Never skip Step 1. Always show the banner first, even if it means making two separate tool calls. The user expects immediate visual feedback.
+
+### Implementation Verification Checklist
+When executing /ship, verify you have:
+- [ ] ✅ FIRST: Executed `.claude/scripts/block-text.sh -s "SHIPPING"` with Bash tool
+- [ ] ✅ SEEN: The SHIPPING banner displayed in the output
+- [ ] ✅ THEN: Called Task tool with git-shipper agent
+- [ ] ❌ NEVER: Skipped directly to Task tool without showing banner
 
 The git-shipper agent will:
 1. Execute ship-core.sh with all provided arguments (with SKIP_BANNER=1)
