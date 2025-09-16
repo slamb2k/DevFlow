@@ -27,6 +27,7 @@ declare -a ERR=()
 SKIP_REBASE="${SKIP_REBASE:-false}"
 SKIP_CONFLICT_RESOLUTION="${SKIP_CONFLICT_RESOLUTION:-false}"
 SKIP_MERGED_PR_CHECK="${SKIP_MERGED_PR_CHECK:-}"
+FROM_MERGED_PR="${FROM_MERGED_PR:-}"
 
 # Logging functions with immediate output
 note() { INFO+=("$1"); echo -e "${GREEN}✓${NC} $1"; }
