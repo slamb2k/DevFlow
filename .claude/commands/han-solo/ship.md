@@ -216,25 +216,21 @@ When you run `/ship --staged`:
 ### Step 1: Create a new feature branch if on the Main Branch (REQUIRED)
 **FIRST CHECK IF ON THE MAIN/MASTER BRANCH** and if we are:
 
-First, inform the user by outputting:
+First, inform the user by outputting: (Display the ascii art letters in a random color)
 ```
 📝 You're on the main branch. Creating a feature branch for your changes...
 
-█   █▀█ █ █ █▀█ █▀▀ █ █ █ █▀█ █▀▀
-█   █▀█ █ █ █ █ █   █▀█ █ █ █ █ █
-▀▀▀ ▀ ▀ ▀▀▀ ▀ ▀ ▀▀▀ ▀ ▀ ▀ ▀ ▀ ▀▀▀
+    dMP     .aMMMb  dMP dMP dMMMMb  .aMMMb  dMP dMP dMP dMMMMb  .aMMMMP 
+   dMP     dMP"dMP dMP dMP dMP dMP dMP"VMP dMP dMP amr dMP dMP dMP"     
+  dMP     dMMMMMP dMP dMP dMP dMP dMP     dMMMMMP dMP dMP dMP dMP MMP"  
+ dMP     dMP dMP dMP.aMP dMP dMP dMP.aMP dMP dMP dMP dMP dMP dMP.dMP    
+dMMMMMP dMP dMP  VMMMP" dMP dMP  VMMMP" dMP dMP dMP dMP dMP  VMMMP"     
 ```
 
 Then use the Bash tool to run:
 ```bash
 #!/bin/bash
 set -e
-
-# Display banner immediately for instant feedback
-#if [ -f "./.claude/scripts/block-text.sh" ]; then
-#  ./.claude/scripts/block-text.sh -s "LAUNCHING"
-#  echo
-#fi
 
 # Determine branch name based on title flag or auto-generate
 BRANCH_NAME="feature/auto-$(date +%Y%m%d-%H%M%S)"
@@ -252,17 +248,16 @@ fi
 ### Step 2: Display SHIPPING Banner (REQUIRED)
 **AFTER ENSURING ON FEATURE BRANCH**:
 
-First, inform the user by outputting:
+First, inform the user by outputting: (Display the ascii art letters in a random color)
 ```
 🚢 Now shipping your changes through the PR workflow...
-```
 
-Then use the Bash tool to run:
-```bash
-./.claude/scripts/block-text.sh -s "SHIPPING"
+   .dMMMb  dMP dMP dMP dMMMMb  dMMMMb  dMP dMMMMb  .aMMMMP 
+  dMP" VP dMP dMP amr dMP.dMP dMP.dMP amr dMP dMP dMP"     
+  VMMMb  dMMMMMP dMP dMMMMP" dMMMMP" dMP dMP dMP dMP MMP"  
+dP .dMP dMP dMP dMP dMP     dMP     dMP dMP dMP dMP.dMP    
+VMMMP" dMP dMP dMP dMP     dMP     dMP dMP dMP  VMMMP"   
 ```
-
-This provides visual feedback that shipping is starting. If the script doesn't exist, show an error but continue.
 
 ### Step 3: Delegate to Agent
 **AFTER ENSURING NOT ON MAIN**, use the Task tool with:
