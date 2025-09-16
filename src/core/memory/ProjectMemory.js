@@ -262,19 +262,37 @@ export class ProjectMemory extends EventEmitter {
 
     const emitter = new EventEmitter();
 
-    this.watcher = watch(this.devflowPath, { recursive: true }, async (eventType, filename) => {
-      if (!filename || filename.includes('.lock')) {
-        return;
-      }
+    // Try to use recursive watch, but fall back to non-recursive if not supported
+    try {
+      this.watcher = watch(this.devflowPath, { recursive: true }, async (eventType, filename) => {
+        if (!filename || filename.includes('.lock')) {
+          return;
+        }
 
-      emitter.emit('change', filename);
+        emitter.emit('change', filename);
 
-      if (options.autoReload) {
-        // Clear cache to force reload
-        this.cache.clear();
-        this.emit('reloaded', filename);
-      }
-    });
+        if (options.autoReload) {
+          // Clear cache to force reload
+          this.cache.clear();
+          this.emit('reloaded', filename);
+        }
+      });
+    } catch (error) {
+      // Fallback to non-recursive watch for platforms that don't support it
+      this.watcher = watch(this.devflowPath, async (eventType, filename) => {
+        if (!filename || filename.includes('.lock')) {
+          return;
+        }
+
+        emitter.emit('change', filename);
+
+        if (options.autoReload) {
+          // Clear cache to force reload
+          this.cache.clear();
+          this.emit('reloaded', filename);
+        }
+      });
+    }
 
     emitter.close = () => {
       if (this.watcher) {
