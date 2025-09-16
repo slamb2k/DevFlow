@@ -309,17 +309,25 @@ if [[ -f pnpm-lock.yaml ]] && command -v pnpm >/dev/null 2>&1; then
   note "📦 Dependencies installed"
 fi
 
-# Detect and use Nx if available
-if command -v nx >/dev/null 2>&1 || npx nx --version >/dev/null 2>&1; then
+# Detect and use Nx if this is an Nx workspace
+NX_AVAILABLE=false
+if [ -f "nx.json" ] || [ -f "workspace.json" ] || [ -f "angular.json" ]; then
+  # This appears to be an Nx workspace, check if nx command is available
+  if command -v nx >/dev/null 2>&1 || npx nx --version >/dev/null 2>&1; then
+    NX_AVAILABLE=true
+  fi
+fi
+
+if [ "$NX_AVAILABLE" = true ]; then
   echo -e "${BLUE}Using Nx affected for optimized checks...${NC}"
   BASE="$(git merge-base origin/${DEFAULT} HEAD)"
-  
+
   # Run Nx affected targets
   npx nx affected -t format --base="${BASE}" --head=HEAD 2>/dev/null || true
   npx nx affected -t lint --base="${BASE}" --head=HEAD || warn "Lint issues detected"
   npx nx affected -t test --base="${BASE}" --head=HEAD || warn "Test failures detected"
   npx nx affected -t build --base="${BASE}" --head=HEAD || warn "Build issues detected"
-  
+
   note "🎯 Nx affected checks completed"
 else
   # Fallback to standard npm/pnpm scripts
