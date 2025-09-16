@@ -768,9 +768,9 @@ while [[ ${ELAPSED} -lt ${MAX_WAIT} ]]; do
   # Get check status
   STATUS_JSON="$(gh pr checks --json name,state 2>/dev/null || echo '[]')"
   
-  # Count pending and failed checks
-  PENDING="$(echo "${STATUS_JSON}" | jq '[.[] | select(.state == "PENDING")] | length')"
-  FAILED="$(echo "${STATUS_JSON}" | jq '[.[] | select(.state == "FAILURE" or .state == "ERROR")] | length')"
+  # Count pending and failed checks (gh pr checks returns lowercase states)
+  PENDING="$(echo "${STATUS_JSON}" | jq '[.[] | select(.state == "pending")] | length')"
+  FAILED="$(echo "${STATUS_JSON}" | jq '[.[] | select(.state == "fail")] | length')"
   
   if [[ "${PENDING}" -eq 0 ]]; then
     if [[ "${FAILED}" -eq 0 ]]; then
@@ -784,9 +784,9 @@ while [[ ${ELAPSED} -lt ${MAX_WAIT} ]]; do
       else
         fail "❌ ${FAILED} check(s) failed. Use --force to override."
         
-        # Show which checks failed
+        # Show which checks failed (using state == "fail" for gh pr checks)
         echo -e "${RED}Failed checks:${NC}"
-        echo "${STATUS_JSON}" | jq -r '.[] | select(.status == "completed" and .conclusion != "success") | "  • " + .name'
+        echo "${STATUS_JSON}" | jq -r '.[] | select(.state == "fail") | "  • " + .name'
         
         report
       fi
@@ -805,19 +805,25 @@ if [[ ${ELAPSED} -ge ${MAX_WAIT} ]]; then
   report
 fi
 
-# Attempt to merge
-echo -e "\n${GREEN}Merging PR...${NC}"
-if gh pr merge --squash --delete-branch; then
-  note "🎉 PR merged successfully!"
+# Attempt to merge (use --auto since auto-merge is now enabled on the repo)
+echo -e "\n${GREEN}Enabling auto-merge for PR...${NC}"
+if gh pr merge --auto --squash --delete-branch; then
+  note "🎉 Auto-merge enabled! PR will merge when checks complete."
   MERGE_SUCCESS=true
 else
-  # Check if already merged
-  if gh pr view --json state -q '.state' | grep -q "MERGED"; then
-    note "✅ PR was already merged"
+  # Try without --auto for backward compatibility
+  if gh pr merge --squash --delete-branch; then
+    note "🎉 PR merged successfully!"
     MERGE_SUCCESS=true
   else
-    fail "Failed to merge PR (may require manual intervention)"
-    report
+    # Check if already merged
+    if gh pr view --json state -q '.state' | grep -q "MERGED"; then
+      note "✅ PR was already merged"
+      MERGE_SUCCESS=true
+    else
+      fail "Failed to merge PR (may require manual intervention)"
+      report
+    fi
   fi
 fi
 
