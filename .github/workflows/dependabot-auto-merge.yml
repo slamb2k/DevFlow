@@ -1,0 +1,86 @@
+name: Dependabot Auto-merge
+on: pull_request
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    # Only run for Dependabot PRs
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      # Fetch metadata about the Dependabot PR
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      # Auto-approve patch and minor updates
+      - name: Approve patch and minor updates
+        if: |
+          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        run: gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      # Auto-merge for patch updates and dev dependencies
+      - name: Auto-merge patch updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      # Auto-merge for minor updates of dev dependencies only
+      - name: Auto-merge minor updates of dev dependencies
+        if: |
+          steps.metadata.outputs.update-type == 'version-update:semver-minor' &&
+          steps.metadata.outputs.dependency-type == 'direct:development'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      # Add comment for manual review on major updates
+      - name: Comment on major updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-major'
+        run: |
+          gh pr comment "$PR_URL" --body "⚠️ **Major Version Update**
+
+          This PR contains a major version update that may include breaking changes.
+          Please review:
+          - Changelog for breaking changes
+          - Migration guide if available
+          - Impact on existing code
+          - Test coverage
+
+          Dependencies updated: ${{ steps.metadata.outputs.dependency-names }}
+          Previous version: ${{ steps.metadata.outputs.previous-version }}
+          New version: ${{ steps.metadata.outputs.new-version }}"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      # Label PRs for better organization
+      - name: Add labels based on update type
+        run: |
+          if [[ "${{ steps.metadata.outputs.update-type }}" == "version-update:semver-major" ]]; then
+            gh pr edit "$PR_URL" --add-label "major-update,needs-review"
+          elif [[ "${{ steps.metadata.outputs.update-type }}" == "version-update:semver-minor" ]]; then
+            gh pr edit "$PR_URL" --add-label "minor-update"
+          else
+            gh pr edit "$PR_URL" --add-label "patch-update"
+          fi
+
+          # Add security label if it's a security update
+          if [[ "${{ contains(github.event.pull_request.title, 'security') }}" == "true" ]]; then
+            gh pr edit "$PR_URL" --add-label "security"
+          fi
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}

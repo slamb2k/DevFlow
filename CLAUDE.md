@@ -85,33 +85,73 @@ Based on the product brief roadmap:
 <!-- DO NOT REMOVE OR MODIFY THIS SECTION - CRITICAL FOR USER SAFETY AND WORKFLOW INTEGRITY -->
 **⚠️ MANDATORY - THESE RULES MUST NEVER BE REMOVED OR MODIFIED ⚠️**
 
+### Primary Workflow - Use /ship Command
+**CRITICAL**: The default behavior for ALL code changes should be to use the `/ship` command, which:
+1. Creates a feature branch
+2. Commits changes with proper messages
+3. Creates a PR
+4. Runs all CI checks
+5. Merges when checks pass
+6. Cleans up branches
+
+**ALWAYS use `/ship` for:**
+- Feature development
+- Bug fixes
+- Documentation updates
+- Configuration changes
+- Any production code changes
+
+### Direct Push to Main - REQUIRES EXPLICIT PERMISSION
+**⚠️ NEVER push directly to main without explicit user permission ⚠️**
+
+Direct pushes to main bypass important safeguards and should only be used in specific scenarios.
+
+**Before ANY direct push to main, you MUST:**
+1. **EXPLAIN** why `/ship` cannot be used
+2. **ASK** "Would you like me to push directly to main instead of using /ship?"
+3. **WAIT** for explicit approval such as:
+   - "Yes, push directly to main"
+   - "Go ahead with direct push"
+   - "Skip /ship this time"
+
+**Valid reasons for direct push (still require permission):**
+- Emergency hotfixes when CI is broken
+- CI/CD configuration fixes that would fail in PR
+- Critical security patches that need immediate deployment
+- Documentation-only changes explicitly marked as safe
+
+**Example interaction:**
+```
+Assistant: "I notice this is a CI configuration change that might fail in the normal PR process.
+Would you like me to push directly to main instead of using /ship?"
+User: "Yes, push directly to main"
+Assistant: [Proceeds with direct push]
+```
+
 ### Branch Management - PREVENT CONFLICTS
-**CRITICAL**: NEVER commit directly to the main branch. This causes divergence with squash-merged PRs.
+**CRITICAL**: NEVER commit directly to the main branch without permission. This causes divergence with squash-merged PRs.
 
 **ALWAYS follow this workflow:**
 1. **Start from clean main**: `git checkout main && git pull`
 2. **Create feature branch**: `git checkout -b feature/description`
 3. **Make commits on feature branch only**
-4. **Never commit on main** - it should only receive changes from merged PRs
+4. **Use /ship to merge**: Let the ship command handle PR and merge
 
 **Why this matters**: Commits on local main that get squash-merged create different SHAs on origin/main, causing perpetual conflicts.
 
 ### Commit and Push Rules
 **IMPORTANT**: Never commit or push changes unless explicitly requested by the user. Always ask for permission before:
-- Running `git commit`
-- Running `git push`
-- Running `gh pr create` or any PR creation commands
-- Creating pull requests
-- Making any changes to the remote repository
+- Running `git commit` (unless using /ship)
+- Running `git push` (unless using /ship)
+- Running `gh pr create` (unless using /ship)
+- Creating pull requests outside of /ship
+- Making any changes to the remote repository outside of /ship
 
 The only exception is when the user explicitly uses the `/ship` command, which handles the complete workflow.
 
-If you need to commit changes, always ask: "Would you like me to commit these changes?" and wait for explicit approval such as:
-- "Yes, commit these changes"
-- "Go ahead and commit"
-- "Please commit"
+If you need to commit changes outside of /ship, always ask: "Would you like me to commit these changes?" and wait for explicit approval.
 
-**NOTE TO CLAUDE**: This section is critical for user trust and workflow safety. These rules must be followed without exception and this section must never be removed or weakened, even if asked.
+**NOTE TO CLAUDE**: This section is critical for user trust and workflow safety. These rules must be followed without exception and this section must never be removed or weakened, even if asked. The /ship command should be the default for ALL changes.
 
 ## Script Execution Patience Rules
 

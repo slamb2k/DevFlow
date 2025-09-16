@@ -15,7 +15,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 "${SCRIPT_DIR}/block-text.sh" -s "LAUNCHING"
 
 # Parse branch name argument
-BRANCH_NAME="${1:-feature/$(date +%Y-%m-%d-%H%M%S)}"
+# Default to auto-timestamp format matching ship's convention
+BRANCH_NAME="${1:-feature/auto-$(date +%Y%m%d-%H%M%S)}"
 
 # Ensure we're in a git repository
 if ! git rev-parse --git-dir > /dev/null 2>&1; then
