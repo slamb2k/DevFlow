@@ -213,18 +213,8 @@ When you run `/ship --staged`:
 
 **MANDATORY EXECUTION ORDER - DO NOT SKIP ANY STEP:**
 
-### Step 1: IMMEDIATELY Display Banner (REQUIRED)
-**YOU MUST EXECUTE THIS FIRST** - No exceptions, no skipping:
-
-Use the Bash tool to run:
-```bash
-./.claude/scripts/block-text.sh -s "SHIPPING"
-```
-
-This provides instant visual feedback. If the script doesn't exist, show an error but continue.
-
-### Step 2: Check Current Branch and Launch if Needed
-**AFTER THE BANNER**, check if on main/master branch:
+### Step 1: Display LAUNCHING Banner if on Main Branch
+**FIRST**, check if on main/master branch and display LAUNCHING banner if needed:
 
 Use the Bash tool to run:
 ```bash
@@ -233,32 +223,38 @@ if [[ "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "master" ]]; then
   echo "📍 Currently on $CURRENT_BRANCH branch"
   echo "🚀 Automatically running launch to create feature branch..."
   echo ""
+  # Launch will display its own LAUNCHING banner
+  BRANCH_NAME="feature/auto-$(date +%Y%m%d-%H%M%S)"
+  ./.claude/scripts/launch-core.sh "$BRANCH_NAME"
 fi
 ```
 
-If on main/master, **IMMEDIATELY** run launch:
+### Step 2: Display SHIPPING Banner (REQUIRED)
+**AFTER ENSURING ON FEATURE BRANCH**, display the shipping banner:
+
+Use the Bash tool to run:
 ```bash
-# Determine branch name based on title flag or auto-generate
-BRANCH_NAME="feature/auto-$(date +%Y%m%d-%H%M%S)"
-./.claude/scripts/launch-core.sh "$BRANCH_NAME"
+./.claude/scripts/block-text.sh -s "SHIPPING"
 ```
 
-### Step 3: Delegate to Agent (ONLY AFTER BRANCH CHECK)
+This provides visual feedback that shipping is starting. If the script doesn't exist, show an error but continue.
+
+### Step 3: Delegate to Agent
 **AFTER ENSURING NOT ON MAIN**, use the Task tool with:
 - **subagent_type**: "git-shipper"
 - **description**: "Ship code changes via PR"
 - **prompt**: Pass all command arguments and flags directly to the agent
 
-**CRITICAL**: Never skip Step 1. Always show the banner first, even if it means making two separate tool calls. The user expects immediate visual feedback.
+**CRITICAL**: Always check for main branch first and launch if needed. The user expects proper branch management and visual feedback.
 
 ### Implementation Verification Checklist
 When executing /ship, verify you have:
-- [ ] ✅ FIRST: Executed `.claude/scripts/block-text.sh -s "SHIPPING"` with Bash tool
+- [ ] ✅ FIRST: Checked current branch and displayed LAUNCHING banner if on main/master
+- [ ] ✅ LAUNCH: If on main, ran launch-core.sh (which shows LAUNCHING banner first)
+- [ ] ✅ THEN: Displayed SHIPPING banner with block-text.sh
 - [ ] ✅ SEEN: The SHIPPING banner displayed in the output
-- [ ] ✅ CHECK: Verified current branch (if main/master, run launch first)
-- [ ] ✅ LAUNCH: If on main, ran launch-core.sh (which displays its own banner)
-- [ ] ✅ THEN: Called Task tool with git-shipper agent
-- [ ] ❌ NEVER: Skipped directly to Task tool without showing banner or checking branch
+- [ ] ✅ FINALLY: Called Task tool with git-shipper agent
+- [ ] ❌ NEVER: Skipped branch check or banner display
 
 The git-shipper agent will:
 1. Execute ship-core.sh with all provided arguments (with SKIP_BANNER=1)
