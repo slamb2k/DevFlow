@@ -201,40 +201,21 @@ fi
 CURR_BRANCH="$(git branch --show-current 2>/dev/null || true)"
 debug "Current branch: ${CURR_BRANCH}"
 
-# Handle being on default branch - create feature branch
+# Handle being on default branch - should not happen if /ship command works correctly
 if [[ "${CURR_BRANCH}" = "${DEFAULT}" ]] || [[ -z "${CURR_BRANCH}" ]]; then
-  # Switch to default and pull latest
-  git switch "${DEFAULT}" >/dev/null 2>&1 || true
-  if ! git pull --ff-only origin "${DEFAULT}"; then
-    fail "Failed to sync ${DEFAULT} branch"
-    report
-  fi
-  note "📥 Synced ${DEFAULT} with origin"
-  
-  # Determine branch name
-  TARGET_BRANCH="${EXPLICIT_BRANCH_NAME}"
-  if [[ -z "${TARGET_BRANCH}" ]]; then
-    if [[ -n "${EXPLICIT_TITLE}" ]]; then
-      # Generate branch name from title
-      SLUG="$(echo "${EXPLICIT_TITLE}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g;s/^-+|-+$//g' | cut -c1-60)"
-      TARGET_BRANCH="feat/${SLUG:-update-$(date +%Y%m%d-%H%M%S)}"
-    else
-      # Auto-generate branch name
-      TARGET_BRANCH="feature/auto-$(date +%Y%m%d-%H%M%S)"
-    fi
-  fi
-  
-  # Create and switch to new branch
-  if git switch -c "${TARGET_BRANCH}"; then
-    note "🌱 Created branch: ${TARGET_BRANCH}"
-    CURR_BRANCH="${TARGET_BRANCH}"
-  else
-    fail "Failed to create branch: ${TARGET_BRANCH}"
-    report
-  fi
-else
-  note "🌿 Using existing branch: ${CURR_BRANCH}"
+  fail "❌ Cannot ship directly from ${DEFAULT} branch"
+  echo
+  echo "The /ship command should have automatically run 'launch' to create a feature branch."
+  echo "If you're running ship-core.sh directly, please use the /ship command instead, or:"
+  echo
+  echo "  1. Run: ./claude/scripts/launch-core.sh"
+  echo "  2. Then run ship again"
+  echo
+  report
 fi
+
+# On feature branch - continue with shipping
+note "🌿 Using existing branch: ${CURR_BRANCH}"
 
 # Handle staged vs default mode for uncommitted changes
 if [[ "${STAGED}" = "true" ]]; then
@@ -328,17 +309,25 @@ if [[ -f pnpm-lock.yaml ]] && command -v pnpm >/dev/null 2>&1; then
   note "📦 Dependencies installed"
 fi
 
-# Detect and use Nx if available
-if command -v nx >/dev/null 2>&1 || npx nx --version >/dev/null 2>&1; then
+# Detect and use Nx if this is an Nx workspace
+NX_AVAILABLE=false
+if [ -f "nx.json" ] || [ -f "workspace.json" ] || [ -f "angular.json" ]; then
+  # This appears to be an Nx workspace, check if nx command is available
+  if command -v nx >/dev/null 2>&1 || npx nx --version >/dev/null 2>&1; then
+    NX_AVAILABLE=true
+  fi
+fi
+
+if [ "$NX_AVAILABLE" = true ]; then
   echo -e "${BLUE}Using Nx affected for optimized checks...${NC}"
   BASE="$(git merge-base origin/${DEFAULT} HEAD)"
-  
+
   # Run Nx affected targets
   npx nx affected -t format --base="${BASE}" --head=HEAD 2>/dev/null || true
   npx nx affected -t lint --base="${BASE}" --head=HEAD || warn "Lint issues detected"
   npx nx affected -t test --base="${BASE}" --head=HEAD || warn "Test failures detected"
   npx nx affected -t build --base="${BASE}" --head=HEAD || warn "Build issues detected"
-  
+
   note "🎯 Nx affected checks completed"
 else
   # Fallback to standard npm/pnpm scripts
