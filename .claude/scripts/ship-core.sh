@@ -201,51 +201,21 @@ fi
 CURR_BRANCH="$(git branch --show-current 2>/dev/null || true)"
 debug "Current branch: ${CURR_BRANCH}"
 
-# Handle being on default branch - check for uncommitted changes
+# Handle being on default branch - should not happen if /ship command works correctly
 if [[ "${CURR_BRANCH}" = "${DEFAULT}" ]] || [[ -z "${CURR_BRANCH}" ]]; then
-  # Check for uncommitted changes
-  if [[ -n "$(git status --porcelain)" ]]; then
-    warn "📦 You have uncommitted changes on ${DEFAULT} branch"
-    note "💡 Consider using 'launch' command first to:"
-    note "   1. Stash your changes"
-    note "   2. Create a clean feature branch"
-    note "   3. Restore your changes"
-    echo
-    note "Or ship will create a branch for you (but won't stash)"
-  fi
-
-  # Switch to default and pull latest
-  git switch "${DEFAULT}" >/dev/null 2>&1 || true
-  if ! git pull --ff-only origin "${DEFAULT}"; then
-    fail "Failed to sync ${DEFAULT} branch"
-    report
-  fi
-  note "📥 Synced ${DEFAULT} with origin"
-
-  # Determine branch name
-  TARGET_BRANCH="${EXPLICIT_BRANCH_NAME}"
-  if [[ -z "${TARGET_BRANCH}" ]]; then
-    if [[ -n "${EXPLICIT_TITLE}" ]]; then
-      # Generate branch name from title
-      SLUG="$(echo "${EXPLICIT_TITLE}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g;s/^-+|-+$//g' | cut -c1-60)"
-      TARGET_BRANCH="feat/${SLUG:-update-$(date +%Y%m%d-%H%M%S)}"
-    else
-      # Auto-generate branch name
-      TARGET_BRANCH="feature/auto-$(date +%Y%m%d-%H%M%S)"
-    fi
-  fi
-
-  # Create and switch to new branch
-  if git switch -c "${TARGET_BRANCH}"; then
-    note "🌱 Created branch: ${TARGET_BRANCH}"
-    CURR_BRANCH="${TARGET_BRANCH}"
-  else
-    fail "Failed to create branch: ${TARGET_BRANCH}"
-    report
-  fi
-else
-  note "🌿 Using existing branch: ${CURR_BRANCH}"
+  fail "❌ Cannot ship directly from ${DEFAULT} branch"
+  echo
+  echo "The /ship command should have automatically run 'launch' to create a feature branch."
+  echo "If you're running ship-core.sh directly, please use the /ship command instead, or:"
+  echo
+  echo "  1. Run: ./claude/scripts/launch-core.sh"
+  echo "  2. Then run ship again"
+  echo
+  report
 fi
+
+# On feature branch - continue with shipping
+note "🌿 Using existing branch: ${CURR_BRANCH}"
 
 # Handle staged vs default mode for uncommitted changes
 if [[ "${STAGED}" = "true" ]]; then

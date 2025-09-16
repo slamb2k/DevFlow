@@ -223,8 +223,32 @@ Use the Bash tool to run:
 
 This provides instant visual feedback. If the script doesn't exist, show an error but continue.
 
-### Step 2: THEN Delegate to Agent (ONLY AFTER BANNER)
-**ONLY AFTER THE BANNER IS DISPLAYED**, use the Task tool with:
+### Step 2: Check Current Branch and Launch if Needed
+**AFTER THE BANNER**, check if on main/master branch:
+
+Use the Bash tool to run:
+```bash
+CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+if [[ "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "master" ]]; then
+  echo "📍 Currently on $CURRENT_BRANCH branch"
+  echo "🚀 Automatically running launch to create feature branch..."
+  echo ""
+fi
+```
+
+If on main/master, **IMMEDIATELY** run launch:
+```bash
+./.claude/scripts/block-text.sh -s "LAUNCHING"
+```
+Then:
+```bash
+# Determine branch name based on title flag or auto-generate
+BRANCH_NAME="feature/auto-$(date +%Y%m%d-%H%M%S)"
+./.claude/scripts/launch-core.sh "$BRANCH_NAME"
+```
+
+### Step 3: Delegate to Agent (ONLY AFTER BRANCH CHECK)
+**AFTER ENSURING NOT ON MAIN**, use the Task tool with:
 - **subagent_type**: "git-shipper"
 - **description**: "Ship code changes via PR"
 - **prompt**: Pass all command arguments and flags directly to the agent
@@ -235,8 +259,10 @@ This provides instant visual feedback. If the script doesn't exist, show an erro
 When executing /ship, verify you have:
 - [ ] ✅ FIRST: Executed `.claude/scripts/block-text.sh -s "SHIPPING"` with Bash tool
 - [ ] ✅ SEEN: The SHIPPING banner displayed in the output
+- [ ] ✅ CHECK: Verified current branch (if main/master, run launch first)
+- [ ] ✅ LAUNCH: If on main, shown LAUNCHING banner and created feature branch
 - [ ] ✅ THEN: Called Task tool with git-shipper agent
-- [ ] ❌ NEVER: Skipped directly to Task tool without showing banner
+- [ ] ❌ NEVER: Skipped directly to Task tool without showing banner or checking branch
 
 The git-shipper agent will:
 1. Execute ship-core.sh with all provided arguments (with SKIP_BANNER=1)
