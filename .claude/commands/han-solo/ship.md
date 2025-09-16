@@ -210,22 +210,62 @@ When you run `/ship --staged`:
 - Auto-deletes branches after merge
 
 ## Implementation
-This command displays a banner immediately then delegates to the git-shipper agent.
 
-First, display the banner for instant feedback:
+**MANDATORY EXECUTION ORDER - DO NOT SKIP ANY STEP:**
+
+### Step 1: Create a new feature branch if on the Main Branch (REQUIRED)
+**FIRST CHECK IF ON THE MAIN/MASTER BRANCH** and if we are, execute the following script:
+
+Use the Bash tool to run:
 ```bash
 #!/bin/bash
+set -e
+
 # Display banner immediately for instant feedback
 if [ -f "./.claude/scripts/block-text.sh" ]; then
-  ./.claude/scripts/block-text.sh -s "SHIPPING"
+  ./.claude/scripts/block-text.sh -s "LAUNCHING"
   echo
+fi
+
+# Determine branch name based on title flag or auto-generate
+BRANCH_NAME="feature/auto-$(date +%Y%m%d-%H%M%S)"
+
+# Execute launch-core.sh with SKIP_BANNER since we already showed it
+if [ -f "./.claude/scripts/launch-core.sh" ]; then
+  SKIP_BANNER=1 ./.claude/scripts/launch-core.sh "$BRANCH_NAME"
+else
+  echo "Error: launch-core.sh script not found"
+  echo "Please ensure han-solo is properly installed"
+  exit 1
 fi
 ```
 
-Then, use the Task tool with:
+### Step 2: Display SHIPPING Banner (REQUIRED)
+**AFTER ENSURING ON FEATURE BRANCH**, display the shipping banner:
+
+Use the Bash tool to run:
+```bash
+./.claude/scripts/block-text.sh -s "SHIPPING"
+```
+
+This provides visual feedback that shipping is starting. If the script doesn't exist, show an error but continue.
+
+### Step 3: Delegate to Agent
+**AFTER ENSURING NOT ON MAIN**, use the Task tool with:
 - **subagent_type**: "git-shipper"
 - **description**: "Ship code changes via PR"
 - **prompt**: Pass all command arguments and flags directly to the agent
+
+**CRITICAL**: Always check for main branch first and launch if needed. The user expects proper branch management and visual feedback.
+
+### Implementation Verification Checklist
+When executing /ship, verify you have:
+- [ ] ✅ FIRST: Checked if on main/master branch
+- [ ] ✅ LAUNCH: If on main, displayed LAUNCHING banner and ran launch-core.sh with SKIP_BANNER=1
+- [ ] ✅ THEN: Displayed SHIPPING banner with block-text.sh
+- [ ] ✅ SEEN: The SHIPPING banner displayed in the output
+- [ ] ✅ FINALLY: Called Task tool with git-shipper agent
+- [ ] ❌ NEVER: Skipped branch check or banner display
 
 The git-shipper agent will:
 1. Execute ship-core.sh with all provided arguments (with SKIP_BANNER=1)

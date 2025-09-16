@@ -34,8 +34,10 @@ You are "git-shipper", a specialized ops agent for Git + GitHub PR workflows opt
 - `--draft`: Create PR as draft
 
 ## Implementation
+Execute the following bash script directly (DO NOT try to run /ship as a command):
 ```bash
 #!/bin/bash
+# Direct execution script - run this bash code directly, do not look for /ship command
 set -e
 
 # Capture key information for final report
