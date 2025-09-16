@@ -1,18 +1,46 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { GitHubIntegration } from '../../../../src/integrations/platforms/github/GitHubIntegration.js';
-import { IntegrationManager } from '../../../../src/integrations/integration-manager.js';
-import { CredentialManager } from '../../../../src/integrations/credential-manager.js';
-import { EventBus } from '../../../../src/integrations/event-bus.js';
-import { Octokit } from '@octokit/rest';
-import { createOAuthAppAuth } from '@octokit/auth-oauth-app';
-import { createAppAuth } from '@octokit/auth-app';
 import crypto from 'crypto';
 
-jest.mock('@octokit/rest');
-jest.mock('@octokit/auth-oauth-app');
-jest.mock('@octokit/auth-app');
-jest.mock('../../../../src/integrations/credential-manager.js');
-jest.mock('../../../../src/integrations/event-bus.js');
+// Manual mocks for ES modules
+jest.unstable_mockModule('@octokit/rest', () => ({
+  Octokit: jest.fn(() => ({}))
+}));
+
+jest.unstable_mockModule('@octokit/auth-oauth-app', () => ({
+  createOAuthAppAuth: jest.fn()
+}));
+
+jest.unstable_mockModule('@octokit/auth-app', () => ({
+  createAppAuth: jest.fn()
+}));
+
+jest.unstable_mockModule('../../../../src/integrations/credential-manager.js', () => ({
+  CredentialManager: {
+    getInstance: jest.fn(() => ({
+      getCredential: jest.fn(),
+      storeCredential: jest.fn(),
+      deleteCredential: jest.fn()
+    }))
+  }
+}));
+
+jest.unstable_mockModule('../../../../src/integrations/event-bus.js', () => ({
+  EventBus: {
+    getInstance: jest.fn(() => ({
+      emit: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn()
+    }))
+  }
+}));
+
+// Dynamic imports after mocks
+const { GitHubIntegration } = await import('../../../../src/integrations/platforms/github/GitHubIntegration.js');
+const { Octokit } = await import('@octokit/rest');
+const { createOAuthAppAuth } = await import('@octokit/auth-oauth-app');
+const { createAppAuth } = await import('@octokit/auth-app');
+const { CredentialManager } = await import('../../../../src/integrations/credential-manager.js');
+const { EventBus } = await import('../../../../src/integrations/event-bus.js');
 
 describe('GitHubIntegration', () => {
   let githubIntegration;
@@ -80,8 +108,8 @@ describe('GitHubIntegration', () => {
     };
 
     Octokit.mockImplementation(() => mockOctokit);
-    CredentialManager.getInstance = jest.fn().mockReturnValue(mockCredentialManager);
-    EventBus.getInstance = jest.fn().mockReturnValue(mockEventBus);
+    CredentialManager.getInstance.mockReturnValue(mockCredentialManager);
+    EventBus.getInstance.mockReturnValue(mockEventBus);
 
     githubIntegration = new GitHubIntegration();
   });
