@@ -27,14 +27,14 @@ describe('StyleRegistry', () => {
       name: 'test',
       format: jest.fn(),
       validateOptions: jest.fn(),
-      isAsyncFormatter: false
+      isAsyncFormatter: false,
     };
   });
 
   describe('Registry Management', () => {
     test('should register a new style formatter', () => {
       const formatter = new BaseFormatter('guide', {
-        description: 'Guide style formatter'
+        description: 'Guide style formatter',
       });
 
       registry.register('guide', formatter);
@@ -99,7 +99,7 @@ describe('StyleRegistry', () => {
     test('should select style by context', () => {
       const context = {
         command: 'init',
-        phase: 'onboarding'
+        phase: 'onboarding',
       };
 
       // Register context mappings
@@ -111,7 +111,7 @@ describe('StyleRegistry', () => {
 
     test('should select style by explicit preference', () => {
       const context = {
-        style: 'expert'
+        style: 'expert',
       };
 
       const style = registry.selectStyle(context);
@@ -122,7 +122,7 @@ describe('StyleRegistry', () => {
       registry.setDefault('expert');
 
       const context = {
-        command: 'unknown'
+        command: 'unknown',
       };
 
       const style = registry.selectStyle(context);
@@ -144,13 +144,13 @@ describe('StyleRegistry', () => {
     beforeEach(() => {
       guideFormatter = new BaseFormatter('guide', {
         verbose: true,
-        includeExamples: true
+        includeExamples: true,
       });
       guideFormatter.format = jest.fn().mockReturnValue('Formatted as guide');
 
       expertFormatter = new BaseFormatter('expert', {
         verbose: false,
-        includeExamples: false
+        includeExamples: false,
       });
       expertFormatter.format = jest.fn().mockReturnValue('Formatted as expert');
 
@@ -183,14 +183,14 @@ describe('StyleRegistry', () => {
       const options = {
         style: 'guide',
         colors: true,
-        width: 80
+        width: 80,
       };
 
       registry.format(data, options);
 
       expect(guideFormatter.format).toHaveBeenCalledWith(data, {
         colors: true,
-        width: 80
+        width: 80,
       });
     });
 
@@ -247,32 +247,42 @@ describe('StyleRegistry', () => {
 
       const style = registry.selectStyle({
         command: 'init',
-        style: 'expert'
+        style: 'expert',
       });
 
       expect(style).toBe('expert');
     });
 
     test('should handle multiple context criteria', () => {
-      registry.mapContext({
-        command: 'analyze',
-        verbose: true
-      }, 'guide');
+      registry.mapContext(
+        {
+          command: 'analyze',
+          verbose: true,
+        },
+        'guide'
+      );
 
-      registry.mapContext({
-        command: 'analyze',
-        verbose: false
-      }, 'expert');
+      registry.mapContext(
+        {
+          command: 'analyze',
+          verbose: false,
+        },
+        'expert'
+      );
 
-      expect(registry.selectStyle({
-        command: 'analyze',
-        verbose: true
-      })).toBe('guide');
+      expect(
+        registry.selectStyle({
+          command: 'analyze',
+          verbose: true,
+        })
+      ).toBe('guide');
 
-      expect(registry.selectStyle({
-        command: 'analyze',
-        verbose: false
-      })).toBe('expert');
+      expect(
+        registry.selectStyle({
+          command: 'analyze',
+          verbose: false,
+        })
+      ).toBe('expert');
     });
   });
 
@@ -346,18 +356,14 @@ describe('StyleRegistry', () => {
       expect(config).toEqual({
         defaultStyle: 'guide',
         registeredStyles: ['guide', 'expert'],
-        contextMappings: [
-          { context: { command: 'init' }, style: 'guide' }
-        ]
+        contextMappings: [{ context: { command: 'init' }, style: 'guide' }],
       });
     });
 
     test('should import configuration', () => {
       const config = {
         defaultStyle: 'expert',
-        contextMappings: [
-          { context: { command: 'analyze' }, style: 'reporter' }
-        ]
+        contextMappings: [{ context: { command: 'analyze' }, style: 'reporter' }],
       };
 
       // Register styles first
@@ -387,7 +393,7 @@ describe('StyleRegistry', () => {
 
     test('should validate formatter has required methods', () => {
       const invalidFormatter = {
-        name: 'invalid'
+        name: 'invalid',
         // Missing format method
       };
 

@@ -44,11 +44,36 @@ class FeedbackManager {
     return entry;
   }
 
+  async recordAccepted(recommendation) {
+    return this.recordFeedback({
+      recommendationId: recommendation.id,
+      category: recommendation.category,
+      type: recommendation.type,
+      accepted: true,
+      timestamp: new Date(),
+    });
+  }
+
+  async recordRejected(recommendation, reason) {
+    return this.recordFeedback({
+      recommendationId: recommendation.id,
+      category: recommendation.category,
+      type: recommendation.type,
+      accepted: false,
+      reason,
+      timestamp: new Date(),
+    });
+  }
+
   generateFeedbackId() {
     return `fb-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  async getFeedbackHistory() {
+  getFeedbackHistory() {
+    return this.feedbackHistory;
+  }
+
+  async getFeedbackHistoryAsync() {
     return this.feedbackHistory;
   }
 

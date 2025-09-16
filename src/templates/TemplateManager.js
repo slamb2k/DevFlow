@@ -2,6 +2,8 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import TemplateValidator from './TemplateValidator.js';
 import TemplateRenderer from './TemplateRenderer.js';
+import TemplateInheritance from './TemplateInheritance.js';
+import TemplateVariables from './TemplateVariables.js';
 
 class TemplateManager {
   constructor(projectPath) {
@@ -9,6 +11,8 @@ class TemplateManager {
     this.templatesPath = path.join(projectPath, '.devflow/templates');
     this.validator = new TemplateValidator();
     this.renderer = new TemplateRenderer();
+    this.inheritance = new TemplateInheritance();
+    this.variableProcessor = new TemplateVariables();
     this.templates = new Map();
     this.categories = new Map();
   }
@@ -56,8 +60,20 @@ class TemplateManager {
     }
   }
 
-  async loadTemplate(templatePath) {
+  async loadTemplate(templateNameOrPath) {
     try {
+      // If it's just a name, convert to path
+      let templatePath = templateNameOrPath;
+      if (!templateNameOrPath.includes('/')) {
+        // Search for template by name
+        const template = this.templates.get(templateNameOrPath);
+        if (template) {
+          return template;
+        }
+        // Try to find in templates path
+        templatePath = path.join(this.templatesPath, `${templateNameOrPath}.json`);
+      }
+
       const content = await fs.readFile(templatePath, 'utf8');
       const template = JSON.parse(content);
 
@@ -70,14 +86,14 @@ class TemplateManager {
       console.warn(`Invalid template at ${templatePath}`);
       return null;
     } catch (error) {
-      console.error(`Error loading template ${templatePath}:`, error.message);
+      console.error(`Error loading template ${templateNameOrPath}:`, error.message);
       return null;
     }
   }
 
   async loadBuiltInTemplates() {
     // Load built-in templates from src/templates/builtin
-    const builtInPath = path.join(__dirname, 'builtin');
+    const builtInPath = path.join(path.dirname(new URL(import.meta.url).pathname), 'builtin');
 
     try {
       const templates = await fs.readdir(builtInPath);
@@ -197,7 +213,12 @@ class TemplateManager {
       throw new Error(`Template not found: ${templateId}`);
     }
 
-    return this.renderer.render(template, variables);
+    // Process variables
+    let content = template.content || '';
+    if (this.variableProcessor) {
+      content = this.variableProcessor.substitute(content, variables);
+    }
+    return content;
   }
 
   async cloneTemplate(templateId, newName) {

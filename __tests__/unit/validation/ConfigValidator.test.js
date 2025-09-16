@@ -23,8 +23,8 @@ describe('ConfigValidator', () => {
         scripts: {
           start: 'react-scripts start',
           build: 'react-scripts build',
-          test: 'react-scripts test'
-        }
+          test: 'react-scripts test',
+        },
       };
 
       const result = validator.validate(config, 'react');
@@ -39,8 +39,8 @@ describe('ConfigValidator', () => {
         dependencies: ['express'],
         scripts: {
           start: 'node index.js',
-          dev: 'nodemon index.js'
-        }
+          dev: 'nodemon index.js',
+        },
       };
 
       const result = validator.validate(config, 'node');
@@ -49,7 +49,7 @@ describe('ConfigValidator', () => {
 
     test('should detect missing required fields', () => {
       const config = {
-        framework: 'react'
+        framework: 'react',
         // Missing projectType
       };
 
@@ -68,9 +68,9 @@ describe('ConfigValidator', () => {
           sourceMap: true,
           optimization: {
             minify: true,
-            splitChunks: true
-          }
-        }
+            splitChunks: true,
+          },
+        },
       };
 
       const result = validator.validateDeep(config);
@@ -84,7 +84,7 @@ describe('ConfigValidator', () => {
         projectType: '  react  ',
         framework: 'REACT',
         port: '3000',
-        debug: 'true'
+        debug: 'true',
       };
 
       const sanitized = validator.sanitize(config);
@@ -98,7 +98,7 @@ describe('ConfigValidator', () => {
       const config = {
         projectType: 'react',
         invalidField: 'should be removed',
-        _internal: 'should be removed'
+        _internal: 'should be removed',
       };
 
       const sanitized = validator.sanitize(config);
@@ -111,7 +111,7 @@ describe('ConfigValidator', () => {
     test('should normalize configuration structure', () => {
       const config = {
         type: 'react', // Should be normalized to projectType
-        deps: ['react'] // Should be normalized to dependencies
+        deps: ['react'], // Should be normalized to dependencies
       };
 
       const normalized = validator.normalize(config);
@@ -121,7 +121,7 @@ describe('ConfigValidator', () => {
 
     test('should apply default values', () => {
       const config = {
-        projectType: 'node'
+        projectType: 'node',
       };
 
       const normalized = validator.normalize(config);
@@ -135,14 +135,14 @@ describe('ConfigValidator', () => {
       const oldConfig = {
         projectType: 'react',
         port: 3000,
-        debug: false
+        debug: false,
       };
 
       const newConfig = {
         projectType: 'react',
         port: 3001,
         debug: true,
-        newField: 'added'
+        newField: 'added',
       };
 
       const diff = validator.diff(oldConfig, newConfig);
@@ -189,7 +189,7 @@ describe('ConfigValidator', () => {
     test('should migrate configuration to new schema', () => {
       const oldConfig = {
         version: '1.0',
-        oldField: 'value'
+        oldField: 'value',
       };
 
       const migrated = validator.migrate(oldConfig, '2.0');
@@ -202,7 +202,7 @@ describe('ConfigValidator', () => {
 
       const migrations = [
         { from: '1.0', to: '1.1', transform: (c) => ({ ...c, version: '1.1', field1: true }) },
-        { from: '1.1', to: '2.0', transform: (c) => ({ ...c, version: '2.0', field2: true }) }
+        { from: '1.1', to: '2.0', transform: (c) => ({ ...c, version: '2.0', field2: true }) },
       ];
 
       const migrated = validator.applyMigrations(config, migrations);

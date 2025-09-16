@@ -34,13 +34,13 @@ describe('Output Formatters', () => {
     test('should create formatter with name and options', () => {
       const formatter = new BaseFormatter('test', {
         verbose: true,
-        colors: false
+        colors: false,
       });
 
       expect(formatter.name).toBe('test');
       expect(formatter.options).toEqual({
         verbose: true,
-        colors: false
+        colors: false,
       });
     });
 
@@ -55,7 +55,7 @@ describe('Output Formatters', () => {
       const formatter = new BaseFormatter('test', {});
       const validation = formatter.validateOptions({
         colors: true,
-        width: 80
+        width: 80,
       });
 
       expect(validation.valid).toBe(true);
@@ -63,16 +63,16 @@ describe('Output Formatters', () => {
 
     test('should merge options with defaults', () => {
       const formatter = new BaseFormatter('test', {
-        verbose: true
+        verbose: true,
       });
 
       const merged = formatter.mergeOptions({
-        colors: true
+        colors: true,
       });
 
       expect(merged).toEqual({
         verbose: true,
-        colors: true
+        colors: true,
       });
     });
 
@@ -82,7 +82,7 @@ describe('Output Formatters', () => {
 
       const result = formatter.renderTemplate({
         greeting: 'Hello',
-        name: 'World'
+        name: 'World',
       });
 
       expect(result).toBe('Hello, World!');
@@ -99,11 +99,7 @@ describe('Output Formatters', () => {
     test('should format with step-by-step instructions', () => {
       const data = {
         title: 'Setting up DevFlow',
-        steps: [
-          'Install dependencies',
-          'Configure environment',
-          'Run initial setup'
-        ]
+        steps: ['Install dependencies', 'Configure environment', 'Run initial setup'],
       };
 
       const result = formatter.format(data);
@@ -120,7 +116,7 @@ describe('Output Formatters', () => {
       const data = {
         title: 'Using Commands',
         description: 'How to use DevFlow commands',
-        example: '/devflow-init --template react'
+        example: '/devflow-init --template react',
       };
 
       const result = formatter.format(data);
@@ -132,10 +128,7 @@ describe('Output Formatters', () => {
     test('should format tips and notes', () => {
       const data = {
         title: 'Best Practices',
-        tips: [
-          'Always run tests before committing',
-          'Use descriptive commit messages'
-        ]
+        tips: ['Always run tests before committing', 'Use descriptive commit messages'],
       };
 
       const result = formatter.format(data);
@@ -148,7 +141,7 @@ describe('Output Formatters', () => {
     test('should handle warnings', () => {
       const data = {
         title: 'Configuration',
-        warning: 'This will overwrite existing settings'
+        warning: 'This will overwrite existing settings',
       };
 
       const result = formatter.format(data);
@@ -161,7 +154,7 @@ describe('Output Formatters', () => {
       const data = {
         concept: 'Git Branching',
         explanation: 'Branches allow parallel development',
-        learn_more: 'https://docs.example.com/git'
+        learn_more: 'https://docs.example.com/git',
       };
 
       const result = formatter.format(data);
@@ -183,7 +176,7 @@ describe('Output Formatters', () => {
       const data = {
         command: 'npm install',
         options: ['--save-dev', '--legacy-peer-deps'],
-        output: 'Installed 245 packages'
+        output: 'Installed 245 packages',
       };
 
       const result = formatter.format(data);
@@ -200,8 +193,8 @@ describe('Output Formatters', () => {
         config: {
           port: 3000,
           env: 'production',
-          workers: 4
-        }
+          workers: 4,
+        },
       };
 
       const result = formatter.format(data);
@@ -216,7 +209,7 @@ describe('Output Formatters', () => {
       const data = {
         error: 'Module not found',
         file: 'src/index.js',
-        line: 42
+        line: 42,
       };
 
       const result = formatter.format(data);
@@ -230,7 +223,7 @@ describe('Output Formatters', () => {
     test('should format code snippets efficiently', () => {
       const data = {
         code: 'const result = await fetch(url);',
-        language: 'javascript'
+        language: 'javascript',
       };
 
       const result = formatter.format(data);
@@ -242,7 +235,7 @@ describe('Output Formatters', () => {
 
     test('should handle lists efficiently', () => {
       const data = {
-        files: ['index.js', 'config.json', 'package.json']
+        files: ['index.js', 'config.json', 'package.json'],
       };
 
       const result = formatter.format(data);
@@ -264,7 +257,7 @@ describe('Output Formatters', () => {
     test('should format with encouraging tone', () => {
       const data = {
         achievement: 'Tests passing',
-        next_step: 'Consider adding edge cases'
+        next_step: 'Consider adding edge cases',
       };
 
       const result = formatter.format(data);
@@ -278,7 +271,7 @@ describe('Output Formatters', () => {
       const data = {
         decision: 'Choosing a framework',
         options: ['React', 'Vue', 'Angular'],
-        considerations: ['Team expertise', 'Project size']
+        considerations: ['Team expertise', 'Project size'],
       };
 
       const result = formatter.format(data);
@@ -292,7 +285,7 @@ describe('Output Formatters', () => {
       const data = {
         topic: 'Git Workflow',
         tip: 'Start with feature branches',
-        practice: 'Try creating a branch for your next feature'
+        practice: 'Try creating a branch for your next feature',
       };
 
       const result = formatter.format(data);
@@ -305,7 +298,7 @@ describe('Output Formatters', () => {
     test('should celebrate progress', () => {
       const data = {
         milestone: 'First PR merged',
-        progress: '5 of 10 tasks complete'
+        progress: '5 of 10 tasks complete',
       };
 
       const result = formatter.format(data);
@@ -319,7 +312,7 @@ describe('Output Formatters', () => {
       const data = {
         issue: 'Tests failing',
         suggestion: 'Check the test setup',
-        encouragement: 'This is a common issue'
+        encouragement: 'This is a common issue',
       };
 
       const result = formatter.format(data);
@@ -345,8 +338,8 @@ describe('Output Formatters', () => {
         sections: {
           overview: 'Analysis complete',
           findings: ['Issue 1', 'Issue 2'],
-          recommendations: ['Fix 1', 'Fix 2']
-        }
+          recommendations: ['Fix 1', 'Fix 2'],
+        },
       };
 
       const result = formatter.format(data);
@@ -363,9 +356,9 @@ describe('Output Formatters', () => {
         metrics: {
           'Total Files': 42,
           'Code Coverage': '85%',
-          'Complexity': 'Low',
-          'Dependencies': 15
-        }
+          Complexity: 'Low',
+          Dependencies: 15,
+        },
       };
 
       const result = formatter.format(data);
@@ -383,9 +376,9 @@ describe('Output Formatters', () => {
           headers: ['File', 'Lines', 'Coverage'],
           rows: [
             ['index.js', '150', '90%'],
-            ['utils.js', '75', '85%']
-          ]
-        }
+            ['utils.js', '75', '85%'],
+          ],
+        },
       };
 
       const result = formatter.format(data);
@@ -405,8 +398,8 @@ describe('Output Formatters', () => {
           total_issues: 5,
           critical: 1,
           warnings: 2,
-          info: 2
-        }
+          info: 2,
+        },
       };
 
       const result = formatter.format(data);
@@ -426,8 +419,8 @@ describe('Output Formatters', () => {
         insights: [
           { priority: 'high', action: 'Update dependencies' },
           { priority: 'medium', action: 'Refactor utils' },
-          { priority: 'low', action: 'Add documentation' }
-        ]
+          { priority: 'low', action: 'Add documentation' },
+        ],
       };
 
       const result = formatter.format(data);
@@ -458,10 +451,10 @@ describe('Output Formatters', () => {
         new GuideFormatter(),
         new ExpertFormatter(),
         new CoachFormatter(),
-        new ReporterFormatter()
+        new ReporterFormatter(),
       ];
 
-      const names = formatters.map(f => f.name);
+      const names = formatters.map((f) => f.name);
       const uniqueNames = [...new Set(names)];
 
       expect(uniqueNames.length).toBe(names.length);
@@ -476,10 +469,10 @@ describe('Output Formatters', () => {
         new GuideFormatter(),
         new ExpertFormatter(),
         new CoachFormatter(),
-        new ReporterFormatter()
+        new ReporterFormatter(),
       ];
 
-      formatters.forEach(formatter => {
+      formatters.forEach((formatter) => {
         expect(() => formatter.format({})).not.toThrow();
         expect(() => formatter.format(null)).not.toThrow();
         expect(() => formatter.format(undefined)).not.toThrow();
@@ -492,10 +485,10 @@ describe('Output Formatters', () => {
         new GuideFormatter(),
         new ExpertFormatter(),
         new CoachFormatter(),
-        new ReporterFormatter()
+        new ReporterFormatter(),
       ];
 
-      formatters.forEach(formatter => {
+      formatters.forEach((formatter) => {
         const withColors = formatter.format(data, { colors: true });
         const withoutColors = formatter.format(data, { colors: false });
 

@@ -100,7 +100,7 @@ export class AnalyzerAgent extends BaseAgent {
       });
 
       const analysis = {
-        ast,
+        ast: ast.program || ast, // Use the program node if available
         functions: [],
         classes: [],
         interfaces: [],
@@ -253,6 +253,8 @@ export class AnalyzerAgent extends BaseAgent {
       );
 
       const recommendations = [];
+      const refactoringCandidates = [];
+
       if (complexity.cyclomatic > 10) {
         recommendations.push('Consider refactoring - high cyclomatic complexity detected');
       }
@@ -262,6 +264,7 @@ export class AnalyzerAgent extends BaseAgent {
           recommendations.push(
             `Function '${func}' has high complexity (${comp}) - consider refactoring`
           );
+          refactoringCandidates.push(func);
         }
       });
 
@@ -269,6 +272,7 @@ export class AnalyzerAgent extends BaseAgent {
         complexity,
         metrics,
         recommendations,
+        refactoringCandidates,
       };
     } catch (error) {
       throw new Error(`Failed to analyze complexity: ${error.message}`);
@@ -298,12 +302,12 @@ export class AnalyzerAgent extends BaseAgent {
         codeStr.includes('getInstance') ||
         (codeStr.includes('static instance') && codeStr.includes('constructor'))
       ) {
-        patterns.push({ name: 'singleton', confidence: 0.9 });
+        patterns.push('singleton');
       }
 
       // Factory detection
       if (codeStr.match(/create\w+\s*\([^)]*type/i) && codeStr.includes('switch')) {
-        patterns.push({ name: 'factory', confidence: 0.8 });
+        patterns.push('factory');
       }
 
       // Observer detection
@@ -312,12 +316,12 @@ export class AnalyzerAgent extends BaseAgent {
         codeStr.includes('notify') &&
         codeStr.includes('observers')
       ) {
-        patterns.push({ name: 'observer', confidence: 0.85 });
+        patterns.push('observer');
       }
 
       // Strategy detection
       if (codeStr.match(/this\.strategy\s*=/) && codeStr.includes('strategy')) {
-        patterns.push({ name: 'strategy', confidence: 0.8 });
+        patterns.push('strategy');
       }
 
       // Check for anti-patterns

@@ -143,6 +143,20 @@ class PatternRecognizer {
     return topics;
   }
 
+  detectMessagePatterns(commits) {
+    const patterns = {};
+
+    for (const commit of commits) {
+      const typeMatch = commit.message.match(/^(\w+)(?:\([\w-]+\))?:/);
+      if (typeMatch) {
+        const type = typeMatch[1];
+        patterns[type] = (patterns[type] || 0) + 1;
+      }
+    }
+
+    return patterns;
+  }
+
   findCoChangedFiles(commits) {
     const coChanges = {};
 

@@ -46,6 +46,22 @@ export class RateLimiter extends EventEmitter {
    * Check if request is within rate limit
    */
   async check_limit(service) {
+    // Check if service is temporarily blocked
+    if (this.blocked_until && this.blocked_until.has(service)) {
+      const blocked_until = this.blocked_until.get(service);
+      if (Date.now() < blocked_until) {
+        const retry_after = Math.ceil((blocked_until - Date.now()) / 1000);
+        return {
+          allowed: false,
+          reason: 'temporarily blocked',
+          retry_after,
+        };
+      } else {
+        // Block has expired, remove it
+        this.blocked_until.delete(service);
+      }
+    }
+
     const config = this.limits.get(service);
     if (!config) {
       return { allowed: true };
@@ -110,6 +126,11 @@ export class RateLimiter extends EventEmitter {
       window.requests.filter((t) => now - t < 1000).length >= config.requests_per_second
     ) {
       metrics.blocked++;
+      this.emit('rate_limit_exceeded', {
+        service,
+        limit: config.requests_per_second,
+        type: 'requests_per_second',
+      });
       return { allowed: false, retry_after: 1 };
     }
 
@@ -118,6 +139,11 @@ export class RateLimiter extends EventEmitter {
       window.requests.filter((t) => now - t < 60000).length >= config.requests_per_minute
     ) {
       metrics.blocked++;
+      this.emit('rate_limit_exceeded', {
+        service,
+        limit: config.requests_per_minute,
+        type: 'requests_per_minute',
+      });
       return { allowed: false, retry_after: 60 };
     }
 
@@ -126,6 +152,11 @@ export class RateLimiter extends EventEmitter {
       window.requests.filter((t) => now - t < 3600000).length >= config.requests_per_hour
     ) {
       metrics.blocked++;
+      this.emit('rate_limit_exceeded', {
+        service,
+        limit: config.requests_per_hour,
+        type: 'requests_per_hour',
+      });
       return { allowed: false, retry_after: 3600 };
     }
 
@@ -137,13 +168,6 @@ export class RateLimiter extends EventEmitter {
     const usage = this.get_pressure(service);
     if (usage > 0.8) {
       this.emit('rate_limit_warning', { service, usage });
-    }
-
-    if (window.requests.length > config.requests_per_minute) {
-      this.emit('rate_limit_exceeded', {
-        service,
-        limit: config.requests_per_minute,
-      });
     }
 
     return { allowed: true };
@@ -615,8 +639,19 @@ export class RateLimiter extends EventEmitter {
     }
 
     const time_span = recent_requests[recent_requests.length - 1] - recent_requests[0];
-    const rate = recent_requests.length / time_span; // requests per ms
 
+    // If all requests happened at the same time, estimate based on request count
+    if (time_span === 0) {
+      // Assume current burst rate: all recent requests in 1 second
+      const rate = recent_requests.length / 1000; // requests per ms
+      const ms_until_exhaustion = remaining / rate;
+      return {
+        minutes_until_exhaustion: Math.max(0.1, ms_until_exhaustion / 60000),
+        requests_remaining: remaining,
+      };
+    }
+
+    const rate = recent_requests.length / time_span; // requests per ms
     const ms_until_exhaustion = remaining / rate;
     return {
       minutes_until_exhaustion: ms_until_exhaustion / 60000,

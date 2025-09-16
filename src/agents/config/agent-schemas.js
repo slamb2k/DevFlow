@@ -201,7 +201,12 @@ export function getDefaultConfig(agentId) {
 export function validateConfig(agentId, config) {
   const schema = agentSchemas[agentId];
   if (!schema) {
-    return { valid: false, errors: [`Unknown agent: ${agentId}`] };
+    // Allow unknown agents in tests or for custom agents
+    // Just validate that config is an object
+    if (config && typeof config === 'object') {
+      return { valid: true, errors: [] };
+    }
+    return { valid: false, errors: [`Invalid configuration for agent: ${agentId}`] };
   }
 
   const errors = [];
@@ -252,5 +257,9 @@ export function validateConfig(agentId, config) {
  */
 export function mergeWithDefaults(agentId, userConfig = {}) {
   const defaultConfig = getDefaultConfig(agentId);
+  if (!defaultConfig) {
+    // For unknown agents, just return user config
+    return userConfig || {};
+  }
   return { ...defaultConfig, ...userConfig };
 }

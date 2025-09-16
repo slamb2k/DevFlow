@@ -21,12 +21,15 @@ describe('Project Structure Validation', () => {
         'src/commands',
         'src/integration',
         'src/output',
-        'src/utils'
+        'src/utils',
       ];
 
       for (const dir of requiredDirs) {
         const dirPath = path.join(rootDir, dir);
-        const exists = await fs.access(dirPath).then(() => true).catch(() => false);
+        const exists = await fs
+          .access(dirPath)
+          .then(() => true)
+          .catch(() => false);
         expect(exists).toBe(true);
       }
     });
@@ -36,12 +39,15 @@ describe('Project Structure Validation', () => {
         'src/core/analysis',
         'src/core/templates',
         'src/core/memory',
-        'src/core/validation'
+        'src/core/validation',
       ];
 
       for (const dir of coreDirs) {
         const dirPath = path.join(rootDir, dir);
-        const exists = await fs.access(dirPath).then(() => true).catch(() => false);
+        const exists = await fs
+          .access(dirPath)
+          .then(() => true)
+          .catch(() => false);
         expect(exists).toBe(true);
       }
     });
@@ -52,12 +58,15 @@ describe('Project Structure Validation', () => {
         'tsconfig.json',
         '.eslintrc.cjs',
         '.prettierrc',
-        'jest.config.cjs'
+        'jest.config.cjs',
       ];
 
       for (const file of configFiles) {
         const filePath = path.join(rootDir, file);
-        const exists = await fs.access(filePath).then(() => true).catch(() => false);
+        const exists = await fs
+          .access(filePath)
+          .then(() => true)
+          .catch(() => false);
         expect(exists).toBe(true);
       }
     });
@@ -77,13 +86,7 @@ describe('Project Structure Validation', () => {
     });
 
     test('should have required scripts', () => {
-      const requiredScripts = [
-        'test',
-        'build',
-        'lint',
-        'format',
-        'typecheck'
-      ];
+      const requiredScripts = ['test', 'build', 'lint', 'format', 'typecheck'];
 
       for (const script of requiredScripts) {
         expect(packageJson.scripts).toHaveProperty(script);
@@ -98,7 +101,7 @@ describe('Project Structure Validation', () => {
         'yaml',
         'fs-extra',
         'fast-glob',
-        'semver'
+        'semver',
       ];
 
       for (const dep of requiredDeps) {
@@ -113,7 +116,7 @@ describe('Project Structure Validation', () => {
         '@types/jest',
         '@types/node',
         'eslint',
-        'prettier'
+        'prettier',
       ];
 
       for (const dep of requiredDevDeps) {
@@ -168,7 +171,9 @@ describe('Core Module Loading', () => {
       const container = new Container();
 
       class TestService {
-        getValue() { return 'test-value'; }
+        getValue() {
+          return 'test-value';
+        }
       }
 
       container.register('testService', TestService);
@@ -264,7 +269,10 @@ describe('TypeScript Build Pipeline', () => {
 describe('Code Quality Tools', () => {
   test('should have ESLint configuration', async () => {
     const eslintPath = path.join(__dirname, '..', '..', '.eslintrc.cjs');
-    const exists = await fs.access(eslintPath).then(() => true).catch(() => false);
+    const exists = await fs
+      .access(eslintPath)
+      .then(() => true)
+      .catch(() => false);
 
     expect(exists).toBe(true);
 
@@ -285,7 +293,10 @@ describe('Code Quality Tools', () => {
 
   test('should have Jest configuration', async () => {
     const jestPath = path.join(__dirname, '..', '..', 'jest.config.cjs');
-    const exists = await fs.access(jestPath).then(() => true).catch(() => false);
+    const exists = await fs
+      .access(jestPath)
+      .then(() => true)
+      .catch(() => false);
 
     expect(exists).toBe(true);
 
