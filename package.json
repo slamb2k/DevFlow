@@ -51,7 +51,7 @@
     "execa": "^8.0.1",
     "express": "^5.1.0",
     "fast-glob": "^3.3.2",
-    "figlet": "^1.9.2",
+    "figlet": "^1.9.3",
     "fs-extra": "^11.3.2",
     "gradient-string": "^2.0.2",
     "handlebars": "^4.7.8",
