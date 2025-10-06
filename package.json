@@ -39,7 +39,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@octokit/auth-app": "^8.1.0",
+    "@octokit/auth-app": "^8.1.1",
     "@octokit/auth-oauth-app": "^9.0.1",
     "@octokit/rest": "^22.0.0",
     "boxen": "^7.1.1",
@@ -47,11 +47,11 @@
     "cli-table3": "^0.6.3",
     "commander": "^11.1.0",
     "cosmiconfig": "^9.0.0",
-    "dotenv": "^17.2.2",
+    "dotenv": "^17.2.3",
     "execa": "^8.0.1",
     "express": "^5.1.0",
     "fast-glob": "^3.3.2",
-    "figlet": "^1.9.2",
+    "figlet": "^1.9.3",
     "fs-extra": "^11.3.2",
     "gradient-string": "^2.0.2",
     "handlebars": "^4.7.8",
@@ -62,7 +62,7 @@
     "p-limit": "^5.0.0",
     "semver": "^7.5.4",
     "supertest": "^7.1.4",
-    "winston": "^3.11.0",
+    "winston": "^3.18.3",
     "yaml": "^2.3.4"
   },
   "devDependencies": {
